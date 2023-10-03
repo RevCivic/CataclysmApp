@@ -50,7 +50,7 @@ class Species(models.Model):
         ('enemy','Enemy'),
         ('nuetral','Nuetral'),
         ('unknown','Unknown'),
-        ('unaware','Unaware'),
+        ('undiscovered','Undiscovered'),
     ]
     SOCIETY_CHOICES = [
         ('monarchy','Monarchy'),
