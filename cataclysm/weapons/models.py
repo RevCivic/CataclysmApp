@@ -9,6 +9,7 @@ class Weapon(models.Model):
     capacity = models.IntegerField()
     usage = models.CharField(max_length=50)
     special_properties = models.TextField()
+    secondary_weapon = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
     weight = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
 
