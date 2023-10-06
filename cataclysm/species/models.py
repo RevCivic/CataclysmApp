@@ -105,7 +105,7 @@ class Species(models.Model):
     telepathic = models.BooleanField()
     psionic = models.BooleanField()
     gravity = models.CharField(max_length=15, choices=GRAVITY_CHOICES)
-    special_abilities = models.TextField()
+    special_abilities = models.JSONField()
     locomotion_method = models.CharField(max_length=20, choices=LOCOMOTION_CHOICES)
 
     def __str__(self):
