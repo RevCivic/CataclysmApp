@@ -1,6 +1,8 @@
 from django.db import models
 
 class Species(models.Model):
+    class Meta:
+        app_label = 'species'
     SIZE_CHOICES = [
         ('diminutive', 'Diminutive'),
         ('tiny', 'Tiny'),

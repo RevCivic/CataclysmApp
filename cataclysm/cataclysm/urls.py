@@ -19,6 +19,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include("landing.urls")),
     path('armor/', include("armor.urls")),
     path('events/', include("events.urls")),
     path('factions/', include("factions.urls")),
@@ -26,6 +27,5 @@ urlpatterns = [
     path('species/', include("species.urls")),
     path('weapons/', include("weapons.urls")),
     path('worlds/', include("worlds.urls")),
-    path('', include("adminflow.urls")),
     path('adminflow/', include("adminflow.urls")),
 ]
