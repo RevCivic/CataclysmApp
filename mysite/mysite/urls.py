@@ -1,5 +1,5 @@
 """
-URL configuration for cataclysm project.
+URL configuration for mysite project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -18,14 +18,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
+    path("polls/", include("polls.urls")),
     path('admin/', admin.site.urls),
-    path('', include("landing.urls")),
-    path('armor/', include("armor.urls")),
-    path('events/', include("events.urls")),
-    path('factions/', include("factions.urls")),
-    path('people/', include("people.urls")),
-    path('species/', include("species.urls")),
-    path('weapons/', include("weapons.urls")),
-    path('worlds/', include("worlds.urls")),
-    path('adminflow/', include("adminflow.urls")),
 ]
