@@ -1,3 +1,35 @@
+@font-face {
+    font-family: 'StarTrekFont';
+    src: url('/static/fonts/Roddenberry.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'AlienRavager';
+    src: url('/static/fonts/AlienRavager.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'AlienRavagerItalic';
+    src: url('/static/fonts/AlienRavagerItalic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Rebellion';
+    src: url('/static/fonts/Rebellion.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'RebellionItalic';
+    src: url('/static/fonts/RebellionItalic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'StarTrekFuture';
+    src: url('/static/fonts/StarTrekFuture.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'StartrekenterprisefutureItalic';
+    src: url('/static/fonts/StartrekenterprisefutureItalic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Stacker';
+    src: url('static/fonts/Stacker.ttf') format('truetype');
+}
 /* Dark mode styles */
 body {
     background-image: url('../images/background.png');
@@ -24,4 +56,48 @@ body h1,
 body h2, 
 body h3 {
     color: #fff; /* White heading text color */
+}
+nav.main {
+    background-color: #D6A444; /* Orange background */
+    font-family: 'StarTrekFont';
+    border-radius: 10px; /* Rounded corners */
+    padding: 10px;
+}
+
+nav.main ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav.main li {
+    display: inline;
+    margin-right: 20px;
+}
+
+nav.main a {
+    text-decoration: none;
+    color: rgb(0, 0, 255); /* Bright blue links */
+    font-size: 24px;
+    padding-right: 15px;
+}
+
+nav.main a:hover {
+    color: #0F0; /* Bright green on hover */
+}
+h1.app_name {
+    color: gold; /* Gold text color */
+    text-align: center;
+    font-family: 'Rebellion';
+    font-size: 72px;
+}
+p.app_description {
+    padding: 25px;
+    color: #FFE81F; /* Yellow text color */
+    text-align: center;
+    font-family: 'RebellionItalic';
+    font-size: 24px;
+}
+p.app_description :hover {
+    color: #0F0; /* Bright green on hover */
 }

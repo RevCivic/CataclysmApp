@@ -25,3 +25,35 @@ body h2,
 body h3 {
     color: #fff; /* White heading text color */
 }
+@font-face {
+    font-family: 'StarTrekFont';
+    src: url('/static/fonts/Roddenberry.ttf') format('truetype');
+}
+nav.main {
+    background-color: #D6A444; /* Orange background */
+    font-family: 'StarTrekFont';
+    border-radius: 10px; /* Rounded corners */
+    padding: 10px;
+}
+
+nav.main ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav.main li {
+    display: inline;
+    margin-right: 20px;
+}
+
+nav.main a {
+    text-decoration: none;
+    color: rgb(0, 0, 255); /* Bright blue links */
+    font-size: 24px;
+    padding-right: 15px;
+}
+
+nav.main a:hover {
+    color: #0F0; /* Bright green on hover */
+}
