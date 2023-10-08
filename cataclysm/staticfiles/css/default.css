@@ -1,3 +1,39 @@
+@font-face {
+    font-family: 'StarTrekFont';
+    src: url('/static/fonts/Roddenberry.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'AlienRavager';
+    src: url('/static/fonts/AlienRavager.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'AlienRavagerItalic';
+    src: url('/static/fonts/AlienRavagerItalic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Rebellion';
+    src: url('/static/fonts/Rebellion.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'RebellionItalic';
+    src: url('/static/fonts/RebellionItalic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'StarTrekFuture';
+    src: url('/static/fonts/StarTrekFuture.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'StartrekenterprisefutureItalic';
+    src: url('/static/fonts/StartrekenterprisefutureItalic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Stacker';
+    src: url('static/fonts/Stacker.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'GoodOT';
+    src: url('/static/fonts/GoodOT.otf') format('opentype');
+}
 /* Dark mode styles */
 body {
     background-image: url('../images/background.png');
@@ -25,10 +61,6 @@ body h2,
 body h3 {
     color: #fff; /* White heading text color */
 }
-@font-face {
-    font-family: 'StarTrekFont';
-    src: url('/static/fonts/Roddenberry.ttf') format('truetype');
-}
 nav.main {
     background-color: #D6A444; /* Orange background */
     font-family: 'StarTrekFont';
@@ -55,5 +87,22 @@ nav.main a {
 }
 
 nav.main a:hover {
+    color: #0F0; /* Bright green on hover */
+}
+h1.app_name {
+    color: gold; /* Gold text color */
+    text-align: center;
+    font-family: 'Rebellion';
+    font-size: 72px;
+}
+p.app_description {
+    background-color: rgba(54, 48, 48, 0.75); /* This sets the text color to white with 50% opacity */
+    padding: 25px;
+    color: #FFE81F; /* Yellow text color */
+    text-align: center;
+    font-family: 'GoodOT';
+    font-size: 24px;
+}
+p.app_description :hover {
     color: #0F0; /* Bright green on hover */
 }
