@@ -1,0 +1,27 @@
+/* Dark mode styles */
+body {
+    background-image: url('../images/background.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+    background-color: #333; /* Dark background color */
+    color: #fff; /* White text color */
+}
+
+/* Example styles for links in dark mode */
+body a {
+    color: #fff; /* White link color */
+}
+
+/* Example styles for buttons in dark mode */
+body button {
+    background-color: #555; /* Dark button background color */
+    color: #fff; /* White button text color */
+}
+
+/* Example styles for headings in dark mode */
+body h1, 
+body h2, 
+body h3 {
+    color: #fff; /* White heading text color */
+}
