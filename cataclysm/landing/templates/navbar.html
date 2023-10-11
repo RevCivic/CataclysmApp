@@ -18,6 +18,12 @@
         <li><a href="/weapons/">Weapons</a></li>
         <li><a href="/armor/">Armor</a></li>
         <li><a href="/events/">Events</a></li>
+        {% if user.is_authenticated %}
+            <li><a href="/admin/">Admin</a></li>
+            <li><a href="/admin/logout/">Log Out</a></li>
+        {% else %}
+            <li><a href="/admin/">Log In</a></li>
+        {% endif %}
         <!-- Add more menu items as needed -->
     </nav>
 </div>
