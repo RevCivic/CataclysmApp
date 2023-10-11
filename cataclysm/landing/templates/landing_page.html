@@ -20,7 +20,9 @@
                 <span class="shooting-star"></span>
                 <span class="shooting-star"></span>
             </section>
-            
+            {% if user.is_authenticated %}
+                <h2 class="welcome">User: {{ user.username }}</h2>
+            {% endif %}
             <h1 class="app_name shimmer-effect">Cataclysm</h1>
             <p class="app_description">The stars as we know them have been torn asunder. 
                 The constellations have shifted. The stars are now in an unexplored state. 

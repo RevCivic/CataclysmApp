@@ -103,6 +103,12 @@ h1.app_name {
     font-family: 'Rebellion';
     font-size: 72px;
 }
+h2.welcome {
+    color: #ff9900; /* Gold text color */
+    text-align: center;
+    font-family: 'Rebellion';
+    font-size: 24px;
+}
 p.app_description {
     background-color: rgba(54, 48, 48, 0.75); /* This sets the text color to white with 50% opacity */
     padding: 25px;

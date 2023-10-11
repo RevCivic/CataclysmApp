@@ -11,6 +11,7 @@ class Armor(models.Model):
     description = models.TextField()
     # JSON field for dynamic tags
     dynamic_tags = models.JSONField(blank=True, null=True)
+    hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

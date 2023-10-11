@@ -11,6 +11,7 @@ class Faction(models.Model):
     species = models.ManyToManyField('species.Species', blank=True)
     worlds = models.ManyToManyField('worlds.World', blank=True)
     events = models.ManyToManyField('events.Event', blank=True)
+    hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
