@@ -34,5 +34,6 @@ class SpeciesForm(forms.ModelForm):
             'gravity',
             'special_abilities',
             'locomotion_method',
+            'image',
             'hidden',
         ]

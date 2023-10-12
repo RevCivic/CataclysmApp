@@ -11,7 +11,7 @@ class Person(models.Model):
     weapons = models.ManyToManyField('weapons.Weapon', blank=True)
     armors = models.ManyToManyField('armor.Armor', blank=True)
     bio = models.TextField(blank=True)
-    image = models.ImageField(upload_to='people', blank=True)
+    image = models.ImageField(upload_to='people/images', blank=True)
     stats = models.ForeignKey('Statset', on_delete=models.SET_NULL, blank=True, null=True)
     skills = models.ForeignKey('Skillset', on_delete=models.SET_NULL, blank=True, null=True)
     location = models.CharField(max_length=50, blank=True)

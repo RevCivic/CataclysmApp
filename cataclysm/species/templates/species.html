@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Page</title>
-</head>
-<body>
-    <h1>{{ current_species.name }}</h1>
-    <!-- Display other attributes of the object as needed -->
-</body>
-</html>
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+
+{% block content %}
+    <h1 class="app_name">{{current_species.name}}</h1>
+    {% if current_species.image %}
+        <img src="{{current_species.image.url}}" class="species_image">
+    {% endif %}
+{%endblock%}

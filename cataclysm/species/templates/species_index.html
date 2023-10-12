@@ -27,7 +27,7 @@
             {% for species in species_list %}
                 {% if not species.hidden %}
                     <tr>
-                        <td>{{ species.name }}</td>
+                        <td><a href="{% url 'species_page' species.id %}">{{ species.name }}</a></td>
                         <td>{{ species.get_size_display }}</td>
                         <td>{{ species.home_world }}</td>
                         <td>{{ species.get_type_display }}</td>
