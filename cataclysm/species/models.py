@@ -46,13 +46,14 @@ class Species(models.Model):
         ('heavy','Heavy'),
     ]
     ACCORD_STATUS_CHOICES = [
+        ('founder','Founding Member'),
         ('ally','Ally'),
         ('member','Member'),
         ('peace','Peace Treaty'),
         ('enemy','Enemy'),
         ('nuetral','Nuetral'),
         ('unknown','Unknown'),
-        ('unaware','Unaware'),
+        ('undiscovered','Undiscovered'),
     ]
     SOCIETY_CHOICES = [
         ('monarchy','Monarchy'),
@@ -85,8 +86,8 @@ class Species(models.Model):
     society = models.CharField(max_length=50, choices=SOCIETY_CHOICES)
     accord_status = models.CharField(max_length=20, choices=ACCORD_STATUS_CHOICES)
     background = models.TextField()
-    sociology = models.TextField(max_length=20)
-    physiology = models.TextField(max_length=20)
+    sociology = models.TextField()
+    physiology = models.TextField()
     racial_traits = models.JSONField()
     size = models.CharField(max_length=20, choices=SIZE_CHOICES)
     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
@@ -109,6 +110,8 @@ class Species(models.Model):
     gravity = models.CharField(max_length=15, choices=GRAVITY_CHOICES)
     special_abilities = models.JSONField()
     locomotion_method = models.CharField(max_length=20, choices=LOCOMOTION_CHOICES)
+    image = models.ImageField(upload_to='species', blank=True)
+    hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

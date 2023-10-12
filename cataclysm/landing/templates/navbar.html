@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{% static 'css/default.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+</head>
+<div>
+    <nav class="main">
+        <li><img src="{% static 'images/cataclysm_logo.png' %}" alt="Cataclysm Logo" height="25px"></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/species/">Species</a></li>
+        <li><a href="/people/">People</a></li>
+        <li><a href="/worlds/">Worlds</a></li>
+        <li><a href="/factions/">Factions</a></li>
+        <li><a href="/starships/">Starships</a></li>
+        <li><a href="/vehicles/">Vehicles</a></li>
+        <li><a href="/weapons/">Weapons</a></li>
+        <li><a href="/armor/">Armor</a></li>
+        <li><a href="/events/">Events</a></li>
+        {% if user.is_authenticated %}
+            <li><a href="/admin/">Admin</a></li>
+            <li><a href="/admin/logout/">Log Out</a></li>
+        {% else %}
+            <li><a href="/admin/">Log In</a></li>
+        {% endif %}
+        <!-- Add more menu items as needed -->
+    </nav>
+</div>
+</html>

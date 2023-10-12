@@ -1,0 +1,108 @@
+@font-face {
+    font-family: 'StarTrekFont';
+    src: url('/static/fonts/Roddenberry.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'AlienRavager';
+    src: url('/static/fonts/AlienRavager.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'AlienRavagerItalic';
+    src: url('/static/fonts/AlienRavagerItalic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Rebellion';
+    src: url('/static/fonts/Rebellion.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'RebellionItalic';
+    src: url('/static/fonts/RebellionItalic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'StarTrekFuture';
+    src: url('/static/fonts/StarTrekFuture.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'StartrekenterprisefutureItalic';
+    src: url('/static/fonts/StartrekenterprisefutureItalic.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Stacker';
+    src: url('static/fonts/Stacker.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'GoodOT';
+    src: url('/static/fonts/GoodOT.otf') format('opentype');
+}
+/* Dark mode styles */
+body {
+    background-image: url('../images/background.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+    background-color: #333; /* Dark background color */
+    color: #fff; /* White text color */
+}
+
+/* Example styles for links in dark mode */
+body a {
+    color: #fff; /* White link color */
+}
+
+/* Example styles for buttons in dark mode */
+body button {
+    background-color: #555; /* Dark button background color */
+    color: #fff; /* White button text color */
+}
+
+/* Example styles for headings in dark mode */
+body h1, 
+body h2, 
+body h3 {
+    color: #fff; /* White heading text color */
+}
+nav.main {
+    background-color: #D6A444; /* Orange background */
+    font-family: 'StarTrekFont';
+    border-radius: 10px; /* Rounded corners */
+    padding: 10px;
+}
+
+nav.main ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav.main li {
+    display: inline;
+    margin-right: 20px;
+}
+
+nav.main a {
+    text-decoration: none;
+    color: rgb(0, 0, 255); /* Bright blue links */
+    font-size: 24px;
+    padding-right: 15px;
+}
+
+nav.main a:hover {
+    color: #0F0; /* Bright green on hover */
+}
+h1.app_name {
+    color: gold; /* Gold text color */
+    text-align: center;
+    font-family: 'Rebellion';
+    font-size: 72px;
+}
+p.app_description {
+    background-color: rgba(54, 48, 48, 0.75); /* This sets the text color to white with 50% opacity */
+    padding: 25px;
+    color: #FFE81F; /* Yellow text color */
+    text-align: center;
+    font-family: 'GoodOT';
+    font-size: 24px;
+}
+p.app_description :hover {
+    color: #0F0; /* Bright green on hover */
+}

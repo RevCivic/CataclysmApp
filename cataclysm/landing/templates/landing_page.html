@@ -1,10 +1,50 @@
+{% include 'navbar.html' %}
+{% load static %}
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Landing Page</title>
-</head>
-<body>
-    <h1>Welcome to Our Application!</h1>
-    <!-- Add content for your landing page -->
-</body>
+    <head>
+        <link rel="stylesheet" href="{% static 'css/default.css' %}">
+        <title>Landing Page</title>
+    </head>
+    <body>
+        <div class="shooting-star-container">
+            <section>
+                <span class="shooting-star"></span>
+                <span class="shooting-star"></span>
+                <span class="shooting-star"></span>
+                <span class="shooting-star"></span>
+                <span class="shooting-star"></span>
+                <span class="shooting-star"></span>
+                <span class="shooting-star"></span>
+                <span class="shooting-star"></span>
+                <span class="shooting-star"></span>
+                <span class="shooting-star"></span>
+            </section>
+            {% if user.is_authenticated %}
+                <h2 class="welcome">User: {{ user.username }}</h2>
+            {% endif %}
+            <h1 class="app_name shimmer-effect">Cataclysm</h1>
+            <p class="app_description">The stars as we know them have been torn asunder. 
+                The constellations have shifted. The stars are now in an unexplored state. 
+                <a href='/starships/starship?name=EternalVigilance'>The Eternal Vigilance</a> and it's crew have been displaced, and have set out on 
+                a journey with <a href='/people/person?name=HugoWalgrave'>Captain Hugo Walgrave</a> to remap the stars, and find our way 
+                back to the known civilizations of the Galactic Accord.
+                <br>
+                <br>
+                The crew is made up of a diverse group of people, from all walks of life. Together they explore the newly formed constellations,
+                and meet many new species and people along the way. They will encounter new planets, new factions, and new dangers. The perils of space
+                combined with the dangers of the unknown will test the crew's resolve, and their ability to work together.
+                <br>
+                <br>
+                Three recent additions to the <a href="/starships/starship?name=Nimbus">Nimbus</a>:
+                <a href="/people/person?name=Trillen">Trillen</a>, <a href="/people/person?name=Xanthi">Xanthi</a>, 
+                and <a href="/people/person?name=Zix">Zix</a>; as well as it's crew, known as 
+                <a href="/factions/faction?name=TheFamily">The Family</a> have found this new ship 
+                <a href="/starships/starship?name=EternalVigilance">The Eternal Vigilance</a> and are slowly building a new crew to assist in their journey.
+            </p>
+            <center>
+                <img src="{% static 'images/cataclysm_logo.png' %}">
+            </center>
+        </div>
+    </body>
 </html>
