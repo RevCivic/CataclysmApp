@@ -110,6 +110,7 @@ class Species(models.Model):
     gravity = models.CharField(max_length=15, choices=GRAVITY_CHOICES)
     special_abilities = models.JSONField()
     locomotion_method = models.CharField(max_length=20, choices=LOCOMOTION_CHOICES)
+    image = models.ImageField(upload_to='species', blank=True)
     hidden = models.BooleanField(default=False)
 
     def __str__(self):

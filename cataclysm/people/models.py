@@ -6,12 +6,15 @@ class Person(models.Model):
     age = models.IntegerField()
     species = models.ForeignKey('species.Species', on_delete=models.CASCADE)
     faction = models.ForeignKey('factions.Faction', on_delete=models.SET_NULL, blank=True, null=True)
+    rank = models.CharField(max_length=50, blank=True)
+    position = models.CharField(max_length=50, blank=True)
     weapons = models.ManyToManyField('weapons.Weapon', blank=True)
-    armors = models.ManyToManyField('armor.Armor', blank=True) 
+    armors = models.ManyToManyField('armor.Armor', blank=True)
     bio = models.TextField(blank=True)
     image = models.ImageField(upload_to='people', blank=True)
     stats = models.ForeignKey('Statset', on_delete=models.SET_NULL, blank=True, null=True)
     skills = models.ForeignKey('Skillset', on_delete=models.SET_NULL, blank=True, null=True)
+    location = models.CharField(max_length=50, blank=True)
     hidden = models.BooleanField(default=False)
 
     def __str__(self):

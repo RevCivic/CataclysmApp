@@ -1,0 +1,59 @@
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+
+{% block content %}
+    <h1 class="app_name">Species Index</h1>
+    <h2 class="index_menu"><a href="{% url 'add' %}">Add a Species</a></h2>
+    <table class="sci-fi-list">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Home World</th>
+                <th>Type</th>
+                <th>Accord Standing</th>
+                <th>Strength</th>
+                <th>Toughness</th>
+                <th>Speed</th>
+                <th>Intelligence</th>
+                {% if request.user|has_group:'admins' %}
+                    <th>Hidden</th>
+                {% endif %}
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% for species in species_list %}
+                {% if not species.hidden %}
+                    <tr>
+                        <td>{{ species.name }}</td>
+                        <td>{{ species.get_size_display }}</td>
+                        <td>{{ species.home_world }}</td>
+                        <td>{{ species.get_type_display }}</td>
+                        <td>{{ species.get_accord_status_display }}</td>
+                        <td>
+                            <div class="rating-bar" style="width: {{species.strength_rating|mul:10}}%">&nbsp;{{ species.strength_rating }}</div>
+                        </td>
+                        <td>
+                            <div class="rating-bar" style="width: {{species.toughness_rating|mul:10}}%">&nbsp;{{ species.toughness_rating }}</div>
+                        </td>
+                        <td>
+                            <div class="rating-bar" style="width: {{species.speed_rating|mul:10}}%">&nbsp;{{ species.speed_rating }}</div>
+                        </td>
+                        <td>
+                            <div class="rating-bar" style="width: {{species.intelligence_rating|mul:10}}%">&nbsp;{{ species.intelligence_rating }}</div>
+                        </td>
+                        {% if request.user|has_group:'admins' %}
+                            <td>{{ species.hidden }}</td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <td colspan="3">No species found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
