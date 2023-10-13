@@ -1,9 +1,11 @@
 {% include 'navbar.html' %}
 {% load mathfilters %}
 {% load group_check %}
+{% load custom_filters %}
 
 {% block content %}
     <h1 class="app_name">{{current_species.name}}</h1>
+    <h2 class="index_menu"><a href="{% url 'edit_species' current_species.id %}">Edit {{current_species.name}} </a></h2>
     <div style="width: 100%;">
         <table class="sci-fi-list">
             <tr style="vertical-align: top;">
@@ -112,9 +114,23 @@
             </tr>
             <tr>
                 <th colspan="2">Racial Traits</th>
-                {% for trait in current_species.racial_traits.items %}
-                    <td>{{ trait }}</td>
+                {% for trait, value in current_species.racial_traits.items %}
+                    <td>{{ trait }}: {% if value > 0 %}+{% endif %}{{ value }}</td>
                 {% endfor %}
+            </tr>
+            <tr>
+                <th colspan="2">Special Abilities</th>
+                <td colspan="6">
+                    <table>        
+                        {% for ability, value in current_species.special_abilities.items %}
+                            {% if value|isnumeric %}
+                                <td>{{ ability }}: {% if value > 0 %}+{% endif %}{{ value }}</td>
+                            {% elif value|isboolean %}
+                                <td>{{ ability }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </td>
             </tr>
         </table>
     </div>
