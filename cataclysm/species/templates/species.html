@@ -1,10 +1,137 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Page</title>
-</head>
-<body>
-    <h1>{{ current_species.name }}</h1>
-    <!-- Display other attributes of the object as needed -->
-</body>
-</html>
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+{% load custom_filters %}
+
+{% block content %}
+    <h1 class="app_name">{{current_species.name}}</h1>
+    <h2 class="index_menu"><a href="{% url 'edit_species' current_species.id %}">Edit {{current_species.name}} </a></h2>
+    <div style="width: 100%;">
+        <table class="sci-fi-list">
+            <tr style="vertical-align: top;">
+                <td colspan="3">
+                    <table style="vertical-align: top; width: 100%;">
+                        <th colspan="2" style="text-align: center;">Basic Info</th>
+                        <tr>
+                            <th>Name</th>
+                            <td>{{ current_species.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Home World</th>
+                            <td>{{ current_species.home_world }}</td>
+                        </tr>
+                        <tr>
+                            <th>Society</th>
+                            <td>{{ current_species.society }}</td>
+                        </tr>
+                        <tr>
+                            <th>Accord Status</th>
+                            <td>{{ current_species.get_accord_status_display }}</td>
+                        </tr>
+                    </table>
+                </td>
+                <td colspan="2" >
+                    <table style="vertical-align: top; width: 100%;"">
+                        <th colspan="2" style="text-align: center;">Biology</th>
+                        <tr>
+                            <th>Size</th>
+                            <td>{{ current_species.get_size_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Locomotion</th>
+                            <td>{{ current_species.get_locomotion_method_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <td>{{ current_species.get_type_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Preferred Air</th>
+                            <td>{{ current_species.get_air_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Preferred Gravity</th>
+                            <td>{{ current_species.get_gravity_display }}</td>
+                        </tr>
+                        <tr>
+                            <th>Reproduction Method</th>
+                            <td>{{ current_species.get_reproduction_method_display }}</td>
+                        </tr>
+                    </table>
+                </td>
+                <td colspan="2" style="align-items: center;">
+                    <table style="vertical-align: top; width: 100%;">
+                        <th colspan="2" style="text-align: center;">Survival</th>
+                        <tr>
+                            <th>Sleep</th>
+                            <td>{{ current_species.hours_of_sleep }} Hours</td>
+                        </tr>
+                        <tr>
+                            <th>Days without Food</th>
+                            <td>{{ current_species.days_without_food }} Days</td>
+                        </tr>
+                        <tr>
+                            <th>Days without Water</th>
+                            <td>{{ current_species.days_without_water }} Days</td>
+                        </tr>
+                    </table>
+                </td>
+                <td rowspan="3" style="vertical-align: middle; width: 250px;">
+                    {% if current_species.image %}
+                        <center><img src="{{current_species.image.url}}" class="species_image"></center>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th style="text-align: center;">Natural Weapons</th>
+                <th style="text-align: center;">Natural Armor</th>
+                <th style="text-align: center;">Can Fly</th>
+                <th style="text-align: center;">Aquatic</th>
+                <th style="text-align: center;">Amphibious</th>
+                <th style="text-align: center;">Telepathic</th>
+                <th style="text-align: center;">Psionic</th>
+            </tr>
+            <tr>
+                <td style="text-align: center;">{{ current_species.natural_weapons }}</td>
+                <td style="text-align: center;">{{ current_species.natural_armor }}</td>
+                <td style="text-align: center;">{{ current_species.can_fly }}</td>
+                <td style="text-align: center;">{{ current_species.aquatic }}</td>
+                <td style="text-align: center;">{{ current_species.amphibious }}</td>
+                <td style="text-align: center;">{{ current_species.telepathic }}</td>
+                <td style="text-align: center;">{{ current_species.psionic }}</td>
+            </tr>
+            <tr>
+                <th colspan="2" style="text-align: center;">Background</th>
+                <td colspan="6">{{ current_species.background }}</td>
+            </tr>
+            <tr>
+                <th colspan="2" style="text-align: center;">Sociology</th>
+                <td colspan="6">{{ current_species.sociology }}</td>
+            </tr>
+            <tr>
+                <th colspan="2" style="text-align: center;">Physiology</th>
+                <td colspan="6">{{ current_species.physiology }}</td>
+            </tr>
+            <tr>
+                <th colspan="2">Racial Traits</th>
+                {% for trait, value in current_species.racial_traits.items %}
+                    <td>{{ trait }}: {% if value > 0 %}+{% endif %}{{ value }}</td>
+                {% endfor %}
+            </tr>
+            <tr>
+                <th colspan="2">Special Abilities</th>
+                <td colspan="6">
+                    <table>        
+                        {% for ability, value in current_species.special_abilities.items %}
+                            {% if value|isnumeric %}
+                                <td>{{ ability }}: {% if value > 0 %}+{% endif %}{{ value }}</td>
+                            {% elif value|isboolean %}
+                                <td>{{ ability }}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+{%endblock%}

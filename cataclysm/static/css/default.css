@@ -252,6 +252,14 @@ p.app_description :hover {
     color: #fff; /* Light text color */
 }
 
+.sci-fi-list-species {
+    border-collapse: collapse;
+    width: 80%;
+    font-family: GoodOT;
+    background-color: #333; /* Dark background color */
+    color: #fff; /* Light text color */
+}
+
 /* Style for table headers */
 .sci-fi-list th {
     background-color: #222;
@@ -305,4 +313,9 @@ p.app_description :hover {
 }
 .index_menu a:hover {
     color: #0F0; /* Bright green on hover */
+}
+.species_image {
+    width: 250px;
+    height: auto;
+    border-radius: 10px;
 }
