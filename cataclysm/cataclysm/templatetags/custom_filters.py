@@ -15,3 +15,12 @@ def isboolean(value):
 @register.filter(name='sort_by_key')
 def sort_by_key(value, key):
     return sorted(value, key=lambda x: x[key])
+
+@register.filter
+def ability_score_modifier(score):
+    modifier = (score - 10) // 2
+    return modifier
+
+@register.filter
+def get_json_value(json_object, key):
+    return json_object.get(key)
