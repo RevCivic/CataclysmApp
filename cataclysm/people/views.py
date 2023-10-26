@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from people.models import Person as People
+from people.models import Character
 from people.forms import PersonForm
 
 def index(request):
@@ -16,6 +17,13 @@ def person_page(request, id):
         'current_person': current_person,
     }
     return render(request, 'person.html', context)
+
+def character_page(request, id):
+    current_person = Character.objects.get(id=id)
+    context = {
+        'current_person': current_person,
+    }
+    return render(request, 'charsheet.html', context)
 
 def add_person(request):
     if request.method == 'POST':

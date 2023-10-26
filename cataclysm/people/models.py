@@ -61,3 +61,17 @@ class Skillset(models.Model):
             return f'Skills for {self.linked_person.name}'
         else:
             return 'Unlinked Skills'
+        
+class Character(models.Model):
+    name = models.CharField(max_length=50)
+    age = models.IntegerField()
+    species = models.ForeignKey('species.Species', on_delete=models.CASCADE)
+    alignment = models.CharField(max_length=50)
+    deity = models.CharField(max_length=50)
+    gender = models.CharField(max_length=50)
+    bio = models.TextField(blank=True)
+    image = models.ImageField(upload_to='people/images', blank=True)
+    hero_lab_json = models.JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
