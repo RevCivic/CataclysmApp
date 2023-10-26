@@ -1,0 +1,45 @@
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+{% load custom_filters %}
+
+{%block content%}
+    <h1 class="app_name">Characters</h1>
+    <h2 class="index_menu"><a href="{% url 'add_person' %}">Add a person</a></h2>
+    <table class="sci-fi-list">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Species</th>
+                <th>Faction</th>
+                <th>Rank</th>
+                <th>Position</th>
+                <th>Location</th>
+                {% if request.user|has_group:'admins' %}
+                    <th>Hidden</th>
+                {% endif %}
+            </tr>
+            {% for person in people_list %}
+                {% if not person.hidden %}
+                    <tr>
+                        <td><a href="{% url 'person_page' person.id %}">{{ person.name }}</a></td>
+                        <td>{{ person.age }}</td>
+                        <td>{{ person.species }}</td>
+                        <td>{{ person.faction }}</td>
+                        <td>{{ person.rank }}</td>
+                        <td>{{ person.position }}</td>
+                        <td>{{ person.location }}</td>
+                        {% if request.user|has_group:'admins' %}
+                            <td>{{ person.hidden }}</td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <td colspan="3">No people found.</td>
+                </tr>
+            {% endfor %}
+        </thead>
+    </table>
+{%endblock%}

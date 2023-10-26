@@ -102,6 +102,7 @@ h1.app_name {
     text-align: center;
     font-family: 'Rebellion';
     font-size: 72px;
+    margin: 10px;
 }
 h2.welcome {
     color: #ff9900; /* Gold text color */

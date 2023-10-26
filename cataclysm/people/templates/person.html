@@ -1,0 +1,189 @@
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+{% load custom_filters %}
+
+{% block content %}
+
+    <h1 class="app_name">{{current_person.name}}</h1>
+    <h2 class="index_menu"><a href="{% url 'edit_person' current_person.id %}">Edit {{current_person.name}}</a></h2>
+    <div style="width: 100%;">
+        <table style="width: 100%;">
+            <td style="vertical-align: top;">
+                <table class= "sci-fi-list" style="vertical-align: top;">
+                    <th colspan="2" style="text-align: center;">Basic Info</th>
+                    <tr>
+                        <th>Name</th>
+                        <td>{{ current_person.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Age</th>
+                        <td>{{ current_person.age }}</td>
+                    </tr>
+                    <tr>
+                        <th>Species</th>
+                        <td><a href="{% url 'species_page' current_person.species.id %}">{{ current_person.species }}</a></td>
+                    </tr>
+                    <tr>
+                        <th>Faction</th>
+                        <td>{{ current_person.faction }}</td>
+                    </tr>
+                    <tr>
+                        <th>Rank</th>
+                        <td>{{ current_person.rank }}</td>
+                    </tr>
+                    <tr>
+                        <th>Position</th>
+                        <td>{{ current_person.position }}</td>
+                    </tr>
+                    <tr>
+                        <th>Location</th>
+                        <td>{{ current_person.location }}</td>
+                    </tr>
+                </table>               
+            </td>
+            <td style="vertical-align: top; width: 20%;"></td>
+            <td style="vertical-align: top;">
+                <table class="sci-fi-list" style="vertical-align: top;">
+                    <tr><th colspan="2">Inventory</th></tr>
+                    <tr>
+                        {% if current_person.weapons.all|length > 0 %}
+                            <th style="text-align: center;">Weapons</th>
+                            {% for weapon in current_person.weapons.all %}
+                                <td>{{ weapon.name }}</td>
+                            {% endfor %}
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if current_person.armors.all|length > 0 %}
+                            <th style="text-align: center;">Armor</th>
+                            {% for armor in current_person.armors.all %}
+                                <td>{{ armor.name }}</td>
+                            {% endfor %}
+                        {% endif %}
+                    </tr>
+                </table>
+            </td>
+            <tr>
+                <td colspan="3">
+                    <table class="sci-fi-list">
+                        <th>Bio</th>
+                        <tr>
+                            <td>{{ current_person.bio }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <br>
+        
+            <table class="sci-fi-list" style="width: fit-content;">
+                {% if current_person.stats %}
+                    <td style="vertical-align: top;">
+                        <table>
+                            <th colspan="2" style="text-align: center;">Stats</th>
+                            <tr>
+                                <th>Strength</th>
+                                <td>{{ current_person.stats.strength }}</td>
+                            </tr>
+                            <tr>
+                                <th>Dexterity</th>
+                                <td>{{ current_person.stats.dexterity }}</td>
+                            </tr>
+                            <tr>
+                                <th>Constitution</th>
+                                <td>{{ current_person.stats.constitution }}</td>
+                            </tr>
+                            <tr>
+                                <th>Intelligence</th>
+                                <td>{{ current_person.stats.intelligence }}</td>
+                            </tr>
+                            <tr>
+                                <th>Wisdom</th>
+                                <td>{{ current_person.stats.wisdom }}</td>
+                            </tr>
+                            <tr>
+                                <th>Charisma</th>
+                                <td>{{ current_person.stats.charisma }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                {% endif %}
+                {% if current_person.skills %}
+                <td style="vertical-align: top;">
+                    <table>
+                        <th colspan="2">Skills</th>
+                        <tr>
+                            <th>Acrobatics</th>
+                            <td>{{ current_person.skills.acrobatics }}</td>
+                        </tr>
+                        <tr>
+                            <th>Athletics</th>
+                            <td>{{ current_person.skills.athletics }}</td>
+                        </tr>
+                        <tr>
+                            <th>Bluff</th>
+                            <td>{{ current_person.skills.bluff }}</td>
+                        </tr>
+                        <tr>
+                            <th>Computers</th>
+                            <td>{{ current_person.skills.computers }}</td>
+                        </tr>
+                        <tr>
+                            <th>Diplomacy</th>
+                            <td>{{ current_person.skills.diplomacy }}</td>
+                        </tr>
+                        <tr>
+                            <th>Disguise</th>
+                            <td>{{ current_person.skills.disguise }}</td>
+                        </tr>
+                        <tr>
+                            <th>Engineering</th>
+                            <td>{{ current_person.skills.engineering }}</td>
+                        </tr>
+                        <tr>
+                            <th>Intimidate</th>
+                            <td>{{ current_person.skills.intimidate }}</td>
+                        </tr>
+                        <tr>
+                            <th>Medicine</th>
+                            <td>{{ current_person.skills.medicine }}</td>
+                        </tr>
+                        <tr>
+                            <th>Perception</th>
+                            <td>{{ current_person.skills.perception }}</td>
+                        </tr>
+                        <tr>
+                            <th>Piloting</th>
+                            <td>{{ current_person.skills.piloting }}</td>
+                        </tr>
+                        <tr>
+                            <th>Life Science</th>
+                            <td>{{ current_person.skills.life_science }}</td>
+                        </tr>
+                        <tr>
+                            <th>Physical Science</th>
+                            <td>{{ current_person.skills.physical_science }}</td>
+                        </tr>
+                        <tr>
+                            <th>Slight of Hand</th>
+                            <td>{{ current_person.skills.slight_of_hand }}</td>
+                        </tr>
+                        <tr>
+                            <th>Stealth</th>
+                            <td>{{ current_person.skills.stealth }}</td>
+                        </tr>
+                        <tr>
+                            <th>Survival</th>
+                            <td>{{ current_person.skills.survival }}</td>
+                        </tr>
+
+                    </table>
+                </td>
+                {% endif %}
+                
+            </table>
+        
+    </div>
+
+{% endblock %}

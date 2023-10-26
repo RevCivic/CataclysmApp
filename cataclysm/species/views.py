@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from species.models import Species
 from species.forms import SpeciesForm
 
@@ -19,7 +19,7 @@ def species_page(request, id):
     }
     return render(request, 'species.html', context)
 
-def add(request):
+def add_species(request):
     if request.method == 'POST':
         form = SpeciesForm(request.POST)
         if form.is_valid():
