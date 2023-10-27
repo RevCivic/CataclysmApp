@@ -591,15 +591,17 @@
 		</table>
 		<table class="fullwidth">
 			<tr>
-				<td colspan="3"><input type="text" id="ClassLevels" class="input_u" value="{{actor_data|get_json_value:'actClassText'}}"><br />Class/Level</td>
+				<td colspan="3"><input type="text" id="ClassLevels" class="input_u" value="{{hero_lab_data.gameValues.actLevelNet}}"><br />Class/Level</td>
 				<td><input type="text" id="Race" class="input_u" value="{{current_person.species.name}}"><br />Species</td>
 				<td><input type="text" id="Theme" class="input_u" value=""><br />Theme</td>
-				<th rowspan=3>Description<br /><textarea rows="8" cols="30" id="CharDesc"></textarea></th>
+				<th rowspan=3>Description<br /><textarea rows="8" cols="30" id="CharDesc">{{current_person.bio}}</textarea></th>
 			</tr>
 			<tr>
 				<td><input type="text" id="Size" class="input_u" value="{{current_person.species.get_size_display}}"><br />Size</td>
-				<td><input type="text" id="Speed" class="input_u" value="{{actor_data|get_json_value:'mvSpeed.128'}}"><br />Speed</td>
-				<td><input type="text" id="Gender" class="input_u"><br />Gender</td>
+				{% with speed=hero_lab_data.items|get_json_value:'mvSpeed.128' %}
+					<td><input type="text" id="Speed" class="input_u" value="{{speed.stNet}}"><br />Speed</td>
+            	{% endwith %}
+				<td><input type="text" id="Gender" class="input_u" value="{{current_person.gender}}"><br />Gender</td>
 				<td colspan="2"><input type="text" id="Homeworld" class="input_u" value="{{current_person.species.home_world}}"><br />Homeworld</td>
 			</tr>
 			<tr>
@@ -624,8 +626,8 @@
 							<td>
 								<button class="nonprinting" onclick="PopulateAbMod('StrMod','StrUpMod','UseStrMod')" title="Click to populate skill and attack modifiers.">+</button>
 								<b>Str</b>ength</td>
-							<td><input type="text" id="StrScore" class="input_b"></td>
-							<td><input type="text" id="StrMod" class="input_b"></td>
+							<td><input type="text" id="StrScore" class="input_b" value="{{str.stNet}}"></td>
+							<td><input type="text" id="StrMod" class="input_b" value="{{str.stAbScModifier}}"></td>
 							<td><input type="text" id="StrUpScore" class="input_b"></td>
 							<td><input type="text" id="StrUpMod" class="input_b"></td>
 						</tr>
@@ -633,8 +635,8 @@
 							<td>
 								<button class="nonprinting" onclick="PopulateAbMod('DexMod','DexUpMod','UseDexMod')" title="Click to populate skill, save, AC, and attack modifiers.">+</button>
 								<b>Dex</b>terity</td>
-							<td><input type="text" id="DexScore" class="input_b"></td>
-							<td><input type="text" id="DexMod" class="input_b"></td>
+							<td><input type="text" id="DexScore" class="input_b" value="{{dex.stNet}}"></td>
+							<td><input type="text" id="DexMod" class="input_b" value="{{dex.stAbScModifier}}"></td>
 							<td><input type="text" id="DexUpScore" class="input_b"></td>
 							<td><input type="text" id="DexUpMod" class="input_b"></td>
 						</tr>
@@ -642,8 +644,8 @@
 							<td>
 								<button class="nonprinting" onclick="PopulateAbMod('ConMod','ConUpMod','UseConMod')" title="Click to populate save modifier.">+</button>
 								<b>Con</b>stitution</td>
-							<td><input type="text" id="ConScore" class="input_b"></td>
-							<td><input type="text" id="ConMod" class="input_b"></td>
+							<td><input type="text" id="ConScore" class="input_b" value="{{con.stNet}}"></td>
+							<td><input type="text" id="ConMod" class="input_b" value="{{con.stAbScModifier}}"></td>
 							<td><input type="text" id="ConUpScore" class="input_b"></td>
 							<td><input type="text" id="ConUpMod" class="input_b"></td>
 						</tr>
@@ -651,8 +653,8 @@
 							<td>
 								<button class="nonprinting" onclick="PopulateAbMod('IntMod','IntUpMod','UseIntMod')" title="Click to populate skill modifiers.">+</button>
 								<b>Int</b>elligence</td>
-							<td><input type="text" id="IntScore" class="input_b"></td>
-							<td><input type="text" id="IntMod" class="input_b"></td>
+							<td><input type="text" id="IntScore" class="input_b" value="{{int.stNet}}"></td>
+							<td><input type="text" id="IntMod" class="input_b" value="{{int.stAbScModifier}}"></td>
 							<td><input type="text" id="IntUpScore" class="input_b"></td>
 							<td><input type="text" id="IntUpMod" class="input_b"></td>
 						</tr>
@@ -660,8 +662,8 @@
 							<td>
 								<button class="nonprinting" onclick="PopulateAbMod('WisMod','WisUpMod','UseWisMod')" title="Click to populate skill and save modifiers.">+</button>
 								<b>Wis</b>dom</td>
-							<td><input type="text" id="WisScore" class="input_b"></td>
-							<td><input type="text" id="WisMod" class="input_b"></td>
+							<td><input type="text" id="WisScore" class="input_b" value="{{wis.stNet}}"></td>
+							<td><input type="text" id="WisMod" class="input_b" value="{{wis.stAbScModifier}}"></td>
 							<td><input type="text" id="WisUpScore" class="input_b"></td>
 							<td><input type="text" id="WisUpMod" class="input_b"></td>
 						</tr>
@@ -669,8 +671,8 @@
 							<td>
 								<button class="nonprinting" onclick="PopulateAbMod('ChaMod','ChaUpMod','UseChaMod')" title="Click to populate skill modifiers.">+</button>
 								<b>Cha</b>risma</td>
-							<td><input type="text" id="ChaScore" class="input_b"></td>
-							<td><input type="text" id="ChaMod" class="input_b"></td>
+							<td><input type="text" id="ChaScore" class="input_b" value="{{cha.stNet}}"></td>
+							<td><input type="text" id="ChaMod" class="input_b" value="{{cha.stAbScModifier}}"></td>
 							<td><input type="text" id="ChaUpScore" class="input_b"></td>
 							<td><input type="text" id="ChaUpMod" class="input_b"></td>
 						</tr>
@@ -693,171 +695,171 @@
 							<th>Misc<br />Mod</th>
 						</tr>
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="AcrobaticsClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="AcrobaticsClass" {%if "skClassSkillBon" in skills.acrobatics %} checked {%endif%}></td>
 							<td>Acrobatics<sup>*</sup> (Dex)</td>
-							<td><input type="text" id="AcrobaticsTotal" class="input_b"></td>
+							<td><input type="text" id="AcrobaticsTotal" class="input_b" value="{{skills.acrobatics.stNet}}"></td>
 							<td><button class="nonprinting" onclick="SumUpSkill('Acrobatics',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="AcrobaticsRanks" class="input_b"></td>
+							<td><input type="text" id="AcrobaticsRanks" class="input_b" value="{{skills.acrobatics.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="AcrobaticsClassB" class="input_b"></td>
+							<td><input type="text" id="AcrobaticsClassB" class="input_b" value="{{skills.acrobatics.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="AcrobaticsAbility" class="input_b UseDexMod"></td>
+							<td><input type="text" id="AcrobaticsAbility" class="input_b UseDexMod" value="{{dex.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="AcrobaticsIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="AcrobaticsMisc" class="input_b"></td>
+							<td><input type="text" id="AcrobaticsMisc" class="input_b" value="{{skills.acrobatics.stMiscMod}}"></td>
 						</tr>
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="AthleticsClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="AthleticsClass" {%if "skClassSkillBon" in skills.athletics %} checked {%endif%}></td>
 							<td>Athletics<sup>*</sup> (Str)</td>
-							<td><input type="text" id="AthleticsTotal" class="input_b"></td>
+							<td><input type="text" id="AthleticsTotal" class="input_b" value="{{skills.athletics.stNet}}"></td>
 							<td><button class="nonprinting" onclick="SumUpSkill('Athletics',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="AthleticsRanks" class="input_b"></td>
+							<td><input type="text" id="AthleticsRanks" class="input_b" value="{{skills.athletics.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="AthleticsClassB" class="input_b"></td>
+							<td><input type="text" id="AthleticsClassB" class="input_b" value="{{skills.athletics.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="AthleticsAbility" class="input_b UseStrMod"></td>
+							<td><input type="text" id="AthleticsAbility" class="input_b UseStrMod" value="{{str.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="AthleticsIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="AthleticsMisc" class="input_b"></td>
+							<td><input type="text" id="AthleticsMisc" class="input_b" value="{{skills.athletics.stMiscMod}}"></td>
 						</tr>
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="BluffClass"></td>
-							<td>Bluff (Cha)</td>
-							<td><input type="text" id="BluffTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Bluff',false,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="BluffRanks" class="input_b"></td>
+							<td class="right-aligned"><input type="checkbox" id="BluffClass" {%if "skClassSkillBon" in skills.bluff %} checked {%endif%}></td>
+							<td>Bluff<sup>*</sup> (Cha)</td>
+							<td><input type="text" id="BluffTotal" class="input_b" value="{{skills.bluff.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Bluff',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="BluffRanks" class="input_b" value="{{skills.bluff.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="BluffClassB" class="input_b"></td>
+							<td><input type="text" id="BluffClassB" class="input_b" value="{{skills.bluff.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="BluffAbility" class="input_b UseChaMod"></td>
+							<td><input type="text" id="BluffAbility" class="input_b UseChaMod" value="{{cha.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="BluffIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="BluffMisc" class="input_b"></td>
+							<td><input type="text" id="BluffMisc" class="input_b" value="{{skills.bluff.stMiscMod}}"></td>
 						</tr>
 						<tr>
-							<td class="right-aligned"><sup>&dagger;</sup><input type="checkbox" id="ComputersClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="ComputersClass" {%if "skClassSkillBon" in skills.computers %} checked {%endif%}></td>
 							<td>Computers (Int)</td>
-							<td><input type="text" id="ComputersTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Computers',true,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="ComputersRanks" class="input_b"></td>
+							<td><input type="text" id="ComputersTotal" class="input_b" value="{{skills.computers.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Computers',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="ComputersRanks" class="input_b" value="{{skills.computers.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="ComputersClassB" class="input_b"></td>
+							<td><input type="text" id="ComputersClassB" class="input_b" value="{{skills.computers.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="ComputersAbility" class="input_b UseIntMod"></td>
+							<td><input type="text" id="ComputersAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="ComputersIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="ComputersMisc" class="input_b"></td>
-						</tr>
+							<td><input type="text" id="ComputersMisc" class="input_b" value="{{skills.computers.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><sup>&dagger;</sup><input type="checkbox" id="CultureClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="CultureClass" {%if "skClassSkillBon" in skills.culture %} checked {%endif%}></td>
 							<td>Culture (Int)</td>
-							<td><input type="text" id="CultureTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Culture',true,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="CultureRanks" class="input_b"></td>
+							<td><input type="text" id="CultureTotal" class="input_b" value="{{skills.culture.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Culture',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="CultureRanks" class="input_b" value="{{skills.culture.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="CultureClassB" class="input_b"></td>
+							<td><input type="text" id="CultureClassB" class="input_b" value="{{skills.culture.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="CultureAbility" class="input_b UseIntMod"></td>
+							<td><input type="text" id="CultureAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="CultureIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="CultureMisc" class="input_b"></td>
-						</tr>
+							<td><input type="text" id="CultureMisc" class="input_b" value="{{skills.culture.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="DiplomacyClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="DiplomacyClass" {%if "skClassSkillBon" in skills.diplomacy %} checked {%endif%}></td>
 							<td>Diplomacy (Cha)</td>
-							<td><input type="text" id="DiplomacyTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Diplomacy',false,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="DiplomacyRanks" class="input_b"></td>
+							<td><input type="text" id="DiplomacyTotal" class="input_b" value="{{skills.diplomacy.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Diplomacy',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="DiplomacyRanks" class="input_b" value="{{skills.diplomacy.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="DiplomacyClassB" class="input_b"></td>
+							<td><input type="text" id="DiplomacyClassB" class="input_b" value="{{skills.diplomacy.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="DiplomacyAbility" class="input_b UseChaMod"></td>
+							<td><input type="text" id="DiplomacyAbility" class="input_b UseChaMod" value="{{cha.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="DiplomacyIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="DiplomacyMisc" class="input_b"></td>
-						</tr>
+							<td><input type="text" id="DiplomacyMisc" class="input_b" value="{{skills.diplomacy.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="DisguiseClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="DisguiseClass" {%if "skClassSkillBon" in skills.disguise %} checked {%endif%}></td>
 							<td>Disguise (Cha)</td>
-							<td><input type="text" id="DisguiseTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Disguise',false,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="DisguiseRanks" class="input_b"></td>
+							<td><input type="text" id="DisguiseTotal" class="input_b" value="{{skills.disguise.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Disguise',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="DisguiseRanks" class="input_b" value="{{skills.disguise.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="DisguiseClassB" class="input_b"></td>
+							<td><input type="text" id="DisguiseClassB" class="input_b" value="{{skills.disguise.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="DisguiseAbility" class="input_b UseChaMod"></td>
+							<td><input type="text" id="DisguiseAbility" class="input_b UseChaMod" value="{{cha.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="DisguiseIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="DisguiseMisc" class="input_b"></td>
-						</tr>
+							<td><input type="text" id="DisguiseMisc" class="input_b" value="{{skills.disguise.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><sup>&dagger;</sup><input type="checkbox" id="EngineeringClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="EngineeringClass" {%if "skClassSkillBon" in skills.engineering %} checked {%endif%}></td>
 							<td>Engineering (Int)</td>
-							<td><input type="text" id="EngineeringTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Engineering',true,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="EngineeringRanks" class="input_b"></td>
+							<td><input type="text" id="EngineeringTotal" class="input_b" value="{{skills.engineering.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Engineering',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="EngineeringRanks" class="input_b" value="{{skills.engineering.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="EngineeringClassB" class="input_b"></td>
+							<td><input type="text" id="EngineeringClassB" class="input_b" value="{{skills.engineering.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="EngineeringAbility" class="input_b UseIntMod"></td>
+							<td><input type="text" id="EngineeringAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="EngineeringIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="EngineeringMisc" class="input_b"></td>
-						</tr>
+							<td><input type="text" id="EngineeringMisc" class="input_b" value="{{skills.engineering.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="IntimidateClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="IntimidateClass" {%if "skClassSkillBon" in skills.intimidate %} checked {%endif%}></td>
 							<td>Intimidate (Cha)</td>
-							<td><input type="text" id="IntimidateTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Intimidate',false,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="IntimidateRanks" class="input_b"></td>
+							<td><input type="text" id="IntimidateTotal" class="input_b" value="{{skills.intimidate.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Intimidate',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="IntimidateRanks" class="input_b" value="{{skills.intimidate.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="IntimidateClassB" class="input_b"></td>
+							<td><input type="text" id="IntimidateClassB" class="input_b" value="{{skills.intimidate.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="IntimidateAbility" class="input_b UseChaMod"></td>
+							<td><input type="text" id="IntimidateAbility" class="input_b UseChaMod" value="{{cha.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="IntimidateIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="IntimidateMisc" class="input_b"></td>
+							<td><input type="text" id="IntimidateMisc" class="input_b" value="{{skills.intimidate.stMiscMod}}"></td>
 						</tr>		
 						<tr>
-							<td class="right-aligned"><sup>&dagger;</sup><input type="checkbox" id="LifeSciClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="LifeSciClass" {%if "skClassSkillBon" in skills.lifeScience %} checked {%endif%}></td>
 							<td>Life Science (Int)</td>
-							<td><input type="text" id="LifeSciTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('LifeSci',true,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="LifeSciRanks" class="input_b"></td>
+							<td><input type="text" id="LifeSciTotal" class="input_b" value="{{skills.lifeScience.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('LifeSci',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="LifeSciRanks" class="input_b" value="{{skills.lifeScience.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="LifeSciClassB" class="input_b"></td>
+							<td><input type="text" id="LifeSciClassB" class="input_b" value="{{skills.lifeScience.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="LifeSciAbility" class="input_b UseIntMod"></td>
+							<td><input type="text" id="LifeSciAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="LifeSciIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="LifeSciMisc" class="input_b"></td>
-						</tr>
+							<td><input type="text" id="LifeSciMisc" class="input_b" value="{{skills.lifeScience.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><sup>&dagger;</sup><input type="checkbox" id="MedicineClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="MedicineClass" {%if "skClassSkillBon" in skills.medicine %} checked {%endif%}></td>
 							<td>Medicine (Int)</td>
-							<td><input type="text" id="MedicineTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Medicine',true,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="MedicineRanks" class="input_b"></td>
+							<td><input type="text" id="MedicineTotal" class="input_b" value="{{skills.medicine.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Medicine',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="MedicineRanks" class="input_b" value="{{skills.medicine.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="MedicineClassB" class="input_b"></td>
+							<td><input type="text" id="MedicineClassB" class="input_b" value="{{skills.medicine.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="MedicineAbility" class="input_b UseIntMod"></td>
+							<td><input type="text" id="MedicineAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="MedicineIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="MedicineMisc" class="input_b"></td>
-						</tr>								
-						<tr>
+							<td><input type="text" id="MedicineMisc" class="input_b" value="{{skills.medicine.stMiscMod}}"></td>
+						</tr>												
+						<tr style="display: none;">
 							<td class="right-aligned"><sup>&dagger;</sup><input type="checkbox" id="MysticismClass"></td>
 							<td>Mysticism (Wis)</td>
 							<td><input type="text" id="MysticismTotal" class="input_b"></td>
@@ -873,51 +875,51 @@
 							<td><input type="text" id="MysticismMisc" class="input_b"></td>
 						</tr>		
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="PerceptionClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="PerceptionClass" {%if "skClassSkillBon" in skills.perception %} checked {%endif%}></td>
 							<td>Perception (Wis)</td>
-							<td><input type="text" id="PerceptionTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Perception',false,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="PerceptionRanks" class="input_b"></td>
+							<td><input type="text" id="PerceptionTotal" class="input_b" value="{{skills.perception.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Perception',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="PerceptionRanks" class="input_b" value="{{skills.perception.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="PerceptionClassB" class="input_b"></td>
+							<td><input type="text" id="PerceptionClassB" class="input_b" value="{{skills.perception.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="PerceptionAbility" class="input_b UseWisMod"></td>
+							<td><input type="text" id="PerceptionAbility" class="input_b UseWisMod" value="{{wis.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="PerceptionIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="PerceptionMisc" class="input_b"></td>
-						</tr>	
+							<td><input type="text" id="PerceptionMisc" class="input_b" value="{{skills.perception.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><sup>&dagger;</sup><input type="checkbox" id="PhysSciClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="PhysSciClass" {%if "skClassSkillBon" in physicalScience %} checked {%endif%}></td>
 							<td>Physical Science (Int)</td>
-							<td><input type="text" id="PhysSciTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('PhysSci',true,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="PhysSciRanks" class="input_b"></td>
+							<td><input type="text" id="PhysSciTotal" class="input_b" value="{{skills.physicalScience.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('PhysSci',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="PhysSciRanks" class="input_b" value="{{skills.physicalScience.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="PhysSciClassB" class="input_b"></td>
+							<td><input type="text" id="PhysSciClassB" class="input_b" value="{{skills.physicalScience.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="PhysSciAbility" class="input_b UseIntMod"></td>
+							<td><input type="text" id="PhysSciAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="PhysSciIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="PhysSciMisc" class="input_b"></td>
-						</tr>
+							<td><input type="text" id="PhysSciMisc" class="input_b" value="{{skills.physicalScience.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="PilotClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="PilotClass" {%if "skClassSkillBon" in skills.piloting %} checked {%endif%}></td>
 							<td>Piloting (Dex)</td>
-							<td><input type="text" id="PilotTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Pilot',false,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="PilotRanks" class="input_b"></td>
+							<td><input type="text" id="PilotTotal" class="input_b" value="{{skills.piloting.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Pilot',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="PilotRanks" class="input_b" value="{{skills.piloting.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="PilotClassB" class="input_b"></td>
+							<td><input type="text" id="PilotClassB" class="input_b" value="{{skills.piloting.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="PilotAbility" class="input_b UseDexMod"></td>
+							<td><input type="text" id="PilotAbility" class="input_b UseDexMod" value="{{dex.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="PilotIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="PilotMisc" class="input_b"></td>
-						</tr>	
-						<tr>
+							<td><input type="text" id="PilotMisc" class="input_b" value="{{skills.piloting.stMiscMod}}"></td>
+						</tr>						
+						<tr style="display: none;">
 							<td class="right-aligned top-aligned"><sup>&dagger;</sup><input type="checkbox" id="Profession1Class"></td>
 							<td>Profession (<input type="text" class="input_u3" id="Profession1ABScore">)<br /><input type="text" id="Profession1Type" class="input_u"></td>
 							<td><input type="text" id="Profession1Total" class="input_b"></td>
@@ -932,7 +934,7 @@
 							<td>+</td>
 							<td><input type="text" id="Profession1Misc" class="input_b"></td>
 						</tr>						
-						<tr>
+						<tr style="display: none;">
 							<td class="right-aligned top-aligned"><sup>&dagger;</sup><input type="checkbox" id="Profession2Class"></td>
 							<td>Profession (<input type="text" class="input_u3" id="Profession2ABScore">)<br /><input type="text" id="Profession2Type" class="input_u"></td>
 							<td><input type="text" id="Profession2Total" class="input_b"></td>
@@ -948,65 +950,65 @@
 							<td><input type="text" id="Profession2Misc" class="input_b"></td>
 						</tr>
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="SenseClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="SenseClass" {%if "skClassSkillBon" in skills.senseMotive %} checked {%endif%}></td>
 							<td>Sense Motive (Wis)</td>
-							<td><input type="text" id="SenseTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Sense',false,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="SenseRanks" class="input_b"></td>
+							<td><input type="text" id="SenseTotal" class="input_b" value="{{skills.senseMotive.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Sense',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="SenseRanks" class="input_b" value="{{skills.senseMotive.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="SenseClassB" class="input_b"></td>
+							<td><input type="text" id="SenseClassB" class="input_b" value="{{skills.senseMotive.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="SenseAbility" class="input_b UseWisMod"></td>
+							<td><input type="text" id="SenseAbility" class="input_b UseWisMod" value="{{wis.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="SenseIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="SenseMisc" class="input_b"></td>
-						</tr>		
+							<td><input type="text" id="SenseMisc" class="input_b" value="{{skills.senseMotive.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><sup>&dagger;</sup><input type="checkbox" id="SleightClass"></td>
-							<td>Sleight of Hand (Dex)<sup>*</sup></td>
-							<td><input type="text" id="SleightTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Sleight',true,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="SleightRanks" class="input_b"></td>
+							<td class="right-aligned"><input type="checkbox" id="SleightClass" {%if "skClassSkillBon" in skills.sleightOfHand %} checked {%endif%}></td>
+							<td>Sleight of Hand (Dex)</td>
+							<td><input type="text" id="SleightTotal" class="input_b" value="{{skills.sleightOfHand.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Sleight',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="SleightRanks" class="input_b" value="{{skills.sleightOfHand.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="SleightClassB" class="input_b"></td>
+							<td><input type="text" id="SleightClassB" class="input_b" value="{{skills.sleightOfHand.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="SleightAbility" class="input_b UseDexMod"></td>
+							<td><input type="text" id="SleightAbility" class="input_b UseDexMod" value="{{dex.stAbScModifier}}"></td>
 							<td>+</td>
-							<td><input type="text" id="SleightInt" class="input_b"></td>
+							<td><input type="text" id="SleightIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="SleightMisc" class="input_b"></td>
-						</tr>		
+							<td><input type="text" id="SleightMisc" class="input_b" value="{{skills.sleightOfHand.stMiscMod}}"></td>
+						</tr>						
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="StealthClass"></td>
-							<td>Stealth (Dex)<sup>*</sup></td>
-							<td><input type="text" id="StealthTotal" class="input_b"></td>
+							<td class="right-aligned"><input type="checkbox" id="StealthClass" {%if "skClassSkillBon" in skills.stealth %} checked {%endif%}></td>
+							<td>Stealth (Dex)</td>
+							<td><input type="text" id="StealthTotal" class="input_b" value="{{stealth.stNet}}"></td>
 							<td><button class="nonprinting" onclick="SumUpSkill('Stealth',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="StealthRanks" class="input_b"></td>
+							<td><input type="text" id="StealthRanks" class="input_b" value="{{skills.stealth.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="StealthClassB" class="input_b"></td>
+							<td><input type="text" id="StealthClassB" class="input_b" value="{{skills.stealth.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="StealthAbility" class="input_b UseDexMod"></td>
+							<td><input type="text" id="StealthAbility" class="input_b UseDexMod" value="{{dex.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="StealthIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="StealthMisc" class="input_b"></td>
-						</tr>						
+							<td><input type="text" id="StealthMisc" class="input_b" value="{{skills.stealth.stMiscMod}}"></td>
+						</tr>											
 						<tr>
-							<td class="right-aligned"><input type="checkbox" id="SurvivalClass"></td>
+							<td class="right-aligned"><input type="checkbox" id="SurvivalClass" {%if "skClassSkillBon" in skills.survival %} checked {%endif%}></td>
 							<td>Survival (Wis)</td>
-							<td><input type="text" id="SurvivalTotal" class="input_b"></td>
-							<td><button class="nonprinting" onclick="SumUpSkill('Survival',false,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="SurvivalRanks" class="input_b"></td>
+							<td><input type="text" id="SurvivalTotal" class="input_b" value="{{skills.survival.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Survival',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="SurvivalRanks" class="input_b" value="{{skills.survival.skRanks}}"></td>
 							<td>+</td>
-							<td><input type="text" id="SurvivalClassB" class="input_b"></td>
+							<td><input type="text" id="SurvivalClassB" class="input_b" value="{{skills.survival.skClassSkillBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="SurvivalAbility" class="input_b UseWisMod"></td>
+							<td><input type="text" id="SurvivalAbility" class="input_b UseWisMod" value="{{wis.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="SurvivalIns" class="input_b"></td>
 							<td>+</td>
-							<td><input type="text" id="SurvivalMisc" class="input_b"></td>
-						</tr>
+							<td><input type="text" id="SurvivalMisc" class="input_b" value="{{skills.survival.stMiscMod}}"></td>
+						</tr>						
 						<tr>
 							<td></td>
 							<td colspan=3 class="right-aligned">Skill Points Spent/Total</td>
@@ -1019,7 +1021,19 @@
 					</table>
 					<p>&dagger;Trained only <input type="checkbox" id="alwaystrue" checked disabled>Class skill *Armor check penalty applies</p>
 					<h3>Skill Notes</h3><br>
-					<textarea rows="6" cols="48" id="SkillNotes"></textarea>
+					<textarea rows="6" cols="48" id="SkillNotes">
+						
+					</textarea>
+					<table>
+						{%for skill_name, skill_value in skills.items %}
+							{% if skill_value.useInPlay%}
+								<tr>
+									<th style="vertical-align: top;">{{skill_value.name}}:</th>
+									<td>{{skill_value.useInPlay|read_hlo_text|safe}}</td>
+								</tr>
+							{%endif%}
+						{%endfor%}
+					</table>
 					
 				</td>
 				<td class="halfwidth">
@@ -1033,9 +1047,9 @@
 							<th>Misc Modifier</th>
 						</tr>
 						<tr>
-							<td><input type="text" id="InitTotal" class="input_b"></td>
+							<td><input type="text" id="InitTotal" class="input_b" value="{{initiative.stNet}}"></td>
 							<td><button class="nonprinting" onclick="SumUp('InitTotal',['InitDexMod','InitMiscMod'])" title="Click to calculate total initiative.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="InitDexMod" class="input_b UseDexMod"></td>
+							<td><input type="text" id="InitDexMod" class="input_b UseDexMod" value="{{initiative.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="InitMiscMod" class="input_b"></td>
 						</tr>
@@ -1050,15 +1064,15 @@
 						</tr>
 						<tr>
 							<th class="right-aligned">Total</th>
-							<td><input type="text" id="SPTotal" class="input_b"></td>
-							<td><input type="text" id="HPTotal" class="input_b"></td>
-							<td><input type="text" id="RPTotal" class="input_b"></td>
+							<td><input type="text" id="SPTotal" class="input_b" value="{{stamina.rvMax}}"></td>
+							<td><input type="text" id="HPTotal" class="input_b" value="{{health.rvMax}}"></td>
+							<td><input type="text" id="RPTotal" class="input_b" value="{{resolve.rvMax}}"></td>
 						</tr>
 						<tr>
 							<th class="right-aligned">Current</th>
-							<td><input type="text" id="SPCurrent" class="input_b"></td>
-							<td><input type="text" id="HPCurrent" class="input_b"></td>
-							<td><input type="text" id="RPCurrent" class="input_b"></td>
+							<td><input type="text" id="SPCurrent" class="input_b" value="{{stamina.rvCurrent}}"></td>
+							<td><input type="text" id="HPCurrent" class="input_b" value="{{health.rvCurrent}}"></td>
+							<td><input type="text" id="RPCurrent" class="input_b" value="{{resolve.rvCurrent}}"></td>
 						</tr>
 					</table>
 					<h3>Armor Class</h3>
@@ -1075,9 +1089,9 @@
 						</tr>
 						<tr>
 							<td><b>E</b>nergy <b>A</b>rmor <b>C</b>lass</td>
-							<td><input type="text" id="EACTotal" class="input_b"></td>
+							<td><input type="text" id="EACTotal" class="input_b" value="{{eac.stNet}}"></td>
 							<td><button class="nonprinting" onclick="SumPlusTen('EACTotal',['EACArmor','EACDexMod','EACMiscMod'])" title="Click to calculate total EAC.">=</button><span class="printonly">=</span> 10 +</td>
-							<td><input type="text" id="EACArmor" class="input_b"></td>
+							<td><input type="text" id="EACArmor" class="input_b" ></td>
 							<td>+</td>
 							<td><input type="text" id="EACDexMod" class="input_b UseDexMod"></td>
 							<td>+</td>
@@ -1085,7 +1099,7 @@
 						</tr>
 						<tr>
 							<td><b>K</b>inetic <b>A</b>rmor <b>C</b>lass</td>
-							<td><input type="text" id="KACTotal" class="input_b"></td>
+							<td><input type="text" id="KACTotal" class="input_b" value="{{kac.stNet}}"></td>
 							<td><button class="nonprinting" onclick="SumPlusTen('KACTotal',['KACArmor','KACDexMod','KACMiscMod'])" title="Click to calculate total KAC.">=</button><span class="printonly">=</span> 10 +</td>
 							<td><input type="text" id="KACArmor" class="input_b"></td>
 							<td>+</td>
@@ -1095,7 +1109,7 @@
 						</tr>
 						<tr>
 							<td>AC vs. Combat Maneuvers</td>
-							<td><input type="text" id="MACTotal" class="input_b"></td>
+							<td><input type="text" id="MACTotal" class="input_b" value="{{mac.stNet}}"></td>
 							<td><button class="nonprinting" onclick="AddEight('MACTotal','KACTotal')" title="Click to calculate maneuver KAC.">=</button><span class="printonly">=</span> 8 +</td>
 							<td><b>KAC</b></td>
 							<td></td>
@@ -1122,31 +1136,31 @@
 						</tr>
 						<tr>
 							<td>Fortitude (Con)</td>
-							<td><input type="text" id="FortTotal" class="input_b"></td>
+							<td><input type="text" id="FortTotal" class="input_b" value="{{skills.fortSave.stNet}}"></td>
 							<td><button class="nonprinting" onclick="SumUp('FortTotal',['FortBase','FortAbility','FortMisc'])" title="Click to calculate total save.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="FortBase" class="input_b"></td>
+							<td><input type="text" id="FortBase" class="input_b" value="{{skills.fortSave.stBaseBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="FortAbility" class="input_b UseConMod"></td>
+							<td><input type="text" id="FortAbility" class="input_b UseConMod" value="{{skills.fortSave.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="FortMisc" class="input_b"></td>
 						</tr>
 						<tr>
 							<td>Reflex (Dex)</td>
-							<td><input type="text" id="RefTotal" class="input_b"></td>
+							<td><input type="text" id="RefTotal" class="input_b" value="{{skills.reflexSave.stNet}}"></td>
 							<td><button class="nonprinting" onclick="SumUp('RefTotal',['RefBase','RefAbility','RefMisc'])" title="Click to calculate total save.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="RefBase" class="input_b"></td>
+							<td><input type="text" id="RefBase" class="input_b" value="{{skills.reflexSave.stBaseBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="RefAbility" class="input_b UseDexMod"></td>
+							<td><input type="text" id="RefAbility" class="input_b UseDexMod" value="{{skills.reflexSave.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="RefMisc" class="input_b"></td>
 						</tr>
 						<tr>
 							<td>Will (Wis)</td>
-							<td><input type="text" id="WillTotal" class="input_b"></td>
+							<td><input type="text" id="WillTotal" class="input_b" value="{{skills.willSave.stNet}}"></td>
 							<td><button class="nonprinting" onclick="SumUp('WillTotal',['WillBase','WillAbility','WillMisc'])" title="Click to calculate total save.">=</button><span class="printonly">=</span></td>
-							<td><input type="text" id="WillBase" class="input_b"></td>
+							<td><input type="text" id="WillBase" class="input_b" value="{{skills.willSave.stBaseBon}}"></td>
 							<td>+</td>
-							<td><input type="text" id="WillAbility" class="input_b UseWisMod"></td>
+							<td><input type="text" id="WillAbility" class="input_b UseWisMod" value="{{skills.willSave.stAbScModifier}}"></td>
 							<td>+</td>
 							<td><input type="text" id="WillMisc" class="input_b"></td>
 						</tr>
@@ -1270,7 +1284,7 @@
 					<h3>Abilities</h3><br>
 					<textarea rows="42" cols="80" id="AbilityTextArea"></textarea>
 				</td>
-				<td rowspan="2" class="onethirdwidth">
+				<td rowspan="2" class="onethirdwidth" style="display: none;">
 					<h3>Spells</h3>
 					<table>
 						<tr>

@@ -24,3 +24,7 @@ def ability_score_modifier(score):
 @register.filter
 def get_json_value(json_object, key):
     return json_object.get(key)
+
+@register.filter
+def read_hlo_text(text):
+    return text.replace('\\n', '<br>').replace("{b}","<b>").replace("{/b}","</b>").replace("{i}","<i>").replace("{/i}","</i>")
