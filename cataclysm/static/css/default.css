@@ -280,7 +280,7 @@ p.app_description :hover {
 
 /* Style for table cells */
 .sci-fi-list td {
-    border: 1px solid #ccc;
+    border: none;
     padding: 10px;
 }
 
@@ -288,6 +288,71 @@ p.app_description :hover {
 .sci-fi-list tr:hover {
     background-color: #666; /* Slightly lighter hover color */
 }
+.table-label {
+    background-color: #333; /* Dark background color */
+    color: #fff; /* White text color */
+    font-size: 24px; /* Increase font size */
+}
+.toggle-table {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    padding: 20px;
+}
+
+.toggle-table th {
+    font-family: GoodOT;
+    font-size: 24px;
+    color: #fff;
+    padding-left: 25px;
+    padding-right: 25px;
+}
+
+.toggle-table td {
+    font-family: GoodOT;
+    font-size: 24px;
+    color: #fff;
+    margin-right: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.toggle-button {
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    background-color: #333;
+    border-radius: 15px;
+    position: relative;
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+.toggle-button::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 26px;
+    height: 26px;
+    background-color: #10dfab;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 0 0 10px rgba(16, 223, 171, 0.5);
+}
+
+.toggle-button.active {
+    background-color: #10dfab;
+}
+
+.toggle-button.active::before {
+    transform: translateX(30px);
+    box-shadow: 0 0 10px rgba(16, 223, 171, 0.8);
+}
+
 .rating-bar {
     height: 22px;
     background-color: #10dfab;
