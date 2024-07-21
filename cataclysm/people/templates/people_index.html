@@ -12,9 +12,11 @@
 
     th.rotate {
     /* Something you can count on */
-    width: 15px;
-    height: 140px;
+    width: 10px;
+    height: 100px;
     white-space: nowrap;
+    padding: 0px;
+    margin: 0px;
     }
 
     th.rotate > div {
@@ -26,13 +28,15 @@
     /* width: 30px; */
     }
     td.boolean {
-        width: 15px;
+        width: 10px !important;
+        padding: 0px !important;
+        margin: 0px !important;
         text-align: center;
     }
     
 </style>
     <h1 class="app_name">People Index</h1>
-    <h2 class="index_menu"><a href="{% url 'add' %}">Add a Person</a></h2>
+    <h2 class="index_menu"><a href="{% url 'add_person' %}">Add a Person</a></h2>
 
     <div class="column-buttons ">
         <table class="toggle-table">
@@ -127,20 +131,21 @@
                 <th class="center"><a href="?order_by=faction">Faction</a></th>
                 <th class="center"><a href="?order_by=rank">Rank</a></th>
                 <th class="center"><a href="?order_by=position">Position</a></th>
-                <th class="rotate agile"><div><span><a href="?order_by=agile">Agile</a></span></div></th>
-                <th class="rotate cybernetic"><div><span><a href="?order_by=cybernetic">Cybernetic</a></span></div></th>
-                <th class="rotate engineer"><div><span><a href="?order_by=engineer">Engineer</a></span></div></th>
-                <th class="rotate flier"><div><span><a href="?order_by=flier">Flier</a></span></div></th>
-                <th class="rotate genius"><div><span><a href="?order_by=genius">Genius</a></span></div></th>
-                <th class="rotate leader"><div><span><a href="?order_by=leader">Leader</a></span></div></th>
-                <th class="rotate medical"><div><span><a href="?order_by=medical">Medical</a></span></div></th>
-                <th class="rotate mutant"><div><span><a href="?order_by=mutant">Mutant</a></span></div></th>
-                <th class="rotate psychic"><div><span><a href="?order_by=psychic">Psychic</a></span></div></th>
-                <th class="rotate scientist"><div><span><a href="?order_by=scientist">Scientist</a></span></div></th>
-                <th class="rotate stealthy"><div><span><a href="?order_by=stealthy">Stealthy</a></span></div></th>
-                <th class="rotate strong"><div><span><a href="?order_by=strong">Strong</a></span></div></th>
-                <th class="rotate tactician"><div><span><a href="?order_by=tactician">Tactician</a></span></div></th>
-                <th class="rotate tough"><div><span><a href="?order_by=tough">Tough</a></span></div></th>
+                <th class="rotate agile boolean"><div><span><a href="?order_by=agile">Agile</a></span></div></th>
+                <th class="rotate cybernetic boolean"><div><span><a href="?order_by=cybernetic">Cybernetic</a></span></div></th>
+                <th class="rotate engineer boolean"><div><span><a href="?order_by=engineer">Engineer</a></span></div></th>
+                <th class="rotate flier boolean"><div><span><a href="?order_by=flier">Flier</a></span></div></th>
+                <th class="rotate genius boolean"><div><span><a href="?order_by=genius">Genius</a></span></div></th>
+                <th class="rotate leader boolean"><div><span><a href="?order_by=leader">Leader</a></span></div></th>
+                <th class="rotate medical boolean"><div><span><a href="?order_by=medical">Medical</a></span></div></th>
+                <th class="rotate mutant boolean"><div><span><a href="?order_by=mutant">Mutant</a></span></div></th>
+                <th class="rotate psychic boolean"><div><span><a href="?order_by=psychic">Psychic</a></span></div></th>
+                <th class="rotate scientist boolean"><div><span><a href="?order_by=scientist">Scientist</a></span></div></th>
+                <th class="rotate stealthy boolean"><div><span><a href="?order_by=stealthy">Stealthy</a></span></div></th>
+                <th class="rotate strong boolean"><div><span><a href="?order_by=strong">Strong</a></span></div></th>
+                <th class="rotate tactician boolean"><div><span><a href="?order_by=tactician">Tactician</a></span></div></th>
+                <th class="rotate tough boolean"><div><span><a href="?order_by=tough">Tough</a></span></div></th>
+                <th class="crew-image">Picture</th>
                 {% if request.user|has_group:'admins' %}
                     <th><a href="?order_by=hidden">Hidden</a></th>
                 {% endif %}
@@ -151,7 +156,7 @@
             {% for person in people_list %}
                 {% if not person.hidden %}
                     <tr>
-                        <td>{{ person.id }}</td>
+                        <td><a href="{% url 'person_page' person.id %}">{{ person.id }}</a></td>
                         <td>{{ person.name }}</td>
                         <td>{{ person.age }}</td>
                         <td>{{ person.sex }}</td>
@@ -173,6 +178,13 @@
                         <td class="boolean strong">{% if person.strong %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
                         <td class="boolean tactician">{% if person.tactician %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
                         <td class="boolean tough">{% if person.tough %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        {% if person.image %}
+                            <td>
+                                <img src="{{ person.image.url }}" alt="{{ person.name }}" class="crew_list_image"></img>
+                            </td>
+                        {% else %}
+                            <td>No image available</td>
+                        {% endif %}
                         {% if request.user|has_group:'admins' %}
                             <td>{{ person.hidden }}</td>
                         {% endif %}

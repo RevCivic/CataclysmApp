@@ -293,6 +293,9 @@ p.app_description :hover {
     color: #fff; /* White text color */
     font-size: 24px; /* Increase font size */
 }
+.boolean {
+    text-align: center; /* Center the text */
+}
 .toggle-table {
     display: flex;
     justify-content: center;
@@ -383,4 +386,35 @@ p.app_description :hover {
     width: 250px;
     height: auto;
     border-radius: 10px;
+}
+.species_image:hover {
+    transform: scale(1.1);
+}
+.crew_image {
+    width: 250px;
+    height: auto;
+    border-radius: 10px;
+}
+.crew_image:hover {
+    left: 200px;
+    position: fixed;
+    transform: scale(2.5);
+}
+.crew_list_image {
+    width: 50px;
+    height: auto;
+    border-radius: 10px;
+}
+.crew_list_image:hover {
+    transform: scale(10);
+    position: relative;
+    left: -100px;
+}
+.crew_list_additional_images {
+    width: 250px;
+    height: auto;
+    border-radius: 10px;
+}
+.crew_list_additional_images:hover {
+    transform: scale(2.5);
 }

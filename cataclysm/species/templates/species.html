@@ -31,7 +31,7 @@
                     </table>
                 </td>
                 <td colspan="2" >
-                    <table style="vertical-align: top; width: 100%;"">
+                    <table style="vertical-align: top; width: 100%;">
                         <th colspan="2" style="text-align: center;">Biology</th>
                         <tr>
                             <th>Size</th>
@@ -92,13 +92,13 @@
                 <th style="text-align: center;">Psionic</th>
             </tr>
             <tr>
-                <td style="text-align: center;">{{ current_species.natural_weapons }}</td>
-                <td style="text-align: center;">{{ current_species.natural_armor }}</td>
-                <td style="text-align: center;">{{ current_species.can_fly }}</td>
-                <td style="text-align: center;">{{ current_species.aquatic }}</td>
-                <td style="text-align: center;">{{ current_species.amphibious }}</td>
-                <td style="text-align: center;">{{ current_species.telepathic }}</td>
-                <td style="text-align: center;">{{ current_species.psionic }}</td>
+                <td style="text-align: center; {% if current_species.natural_weapons %} background-color: darkgreen; {% endif %}">{{ current_species.natural_weapons }}</td>
+                <td style="text-align: center; {% if current_species.natural_armor %} background-color: darkgreen; {% endif %}">{{ current_species.natural_armor }}</td>
+                <td style="text-align: center; {% if current_species.can_fly %} background-color: darkgreen; {% endif %}">{{ current_species.can_fly }}</td>
+                <td style="text-align: center; {% if current_species.aquatic %} background-color: darkgreen; {% endif %}">{{ current_species.aquatic }}</td>
+                <td style="text-align: center; {% if current_species.amphibious %} background-color: darkgreen; {% endif %}">{{ current_species.amphibious }}</td>
+                <td style="text-align: center; {% if current_species.telepathic %} background-color: darkgreen; {% endif %}">{{ current_species.telepathic }}</td>
+                <td style="text-align: center; {% if current_species.psionic %} background-color: darkgreen; {% endif %}">{{ current_species.psionic }}</td>
             </tr>
             <tr>
                 <th colspan="2" style="text-align: center;">Background</th>

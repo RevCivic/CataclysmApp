@@ -1,0 +1,120 @@
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+
+{% block content %}
+<h1 class="app_name">{{ current_person.name }}</h1>
+<h2 class="index_menu"><a href="{% url 'edit_person' current_person.id%}">Edit {{current_person.name}}</a></h2>
+    <div style="width: 100%;">
+        <table class="sci-fi-list">
+            <tr style="vertical-align: top;">
+                <td rowspan="3" style="vertical-align: middle; width: 250px;">
+                    {%if current_person.image %}
+                        <center><img src="{{current_person.image.url}}" class="crew_image"></center>
+                    {% endif %}
+                </td>
+                <td colspan="3">
+                    <table style="vertical-align: top; width: 100%;">
+                        <th colspan="2" style="text-align: center;">Basic Info</th>
+                        <tr>
+                            <th>Name</th>
+                            <td>{{ current_person.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Age</th>
+                            <td>{{ current_person.age }}</td>
+                        </tr>
+                        <tr>
+                            <th>Sex</th>
+                            <td>{{ current_person.sex }}</td>
+                        </tr>
+                        <tr>
+                            <th>Species</th>
+                            <td>{{ current_person.species }}</td>
+                        </tr>
+                    </table>
+                </td>
+                <td colspan="2">
+                    <table style="vertical-align: top; width: 100%;">
+                        <th colspan="2" style="text-align: center;">Career</th>
+                        <tr>
+                            <th>Faction</th>
+                            <td>{{ current_person.faction }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rank</th>
+                            <td>{{ current_person.rank }}</td>
+                        </tr>
+                        <tr>
+                            <th>Current Position</th>
+                            <td>{{ current_person.position }}</td>
+                        </tr>
+                        <tr>
+                            <th>Location</th>
+                            <td>{{ current_person.location }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <table class="sci-fi-list">
+            <tr>
+                <th class="boolean">Agile</th>
+                <th class="boolean">Cybernetic</th>
+                <th class="boolean">Engineer</th>
+                <th class="boolean">Flier</th>
+                <th class="boolean">Genius</th>
+                <th class="boolean">Leader</th>
+                <th class="boolean">Medical</th>
+                <th class="boolean">Mutant</th>
+                <th class="boolean">Psychic</th>
+                <th class="boolean">Scientist</th>
+                <th class="boolean">Stealthy</th>
+                <th class="boolean">Strong</th>
+                <th class="boolean">Tactician</th>
+                <th class="boolean">Tough</th>
+            </tr>
+            <tr>
+                <td style="background-color: {% if current_person.agile %}darkgreen{% endif %}">{{ current_person.agile }}</td>
+                <td style="background-color: {% if current_person.cybernetic %}darkgreen{% endif %}">{{ current_person.cybernetic }}</td>
+                <td style="background-color: {% if current_person.engineer %}darkgreen{% endif %}">{{ current_person.engineer }}</td>
+                <td style="background-color: {% if current_person.flier %}darkgreen{% endif %}">{{ current_person.flier }}</td>
+                <td style="background-color: {% if current_person.genius %}darkgreen{% endif %}">{{ current_person.genius }}</td>
+                <td style="background-color: {% if current_person.leader %}darkgreen{% endif %}">{{ current_person.leader }}</td>
+                <td style="background-color: {% if current_person.medical %}darkgreen{% endif %}">{{ current_person.medical }}</td>
+                <td style="background-color: {% if current_person.mutant %}darkgreen{% endif %}">{{ current_person.mutant }}</td>
+                <td style="background-color: {% if current_person.psychic %}darkgreen{% endif %}">{{ current_person.psychic }}</td>
+                <td style="background-color: {% if current_person.scientist %}darkgreen{% endif %}">{{ current_person.scientist }}</td>
+                <td style="background-color: {% if current_person.stealthy %}darkgreen{% endif %}">{{ current_person.stealthy }}</td>
+                <td style="background-color: {% if current_person.strong %}darkgreen{% endif %}">{{ current_person.strong }}</td>
+                <td style="background-color: {% if current_person.tactician %}darkgreen{% endif %}">{{ current_person.tactician }}</td>
+                <td style="background-color: {% if current_person.tough %}darkgreen{% endif %}">{{ current_person.tough }}</td>
+            </tr>
+        </table>
+    </div>
+    <div>
+        <table class="sci-fi-list">
+            <tr>
+                <th><a href="{% url 'add_images' current_person.id%}"> Add Images</a></th>
+            </tr>
+            {% if current_person.additional_images.count > 0 %}
+                <tr>
+                    <th colspan="2" style="text-align: center;">Additional Images</th>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table>
+                           <tr>
+                            {% for image in current_person.additional_images.all %}
+                                <td><img src="{{ image.additional_image.url }}" class="crew_list_additional_images"></td>
+                            {% endfor %}
+                           </tr>
+                        </table>
+                    </td>
+                </tr>
+            {% endif %}
+        </table>
+    </div>
+{% endblock %}
