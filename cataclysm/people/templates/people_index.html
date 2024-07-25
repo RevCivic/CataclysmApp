@@ -1,0 +1,188 @@
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+
+{% block content %}
+<style>
+    th.center {
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    th.rotate {
+    /* Something you can count on */
+    width: 15px;
+    height: 140px;
+    white-space: nowrap;
+    }
+
+    th.rotate > div {
+    transform: 
+        /* Magic Numbers */
+        /* translate(25px, 51px) */
+        /* 45 is really 360 - 45 */
+        rotate(270deg);
+    /* width: 30px; */
+    }
+    td.boolean {
+        width: 15px;
+        text-align: center;
+    }
+    
+</style>
+    <h1 class="app_name">People Index</h1>
+    <h2 class="index_menu"><a href="{% url 'add' %}">Add a Person</a></h2>
+
+    <div class="column-buttons ">
+        <table class="toggle-table">
+            <tr>
+                <th colspan="14" class="table-label">Active Fields</th>
+            </tr>
+            <tr>
+                <th>Agile</th>
+                <th>Cybernetic</th>
+                <th>Engineer</th>
+                <th>Flier</th>
+                <th>Genius</th>
+                <th>Leader</th>
+                <th>Medical</th>
+                <th>Mutant</th>
+                <th>Psychic</th>
+                <th>Scientist</th>
+                <th>Stealthy</th>
+                <th>Strong</th>
+                <th>Tactician</th>
+                <th>Tough</th>
+            </tr>
+            <tr>
+                <td><button class="column-button toggle-button active" data-column="agile"></button></td>
+                <td><button class="column-button toggle-button active" data-column="cybernetic"></button></td>
+                <td><button class="column-button toggle-button active" data-column="engineer"></button></td>
+                <td><button class="column-button toggle-button active" data-column="flier"></button></td>
+                <td><button class="column-button toggle-button active" data-column="genius"></button></td>
+                <td><button class="column-button toggle-button active" data-column="leader"></button></td>
+                <td><button class="column-button toggle-button active" data-column="medical"></button></td>
+                <td><button class="column-button toggle-button active" data-column="mutant"></button></td>
+                <td><button class="column-button toggle-button active" data-column="psychic"></button></td>
+                <td><button class="column-button toggle-button active" data-column="scientist"></button></td>
+                <td><button class="column-button toggle-button active" data-column="stealthy"></button></td>
+                <td><button class="column-button toggle-button active" data-column="strong"></button></td>
+                <td><button class="column-button toggle-button active" data-column="tactician"></button></td>
+                <td><button class="column-button toggle-button active" data-column="tough"></button></td>
+            </tr>
+            <tr>
+                <th colspan="14" class="table-label">Toggle All</th>
+            </tr>
+            <tr>
+                <td colspan="14"><button class="all-column-button toggle-button" data-column="all"></button></td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        var buttons = document.getElementsByClassName("column-button");
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].addEventListener("click", function() {
+                var column = this.getAttribute("data-column");
+                var cells = document.getElementsByClassName(column);
+                for (var j = 0; j < cells.length; j++) {
+                    if (cells[j].style.display === "none") {
+                        cells[j].style.display = "table-cell";
+                    } else {
+                        cells[j].style.display = "none";
+                    }
+                }
+                if (this.classList.contains("active")) {
+                    this.classList.remove("active");
+                } else {
+                    this.classList.add("active");
+                }
+            });
+        }
+        var allButton = document.getElementsByClassName("all-column-button")[0];
+        allButton.addEventListener("click", function() {
+            var buttons = document.getElementsByClassName("column-button");
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].click();
+            }
+            if (allButton.classList.contains("active")) {
+                allButton.classList.remove("active");
+            } else {
+                allButton.classList.add("active");
+            }
+        });
+    </script>
+
+
+
+    <table class="sci-fi-list">
+        <thead>
+            <tr>
+                <th class="center"><a href="?order_by=id">ID</a></th>
+                <th class="center"><a href="?order_by=name">Name</a></th>
+                <th class="center"><a href="?order_by=age">Age</a></th>
+                <th class="center"><a href="?order_by=sex">Sex</a></th>
+                <th class="center"><a href="?order_by=species">Species</a></th>
+                <th class="center"><a href="?order_by=faction">Faction</a></th>
+                <th class="center"><a href="?order_by=rank">Rank</a></th>
+                <th class="center"><a href="?order_by=position">Position</a></th>
+                <th class="rotate agile"><div><span><a href="?order_by=agile">Agile</a></span></div></th>
+                <th class="rotate cybernetic"><div><span><a href="?order_by=cybernetic">Cybernetic</a></span></div></th>
+                <th class="rotate engineer"><div><span><a href="?order_by=engineer">Engineer</a></span></div></th>
+                <th class="rotate flier"><div><span><a href="?order_by=flier">Flier</a></span></div></th>
+                <th class="rotate genius"><div><span><a href="?order_by=genius">Genius</a></span></div></th>
+                <th class="rotate leader"><div><span><a href="?order_by=leader">Leader</a></span></div></th>
+                <th class="rotate medical"><div><span><a href="?order_by=medical">Medical</a></span></div></th>
+                <th class="rotate mutant"><div><span><a href="?order_by=mutant">Mutant</a></span></div></th>
+                <th class="rotate psychic"><div><span><a href="?order_by=psychic">Psychic</a></span></div></th>
+                <th class="rotate scientist"><div><span><a href="?order_by=scientist">Scientist</a></span></div></th>
+                <th class="rotate stealthy"><div><span><a href="?order_by=stealthy">Stealthy</a></span></div></th>
+                <th class="rotate strong"><div><span><a href="?order_by=strong">Strong</a></span></div></th>
+                <th class="rotate tactician"><div><span><a href="?order_by=tactician">Tactician</a></span></div></th>
+                <th class="rotate tough"><div><span><a href="?order_by=tough">Tough</a></span></div></th>
+                {% if request.user|has_group:'admins' %}
+                    <th><a href="?order_by=hidden">Hidden</a></th>
+                {% endif %}
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% for person in people_list %}
+                {% if not person.hidden %}
+                    <tr>
+                        <td>{{ person.id }}</td>
+                        <td>{{ person.name }}</td>
+                        <td>{{ person.age }}</td>
+                        <td>{{ person.sex }}</td>
+                        <td>{{ person.species }}</td>
+                        <td>{{ person.faction }}</td>
+                        <td>{{ person.rank }}</td>
+                        <td>{{ person.position }}</td>
+                        <td class="boolean agile">{% if person.agile %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean cybernetic">{% if person.cybernetic %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean engineer">{% if person.engineer %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean flier">{% if person.flier %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean genius">{% if person.genius %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean leader">{% if person.leader %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean medical">{% if person.medical %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean mutant">{% if person.mutant %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean psychic">{% if person.psychic %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean scientist">{% if person.scientist %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean stealthy">{% if person.stealthy %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean strong">{% if person.strong %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean tactician">{% if person.tactician %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        <td class="boolean tough">{% if person.tough %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        {% if request.user|has_group:'admins' %}
+                            <td>{{ person.hidden }}</td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <td colspan="3">No people found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

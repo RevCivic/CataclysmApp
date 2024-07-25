@@ -1,0 +1,3092 @@
+<!DOCTYPE html>
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+{% load custom_filters %}
+{% load static %}
+{% with actor_data=current_person.hero_lab_json|get_json_value:'actors'|get_json_value:'actor.1'  %}
+<html lang="en">
+	<head>
+	<meta charset="utf-8">
+	<style> 
+	body {
+		background-color: beige;
+		size: letter;
+		margin: 0.5in;
+	}
+
+	input[type=checkbox] {
+		margin: 1px;
+	}
+	
+	button {
+		border-radius: 1em;
+	}
+	
+	.bigbutton {
+		font-size: 120%;
+	}
+
+	@media print {
+	  .nonprinting {
+		visibility: hidden;
+		display: none;
+	  }
+	}
+	
+	@media screen {
+		.printonly {
+		visibility: hidden;
+		display: none;
+	  }
+	}	
+
+	.invisible{
+		display: none;
+	}
+
+	.fixedcontrols{
+		position: fixed;
+		top: 0;
+		left: 0;
+		background-color: rgb(0, 0, 0);
+		border: 1px solid;
+	}
+
+	.breaking{
+		break-before: page;
+	}
+
+	.top-aligned{
+		vertical-align: top;
+	}
+
+	.bottom-aligned{
+		vertical-align: bottom;
+	}
+
+	.input_u{
+		border: none;
+		border-bottom: 1px solid;
+		text-align: left;
+		font-weight: bold;
+		width: 100%;
+	}
+	
+	.input_u3{
+		border: none;
+		border-bottom: 1px solid;
+		text-align: left;
+		width: 2em;
+		font-family: sans-serif;
+		font-variant: small-caps;
+	}
+	
+	.input_uc{
+		border: none;
+		border-bottom: 1px solid;
+		text-align: center;
+		font-weight: bold;
+		width: 100%;
+	}
+
+	.input_ubig{
+		font-size: 1.2em;
+		border: none;
+		border-bottom: 1px solid;
+		text-align: center;
+		width: 100%;
+	}
+
+	.input_b{
+		border: 1px solid;
+		border-radius: 0.5em;
+		text-align: center;
+		font-weight: bold;
+		width: 100%;
+	}
+
+	.bordered {
+		border: 2px solid;
+		border-radius: 0.5em;
+	}
+
+	.thinbordered{
+		border: 1px solid;
+		border-radius: 0.5em;
+	}
+
+	.halfwidth {
+		width: 48%;
+	}
+
+	.twentyfive {
+		width: 25%;
+	}
+
+	textarea {
+		resize: none;
+		width: 98%;
+		overflow: auto;
+		font-family: GoodOT;
+		border: 1px solid;
+		border-radius: 0.5em;
+		opacity: 1;
+	}
+
+	.fullwidth {
+		width: 100%;
+		background-color: rgb(134, 134, 134);
+		opacity: 0.75;
+		border-radius: 10px;
+	}
+
+	.onethirdwidth {
+		width: 33%;
+	}
+
+	body {
+		font-family: GoodOT;
+		font-variant: small-caps;
+		opacity: 1;
+	}
+
+	.right-aligned {
+		text-align: right;
+	}
+
+	th {
+		vertical-align: bottom;
+		font-variant: small-caps;
+		opacity: 1;
+	}
+
+	td {
+		font-variant: small-caps;
+		white-space: nowrap;
+		opacity: 1;
+	}
+	
+	.wrap {
+		white-space: normal;
+	}
+
+	.nobreak {
+		white-space: nowrap;
+		display: inline-block;
+	}
+
+	h3 {
+		font-size: 1.2em;
+		display: inline-block;
+		padding: 0.1em;
+		font-variant: small-caps;
+		margin-top: 0em;
+		margin-bottom: 0em;
+		opacity: 1;
+	}
+
+	h4 {
+		font-family: GoodOT;
+		font-size: 1.2em;
+		margin-top: 0em;
+		margin-bottom: 0em;
+		margin-left: 0;
+		margin-right: 0;
+		font-weight: bold;
+		display: inline-block;
+		padding: 0.075em;
+		font-variant: small-caps;
+		opacity: 1;
+	}
+
+	h6 {
+		margin-top: 0em;
+		margin-bottom: 0em;
+		margin-left: 0;
+		margin-right: 0;
+		font-weight: normal;
+		font-variant: small-caps;
+		opacity: 1;
+	}
+
+	</style>
+	<script>
+	function AttachListeners(){
+		var inputs = document.getElementsByTagName("input");
+		var areas = document.getElementsByTagName("textarea");
+		var selects = document.getElementsByTagName("select");
+		for(var i=0; i < inputs.length; i++)
+		{
+			inputs[i].addEventListener("change", UpdateDLLink);
+		}
+		
+		for(var i=0; i < areas.length; i++)
+		{
+			areas[i].addEventListener("change", UpdateDLLink);
+		}
+		
+		for(var i=0; i < selects.length; i++)
+		{
+			selects[i].addEventListener("change", UpdateDLLink);
+		}
+
+	}
+	
+	function ModCapacity(boxnumber)
+	{
+		var boxname = "AmmoCapacity" + boxnumber;
+		var capacity = document.getElementById(boxname).value;
+		
+		if(isNaN(capacity))
+			capacity = 20;
+		
+		for (var i=1; i <= 100; i++)
+		{
+			box = document.getElementById("AmmoUsed"+boxnumber+"_"+i+"o");
+			if(i <= capacity)
+				box.classList.remove("invisible");
+			else
+				box.classList.add("invisible");
+		}
+	}
+
+	function PopulateNameAndID()
+	{
+		var charname = document.getElementById("Charname").value;
+		var SFSID = document.getElementById("SFSID").value;
+		
+		document.getElementById("Charname2").value = charname;
+		document.getElementById("Charname3").value = charname;
+		document.getElementById("Charname4").value = charname;
+		
+		document.getElementById("SFSID2").value = SFSID;
+		document.getElementById("SFSID3").value = SFSID;
+		document.getElementById("SFSID4").value = SFSID;
+	}
+
+	function ClearInputs(){
+		var charvars = document.querySelectorAll("input[type=text]");
+		var longvars = document.getElementsByTagName("textarea");
+		var boolvars = document.querySelectorAll("input[type=checkbox]");
+		
+		for(var i=0; i < charvars.length; i++)
+		{
+			charvars[i].value = "";
+		}
+		
+		for(var i=0; i < longvars.length; i++)
+		{
+			longvars[i].value = "";
+		}
+		
+		for(var i=0; i < boolvars.length; i++)
+		{
+			boolvars[i].checked = false;
+		}
+		
+		document.getElementById("alwaystrue").checked=true;
+		document.getElementById("AmmoCapacity1").value=20;
+		document.getElementById("AmmoCapacity2").value=20;
+		document.getElementById("AmmoCapacity3").value=20;
+		document.getElementById("AmmoCapacity4").value=20;
+		document.getElementById("AmmoCapacity5").value=20;
+		document.getElementById("Faction1").value="Acquisitives";
+		document.getElementById("Faction2").value="Dataphiles";
+		document.getElementById("Faction3").value="Exo-guardians";
+		document.getElementById("Faction4").value="Second Seekers ( )";
+		document.getElementById("Faction5").value="Wayfinders";
+		document.getElementById("Faction6").value="Other";
+		document.getElementById("Faction7").value="Other";
+
+		document.getElementById("BackPack").value=0;
+		
+	}
+	
+	function LoadJSON(jstring){
+		var contents = JSON.parse(jstring);
+		for (const [ key, value ] of Object.entries(contents)) {
+			thing = document.getElementById(key);
+			if(thing)
+			{
+				if(thing.type && thing.type == 'checkbox' && value == true)
+					thing.checked = true;
+				else
+					thing.value=value;
+			} else {
+				if (key.startsWith("AbilityText"))
+					document.getElementById("AbilityTextArea").value += (value + "\n");
+				if (key.startsWith("FeatText"))
+					document.getElementById("FeatTextArea").value += (value + "\n");
+				if (key.startsWith("LanguagesText"))
+					document.getElementById("LanguagesTextArea").value += (value + "\n");
+				}
+		}
+		PopulateNameAndID();
+		UpdateDLLink();
+		ModCapacity(1);
+		ModCapacity(2);
+		ModCapacity(3);
+		ModCapacity(4);
+		ModCapacity(5);		
+	}
+	
+	function CrashRecovery(){
+		var jstring = localStorage.getItem("SFSheetCrashRecovery");
+		if(jstring)
+		{
+			ClearInputs();
+			LoadJSON(jstring);	
+		}
+	}
+
+	function LoadFile(){
+		loadbox=document.getElementById('inputfile');
+		var file=loadbox.files[0];
+		if (!file) {
+			return;
+		}
+		ClearInputs();
+		var reader = new FileReader();
+		reader.onloadend = function(e) {
+			LoadJSON(e.target.result);
+		};
+		reader.readAsText(file);
+	}
+
+	function UpdateDLLink(){
+		var cjson = {};
+		var charname = document.getElementById("Charname").value;
+		var charvars = document.querySelectorAll("input[type=text]");
+		var longvars = document.getElementsByTagName("textarea");
+		var boolvars = document.querySelectorAll("input[type=checkbox]");
+		var allowrecoverysave = false;
+		
+		if(charname=="")
+			charname = "Unnamed Character";
+		else
+			allowrecoverysave = true;
+		
+		for(var i=0; i < charvars.length; i++)
+		{
+			cjson[charvars[i].id]=charvars[i].value;
+		}
+		
+		for(var i=0; i < longvars.length; i++)
+		{
+			cjson[longvars[i].id]=longvars[i].value;
+		}
+		
+		for(var i=0; i < boolvars.length; i++)
+		{
+			if(boolvars[i].checked)
+			{
+				cjson[boolvars[i].id]=true;
+			}
+		}
+		
+		cjson['BackPack'] = document.getElementById("BackPack").value;
+		
+		var cstring=JSON.stringify(cjson);
+		var charblob = new Blob([cstring], {type: "application/json"});
+		var url = URL.createObjectURL(charblob);
+		
+		var a = document.createElement('a');
+		a.download    = charname+".json";
+		a.href        = url;
+		a.textContent = "Save";
+			
+		document.getElementById('DownloadLink').innerHTML=""
+		document.getElementById('DownloadLink').appendChild(a);
+		
+		if(allowrecoverysave)
+			localStorage.setItem("SFSheetCrashRecovery", cstring);
+	}
+	
+	function PopulateAbMod(fallbackmod, prefmod, fieldclass){
+		var modifier=document.getElementById(prefmod).value;
+		if(modifier=="")
+		{
+			modifier=document.getElementById(fallbackmod).value;
+		}
+		var fields = document.getElementsByClassName(fieldclass);
+		for(var i=0; i < fields.length; i++)
+		{
+			fields[i].value = modifier;
+		}
+		UpdateDLLink();
+	}
+	
+	function PopulateAll()
+	{
+		PopulateAbMod('StrMod','StrUpMod','UseStrMod');
+		PopulateAbMod('DexMod','DexUpMod','UseDexMod');
+		PopulateAbMod('ConMod','ConUpMod','UseConMod');
+		PopulateAbMod('IntMod','IntUpMod','UseIntMod');
+		PopulateAbMod('WisMod','WisUpMod','UseWisMod');
+		PopulateAbMod('ChaMod','ChaUpMod','UseChaMod');
+	}
+	
+	function CalculateCarry()
+	{
+		var sStrMod=document.getElementById('StrUpScore').value;
+		if(sStrMod=="")
+		{
+			sStrMod=document.getElementById('StrScore').value;
+		}
+		var eStrMod=parseInt(sStrMod)
+		if(!isNaN(eStrMod))
+		{
+			eStrMod+=parseInt(document.getElementById('BackPack').value);
+			if(document.getElementById('Mercenary6').checked)
+			{
+				eStrMod+=1
+			}
+			var uBulk = Math.trunc(eStrMod/2);
+			document.getElementById('CapacityU').value = "" + uBulk;
+			document.getElementById('CapacityE').value = (uBulk+1) + "-" + eStrMod;
+			document.getElementById('CapacityO').value = (eStrMod + 1);
+			UpdateDLLink();
+		}
+	}
+	
+	function CalculateBulk()
+	{
+		var totalbulk = 0;
+		for (var i=1; i <= 40; i++)
+		{
+			box = document.getElementById("ItemBulk"+i);
+			if(box.value=="L")
+				totalbulk += 1;
+			else if(!isNaN(box.value))
+				totalbulk += box.value*10;
+		}
+		
+		document.getElementById("CapacityC").value=Math.trunc(totalbulk/10);
+		UpdateDLLink();
+	}
+	
+	function AddEight(dstfield,srcfield)
+	{
+		var total = 8;
+		field = document.getElementById(srcfield)
+		if(field)
+		{
+			var ival = parseInt(field.value);
+			if(!isNaN(ival))
+			{
+				total += ival;
+			}
+		}
+		document.getElementById(dstfield).value = total;
+		UpdateDLLink();
+	}
+	
+	function SumUp(dstfield,srcfields)
+	{
+		var total = 0;
+		for(var i=0; i < srcfields.length; i++)
+		{
+			field = document.getElementById(srcfields[i])
+			if(field)
+			{
+				var ival = parseInt(field.value);
+				if(!isNaN(ival))
+				{
+					total += ival;
+				}
+			}
+		}
+		
+		document.getElementById(dstfield).value = total;
+		UpdateDLLink();
+	}
+	
+	function SumPlusTen(dstfield,srcfields)
+	{
+		var total = 10;
+		for(var i=0; i < srcfields.length; i++)
+		{
+			field = document.getElementById(srcfields[i])
+			if(field)
+			{
+				var ival = parseInt(field.value);
+				if(!isNaN(ival))
+				{
+					total += ival;
+				}
+			}
+		}
+		
+		document.getElementById(dstfield).value = total;
+		UpdateDLLink();
+	}
+	
+	function SumUpSkill(skill, trainedonly, applyACP)
+	{
+		var SkillTotal = skill+"Total";
+		var SkillRanks = skill+"Ranks";
+		var SkillClassB = skill+"ClassB";
+		var SkillAbility = skill+"Ability";
+		var SkillIns = skill+"Ins";
+		var SkillMisc = skill+"Misc";
+		var ACP = "ACP";
+		if (applyACP)
+			SumUp(SkillTotal,[SkillRanks,SkillClassB,SkillIns,SkillAbility,SkillMisc,ACP])
+		else
+			SumUp(SkillTotal,[SkillRanks,SkillClassB,SkillIns,SkillAbility,SkillMisc])
+			
+		if(trainedonly)
+		{
+			var ranksvalue = document.getElementById(SkillRanks).value;
+			if(ranksvalue=="" || isNaN(ranksvalue) || parseInt(ranksvalue) == 0)
+			{
+				document.getElementById(SkillTotal).value = "-";
+			}
+		}
+		UpdateDLLink();
+	}
+	
+	function CalcAllSkills()
+	{
+		SumUpSkill('Acrobatics',false, true);
+		SumUpSkill('Athletics',false, true);
+		SumUpSkill('Bluff',false, false);
+		SumUpSkill('Computers',true, false);
+		SumUpSkill('Culture',true, false);
+		SumUpSkill('Diplomacy',false, false);
+		SumUpSkill('Disguise',false, false);
+		SumUpSkill('Engineering',true, false);
+		SumUpSkill('Intimidate',false, false);
+		SumUpSkill('LifeSci',true, false);
+		SumUpSkill('Medicine',true, false);
+		SumUpSkill('Mysticism',true, false);
+		SumUpSkill('Perception',false, false);
+		SumUpSkill('PhysSci',true, false);
+		SumUpSkill('Pilot',false, false);
+		SumUpSkill('Profession1',true, false);
+		SumUpSkill('Profession2',true, false);
+		SumUpSkill('Sense',false, false);
+		SumUpSkill('Sleight',true, true);
+		SumUpSkill('Stealth',false, true);
+		SumUpSkill('Survival',false, false);
+		
+		SumUp('TotalSkillSpent',['AcrobaticsRanks','AthleticsRanks','BluffRanks','ComputersRanks','CultureRanks','DiplomacyRanks','DisguiseRanks','EngineeringRanks','IntimidateRanks','LifeSciRanks','MedicineRanks','MysticismRanks','PerceptionRanks','PhysSciRanks','PilotRanks','Profession1Ranks','Profession2Ranks','SenseRanks','SleightRanks','StealthRanks','SurvivalRanks'])
+	}
+	</script>
+	<title>Starfinder Character Sheet</title>
+	</head>
+	<body>
+		<span class="nonprinting fixedcontrols">
+			Load:<input type="file" id="inputfile" onchange="LoadFile()">
+			<span id="DownloadLink"></span>
+			<button onclick="CrashRecovery()" title="Load last auto-saved character.">Crash Recovery</button>
+		</span>
+		<table class="fullwidth">
+			<tr>
+				<td><h2>Starfinder</h2></td>
+				<td><input type="text" id="Charname" class="input_ubig" onchange="PopulateNameAndID()" value="{{current_person.name}}"><br />Character Name</td>
+				<td class="right-aligned"><h2>Page 1</h2></td>
+			</tr>
+		</table>
+		<table class="fullwidth">
+			<tr>
+				<td colspan="3"><input type="text" id="ClassLevels" class="input_u" value="{{hero_lab_data.gameValues.actLevelNet}}"><br />Class/Level</td>
+				<td><input type="text" id="Race" class="input_u" value="{{current_person.species.name}}"><br />Species</td>
+				<td><input type="text" id="Theme" class="input_u" value=""><br />Theme</td>
+				<th rowspan=3>Description<br /><textarea rows="8" cols="30" id="CharDesc">{{current_person.bio}}</textarea></th>
+			</tr>
+			<tr>
+				<td><input type="text" id="Size" class="input_u" value="{{current_person.species.get_size_display}}"><br />Size</td>
+				{% with speed=hero_lab_data.items|get_json_value:'mvSpeed.128' %}
+					<td><input type="text" id="Speed" class="input_u" value="{{speed.stNet}}"><br />Speed</td>
+            	{% endwith %}
+				<td><input type="text" id="Gender" class="input_u" value="{{current_person.gender}}"><br />Gender</td>
+				<td colspan="2"><input type="text" id="Homeworld" class="input_u" value="{{current_person.species.home_world}}"><br />Homeworld</td>
+			</tr>
+			<tr>
+				<td><input type="text" id="Alignment" class="input_u"><br />Alignment</td>
+				<td colspan="2"><input type="text" id="Deity" class="input_u"><br />Deity</td>
+				<td colspan="2"><input type="text" id="Player" class="input_u"><br />Player</td>
+			</tr>
+		</table>
+		<table class="fullwidth">
+			<tr>
+				<td class="halfwidth">
+					<h3>Ability Scores</h3>
+					<table class="bordered">
+						<tr>
+							<td><button class="nonprinting bigbutton" onclick="PopulateAll()" title="Click to populate all skill, save, AC, and attack modifiers.">+</button></td>
+							<th>Score</th>
+							<th>Modifier</th>
+							<th>Upgraded<br />Score</th>
+							<th>Upgraded<br />Modifier</th>
+						</tr>
+						<tr>
+							<td>
+								<button class="nonprinting" onclick="PopulateAbMod('StrMod','StrUpMod','UseStrMod')" title="Click to populate skill and attack modifiers.">+</button>
+								<b>Str</b>ength</td>
+							<td><input type="text" id="StrScore" class="input_b" value="{{str.stNet}}"></td>
+							<td><input type="text" id="StrMod" class="input_b" value="{{str.stAbScModifier}}"></td>
+							<td><input type="text" id="StrUpScore" class="input_b"></td>
+							<td><input type="text" id="StrUpMod" class="input_b"></td>
+						</tr>
+						<tr>
+							<td>
+								<button class="nonprinting" onclick="PopulateAbMod('DexMod','DexUpMod','UseDexMod')" title="Click to populate skill, save, AC, and attack modifiers.">+</button>
+								<b>Dex</b>terity</td>
+							<td><input type="text" id="DexScore" class="input_b" value="{{dex.stNet}}"></td>
+							<td><input type="text" id="DexMod" class="input_b" value="{{dex.stAbScModifier}}"></td>
+							<td><input type="text" id="DexUpScore" class="input_b"></td>
+							<td><input type="text" id="DexUpMod" class="input_b"></td>
+						</tr>
+						<tr>
+							<td>
+								<button class="nonprinting" onclick="PopulateAbMod('ConMod','ConUpMod','UseConMod')" title="Click to populate save modifier.">+</button>
+								<b>Con</b>stitution</td>
+							<td><input type="text" id="ConScore" class="input_b" value="{{con.stNet}}"></td>
+							<td><input type="text" id="ConMod" class="input_b" value="{{con.stAbScModifier}}"></td>
+							<td><input type="text" id="ConUpScore" class="input_b"></td>
+							<td><input type="text" id="ConUpMod" class="input_b"></td>
+						</tr>
+						<tr>
+							<td>
+								<button class="nonprinting" onclick="PopulateAbMod('IntMod','IntUpMod','UseIntMod')" title="Click to populate skill modifiers.">+</button>
+								<b>Int</b>elligence</td>
+							<td><input type="text" id="IntScore" class="input_b" value="{{int.stNet}}"></td>
+							<td><input type="text" id="IntMod" class="input_b" value="{{int.stAbScModifier}}"></td>
+							<td><input type="text" id="IntUpScore" class="input_b"></td>
+							<td><input type="text" id="IntUpMod" class="input_b"></td>
+						</tr>
+						<tr>
+							<td>
+								<button class="nonprinting" onclick="PopulateAbMod('WisMod','WisUpMod','UseWisMod')" title="Click to populate skill and save modifiers.">+</button>
+								<b>Wis</b>dom</td>
+							<td><input type="text" id="WisScore" class="input_b" value="{{wis.stNet}}"></td>
+							<td><input type="text" id="WisMod" class="input_b" value="{{wis.stAbScModifier}}"></td>
+							<td><input type="text" id="WisUpScore" class="input_b"></td>
+							<td><input type="text" id="WisUpMod" class="input_b"></td>
+						</tr>
+						<tr>
+							<td>
+								<button class="nonprinting" onclick="PopulateAbMod('ChaMod','ChaUpMod','UseChaMod')" title="Click to populate skill modifiers.">+</button>
+								<b>Cha</b>risma</td>
+							<td><input type="text" id="ChaScore" class="input_b" value="{{cha.stNet}}"></td>
+							<td><input type="text" id="ChaMod" class="input_b" value="{{cha.stAbScModifier}}"></td>
+							<td><input type="text" id="ChaUpScore" class="input_b"></td>
+							<td><input type="text" id="ChaUpMod" class="input_b"></td>
+						</tr>
+					</table>
+					<h3>Skills</h3>
+					<table>
+						<tr>
+							<td><button class="nonprinting bigbutton" onclick="CalcAllSkills()" title="Click to calculate all skill totals.">=</button></td>
+							<th></th>
+							<th>Total</th>
+							<th></th>
+							<th>Ranks</th>
+							<th></th>
+							<th>Class<br />Bonus</th>
+							<th></th>
+							<th>Ability<br />Mod</th>
+							<th></th>
+							<th>Insight<br />Bonus</th>
+							<th></th>
+							<th>Misc<br />Mod</th>
+						</tr>
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="AcrobaticsClass" {%if "skClassSkillBon" in skills.acrobatics %} checked {%endif%}></td>
+							<td>Acrobatics<sup>*</sup> (Dex)</td>
+							<td><input type="text" id="AcrobaticsTotal" class="input_b" value="{{skills.acrobatics.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Acrobatics',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="AcrobaticsRanks" class="input_b" value="{{skills.acrobatics.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="AcrobaticsClassB" class="input_b" value="{{skills.acrobatics.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="AcrobaticsAbility" class="input_b UseDexMod" value="{{dex.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="AcrobaticsIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="AcrobaticsMisc" class="input_b" value="{{skills.acrobatics.stMiscMod}}"></td>
+						</tr>
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="AthleticsClass" {%if "skClassSkillBon" in skills.athletics %} checked {%endif%}></td>
+							<td>Athletics<sup>*</sup> (Str)</td>
+							<td><input type="text" id="AthleticsTotal" class="input_b" value="{{skills.athletics.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Athletics',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="AthleticsRanks" class="input_b" value="{{skills.athletics.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="AthleticsClassB" class="input_b" value="{{skills.athletics.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="AthleticsAbility" class="input_b UseStrMod" value="{{str.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="AthleticsIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="AthleticsMisc" class="input_b" value="{{skills.athletics.stMiscMod}}"></td>
+						</tr>
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="BluffClass" {%if "skClassSkillBon" in skills.bluff %} checked {%endif%}></td>
+							<td>Bluff<sup>*</sup> (Cha)</td>
+							<td><input type="text" id="BluffTotal" class="input_b" value="{{skills.bluff.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Bluff',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="BluffRanks" class="input_b" value="{{skills.bluff.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="BluffClassB" class="input_b" value="{{skills.bluff.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="BluffAbility" class="input_b UseChaMod" value="{{cha.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="BluffIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="BluffMisc" class="input_b" value="{{skills.bluff.stMiscMod}}"></td>
+						</tr>
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="ComputersClass" {%if "skClassSkillBon" in skills.computers %} checked {%endif%}></td>
+							<td>Computers (Int)</td>
+							<td><input type="text" id="ComputersTotal" class="input_b" value="{{skills.computers.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Computers',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="ComputersRanks" class="input_b" value="{{skills.computers.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="ComputersClassB" class="input_b" value="{{skills.computers.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="ComputersAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="ComputersIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="ComputersMisc" class="input_b" value="{{skills.computers.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="CultureClass" {%if "skClassSkillBon" in skills.culture %} checked {%endif%}></td>
+							<td>Culture (Int)</td>
+							<td><input type="text" id="CultureTotal" class="input_b" value="{{skills.culture.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Culture',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="CultureRanks" class="input_b" value="{{skills.culture.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="CultureClassB" class="input_b" value="{{skills.culture.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="CultureAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="CultureIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="CultureMisc" class="input_b" value="{{skills.culture.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="DiplomacyClass" {%if "skClassSkillBon" in skills.diplomacy %} checked {%endif%}></td>
+							<td>Diplomacy (Cha)</td>
+							<td><input type="text" id="DiplomacyTotal" class="input_b" value="{{skills.diplomacy.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Diplomacy',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="DiplomacyRanks" class="input_b" value="{{skills.diplomacy.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="DiplomacyClassB" class="input_b" value="{{skills.diplomacy.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="DiplomacyAbility" class="input_b UseChaMod" value="{{cha.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="DiplomacyIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="DiplomacyMisc" class="input_b" value="{{skills.diplomacy.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="DisguiseClass" {%if "skClassSkillBon" in skills.disguise %} checked {%endif%}></td>
+							<td>Disguise (Cha)</td>
+							<td><input type="text" id="DisguiseTotal" class="input_b" value="{{skills.disguise.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Disguise',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="DisguiseRanks" class="input_b" value="{{skills.disguise.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="DisguiseClassB" class="input_b" value="{{skills.disguise.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="DisguiseAbility" class="input_b UseChaMod" value="{{cha.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="DisguiseIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="DisguiseMisc" class="input_b" value="{{skills.disguise.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="EngineeringClass" {%if "skClassSkillBon" in skills.engineering %} checked {%endif%}></td>
+							<td>Engineering (Int)</td>
+							<td><input type="text" id="EngineeringTotal" class="input_b" value="{{skills.engineering.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Engineering',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="EngineeringRanks" class="input_b" value="{{skills.engineering.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="EngineeringClassB" class="input_b" value="{{skills.engineering.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="EngineeringAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="EngineeringIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="EngineeringMisc" class="input_b" value="{{skills.engineering.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="IntimidateClass" {%if "skClassSkillBon" in skills.intimidate %} checked {%endif%}></td>
+							<td>Intimidate (Cha)</td>
+							<td><input type="text" id="IntimidateTotal" class="input_b" value="{{skills.intimidate.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Intimidate',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="IntimidateRanks" class="input_b" value="{{skills.intimidate.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="IntimidateClassB" class="input_b" value="{{skills.intimidate.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="IntimidateAbility" class="input_b UseChaMod" value="{{cha.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="IntimidateIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="IntimidateMisc" class="input_b" value="{{skills.intimidate.stMiscMod}}"></td>
+						</tr>		
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="LifeSciClass" {%if "skClassSkillBon" in skills.lifeScience %} checked {%endif%}></td>
+							<td>Life Science (Int)</td>
+							<td><input type="text" id="LifeSciTotal" class="input_b" value="{{skills.lifeScience.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('LifeSci',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="LifeSciRanks" class="input_b" value="{{skills.lifeScience.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="LifeSciClassB" class="input_b" value="{{skills.lifeScience.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="LifeSciAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="LifeSciIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="LifeSciMisc" class="input_b" value="{{skills.lifeScience.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="MedicineClass" {%if "skClassSkillBon" in skills.medicine %} checked {%endif%}></td>
+							<td>Medicine (Int)</td>
+							<td><input type="text" id="MedicineTotal" class="input_b" value="{{skills.medicine.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Medicine',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="MedicineRanks" class="input_b" value="{{skills.medicine.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="MedicineClassB" class="input_b" value="{{skills.medicine.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="MedicineAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="MedicineIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="MedicineMisc" class="input_b" value="{{skills.medicine.stMiscMod}}"></td>
+						</tr>												
+						<tr style="display: none;">
+							<td class="right-aligned"><sup>&dagger;</sup><input type="checkbox" id="MysticismClass"></td>
+							<td>Mysticism (Wis)</td>
+							<td><input type="text" id="MysticismTotal" class="input_b"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Mysticism',true,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="MysticismRanks" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="MysticismClassB" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="MysticismAbility" class="input_b UseWisMod"></td>
+							<td>+</td>
+							<td><input type="text" id="MysticismIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="MysticismMisc" class="input_b"></td>
+						</tr>		
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="PerceptionClass" {%if "skClassSkillBon" in skills.perception %} checked {%endif%}></td>
+							<td>Perception (Wis)</td>
+							<td><input type="text" id="PerceptionTotal" class="input_b" value="{{skills.perception.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Perception',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="PerceptionRanks" class="input_b" value="{{skills.perception.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="PerceptionClassB" class="input_b" value="{{skills.perception.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="PerceptionAbility" class="input_b UseWisMod" value="{{wis.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="PerceptionIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="PerceptionMisc" class="input_b" value="{{skills.perception.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="PhysSciClass" {%if "skClassSkillBon" in physicalScience %} checked {%endif%}></td>
+							<td>Physical Science (Int)</td>
+							<td><input type="text" id="PhysSciTotal" class="input_b" value="{{skills.physicalScience.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('PhysSci',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="PhysSciRanks" class="input_b" value="{{skills.physicalScience.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="PhysSciClassB" class="input_b" value="{{skills.physicalScience.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="PhysSciAbility" class="input_b UseIntMod" value="{{int.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="PhysSciIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="PhysSciMisc" class="input_b" value="{{skills.physicalScience.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="PilotClass" {%if "skClassSkillBon" in skills.piloting %} checked {%endif%}></td>
+							<td>Piloting (Dex)</td>
+							<td><input type="text" id="PilotTotal" class="input_b" value="{{skills.piloting.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Pilot',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="PilotRanks" class="input_b" value="{{skills.piloting.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="PilotClassB" class="input_b" value="{{skills.piloting.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="PilotAbility" class="input_b UseDexMod" value="{{dex.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="PilotIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="PilotMisc" class="input_b" value="{{skills.piloting.stMiscMod}}"></td>
+						</tr>						
+						<tr style="display: none;">
+							<td class="right-aligned top-aligned"><sup>&dagger;</sup><input type="checkbox" id="Profession1Class"></td>
+							<td>Profession (<input type="text" class="input_u3" id="Profession1ABScore">)<br /><input type="text" id="Profession1Type" class="input_u"></td>
+							<td><input type="text" id="Profession1Total" class="input_b"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Profession1',true,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="Profession1Ranks" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="Profession1ClassB" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="Profession1Ability" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="Profession1Ins" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="Profession1Misc" class="input_b"></td>
+						</tr>						
+						<tr style="display: none;">
+							<td class="right-aligned top-aligned"><sup>&dagger;</sup><input type="checkbox" id="Profession2Class"></td>
+							<td>Profession (<input type="text" class="input_u3" id="Profession2ABScore">)<br /><input type="text" id="Profession2Type" class="input_u"></td>
+							<td><input type="text" id="Profession2Total" class="input_b"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Profession2',true,false)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="Profession2Ranks" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="Profession2ClassB" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="Profession2Ability" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="Profession2Ins" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="Profession2Misc" class="input_b"></td>
+						</tr>
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="SenseClass" {%if "skClassSkillBon" in skills.senseMotive %} checked {%endif%}></td>
+							<td>Sense Motive (Wis)</td>
+							<td><input type="text" id="SenseTotal" class="input_b" value="{{skills.senseMotive.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Sense',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="SenseRanks" class="input_b" value="{{skills.senseMotive.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="SenseClassB" class="input_b" value="{{skills.senseMotive.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="SenseAbility" class="input_b UseWisMod" value="{{wis.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="SenseIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="SenseMisc" class="input_b" value="{{skills.senseMotive.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="SleightClass" {%if "skClassSkillBon" in skills.sleightOfHand %} checked {%endif%}></td>
+							<td>Sleight of Hand (Dex)</td>
+							<td><input type="text" id="SleightTotal" class="input_b" value="{{skills.sleightOfHand.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Sleight',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="SleightRanks" class="input_b" value="{{skills.sleightOfHand.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="SleightClassB" class="input_b" value="{{skills.sleightOfHand.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="SleightAbility" class="input_b UseDexMod" value="{{dex.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="SleightIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="SleightMisc" class="input_b" value="{{skills.sleightOfHand.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="StealthClass" {%if "skClassSkillBon" in skills.stealth %} checked {%endif%}></td>
+							<td>Stealth (Dex)</td>
+							<td><input type="text" id="StealthTotal" class="input_b" value="{{stealth.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Stealth',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="StealthRanks" class="input_b" value="{{skills.stealth.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="StealthClassB" class="input_b" value="{{skills.stealth.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="StealthAbility" class="input_b UseDexMod" value="{{dex.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="StealthIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="StealthMisc" class="input_b" value="{{skills.stealth.stMiscMod}}"></td>
+						</tr>											
+						<tr>
+							<td class="right-aligned"><input type="checkbox" id="SurvivalClass" {%if "skClassSkillBon" in skills.survival %} checked {%endif%}></td>
+							<td>Survival (Wis)</td>
+							<td><input type="text" id="SurvivalTotal" class="input_b" value="{{skills.survival.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUpSkill('Survival',false,true)" title="Click to calculate this skill's total.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="SurvivalRanks" class="input_b" value="{{skills.survival.skRanks}}"></td>
+							<td>+</td>
+							<td><input type="text" id="SurvivalClassB" class="input_b" value="{{skills.survival.skClassSkillBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="SurvivalAbility" class="input_b UseWisMod" value="{{wis.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="SurvivalIns" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="SurvivalMisc" class="input_b" value="{{skills.survival.stMiscMod}}"></td>
+						</tr>						
+						<tr>
+							<td></td>
+							<td colspan=3 class="right-aligned">Skill Points Spent/Total</td>
+							<td><input type="text" id="TotalSkillSpent" class="input_b"></td>
+							<td>/</td>
+							<td><input type="text" id="TotalSkillPoints" class="input_b"></td>
+							<td colspan=5 class="right-aligned">Armor Check Penalty</td>
+							<td><input type="text" id="ACP" class="input_b" title="Will be automatically applied to relevant skills when you hit the = button."></td>
+						</tr>
+					</table>
+					<p>&dagger;Trained only <input type="checkbox" id="alwaystrue" checked disabled>Class skill *Armor check penalty applies</p>
+					<h3>Skill Notes</h3><br>
+					<textarea rows="6" cols="48" id="SkillNotes">
+						
+					</textarea>
+					<table>
+						{%for skill_name, skill_value in skills.items %}
+							{% if skill_value.useInPlay%}
+								<tr>
+									<th style="vertical-align: top;">{{skill_value.name}}:</th>
+									<td>{{skill_value.useInPlay|read_hlo_text|safe}}</td>
+								</tr>
+							{%endif%}
+						{%endfor%}
+					</table>
+					
+				</td>
+				<td class="halfwidth">
+					<table>
+						<tr>
+							<td rowspan="2" class="bottom-aligned"><h3>Initiative</h3></td>
+							<th>Total</th>
+							<th></th>
+							<th>Dex Modifier</th>
+							<th></th>
+							<th>Misc Modifier</th>
+						</tr>
+						<tr>
+							<td><input type="text" id="InitTotal" class="input_b" value="{{initiative.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUp('InitTotal',['InitDexMod','InitMiscMod'])" title="Click to calculate total initiative.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="InitDexMod" class="input_b UseDexMod" value="{{initiative.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="InitMiscMod" class="input_b"></td>
+						</tr>
+					</table>
+					<h3>Health and Resolve</h3>
+					<table class="bordered">
+						<tr>
+							<th></th>
+							<th>Stamina Points</th>
+							<th>Hit Points</th>
+							<th>Resolve Points</th>
+						</tr>
+						<tr>
+							<th class="right-aligned">Total</th>
+							<td><input type="text" id="SPTotal" class="input_b" value="{{stamina.rvMax}}"></td>
+							<td><input type="text" id="HPTotal" class="input_b" value="{{health.rvMax}}"></td>
+							<td><input type="text" id="RPTotal" class="input_b" value="{{resolve.rvMax}}"></td>
+						</tr>
+						<tr>
+							<th class="right-aligned">Current</th>
+							<td><input type="text" id="SPCurrent" class="input_b" value="{{stamina.rvCurrent}}"></td>
+							<td><input type="text" id="HPCurrent" class="input_b" value="{{health.rvCurrent}}"></td>
+							<td><input type="text" id="RPCurrent" class="input_b" value="{{resolve.rvCurrent}}"></td>
+						</tr>
+					</table>
+					<h3>Armor Class</h3>
+					<table class="bordered">
+						<tr>							
+							<th></th>
+							<th>Total</th>
+							<th></th>
+							<th>Armor<br />Bonus</th>
+							<th></th>
+							<th>Dex<br />Mod</th>
+							<th></th>
+							<th>Misc<br />Mod</th>							
+						</tr>
+						<tr>
+							<td><b>E</b>nergy <b>A</b>rmor <b>C</b>lass</td>
+							<td><input type="text" id="EACTotal" class="input_b" value="{{eac.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumPlusTen('EACTotal',['EACArmor','EACDexMod','EACMiscMod'])" title="Click to calculate total EAC.">=</button><span class="printonly">=</span> 10 +</td>
+							<td><input type="text" id="EACArmor" class="input_b" ></td>
+							<td>+</td>
+							<td><input type="text" id="EACDexMod" class="input_b UseDexMod"></td>
+							<td>+</td>
+							<td><input type="text" id="EACMiscMod" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><b>K</b>inetic <b>A</b>rmor <b>C</b>lass</td>
+							<td><input type="text" id="KACTotal" class="input_b" value="{{kac.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumPlusTen('KACTotal',['KACArmor','KACDexMod','KACMiscMod'])" title="Click to calculate total KAC.">=</button><span class="printonly">=</span> 10 +</td>
+							<td><input type="text" id="KACArmor" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="KACDexMod" class="input_b UseDexMod"></td>
+							<td>+</td>
+							<td><input type="text" id="KACMiscMod" class="input_b"></td>
+						</tr>
+						<tr>
+							<td>AC vs. Combat Maneuvers</td>
+							<td><input type="text" id="MACTotal" class="input_b" value="{{mac.stNet}}"></td>
+							<td><button class="nonprinting" onclick="AddEight('MACTotal','KACTotal')" title="Click to calculate maneuver KAC.">=</button><span class="printonly">=</span> 8 +</td>
+							<td><b>KAC</b></td>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="DR" class="input_u"><br />DR</td>
+							<td colspan="7"><input type="text" id="Resists" class="input_u"><br />Resistances</td>
+						</tr>
+					</table>
+					<h3>Saving Throws</h3>
+					<table class="bordered">
+						<tr>
+							<td></td>
+							<th>Total</th>
+							<td></td>
+							<th>Base Save</th>
+							<td></td>
+							<th>Ability Mod</th>
+							<td></td>
+							<th>Misc Mod</th>
+						</tr>
+						<tr>
+							<td>Fortitude (Con)</td>
+							<td><input type="text" id="FortTotal" class="input_b" value="{{skills.fortSave.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUp('FortTotal',['FortBase','FortAbility','FortMisc'])" title="Click to calculate total save.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="FortBase" class="input_b" value="{{skills.fortSave.stBaseBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="FortAbility" class="input_b UseConMod" value="{{skills.fortSave.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="FortMisc" class="input_b"></td>
+						</tr>
+						<tr>
+							<td>Reflex (Dex)</td>
+							<td><input type="text" id="RefTotal" class="input_b" value="{{skills.reflexSave.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUp('RefTotal',['RefBase','RefAbility','RefMisc'])" title="Click to calculate total save.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="RefBase" class="input_b" value="{{skills.reflexSave.stBaseBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="RefAbility" class="input_b UseDexMod" value="{{skills.reflexSave.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="RefMisc" class="input_b"></td>
+						</tr>
+						<tr>
+							<td>Will (Wis)</td>
+							<td><input type="text" id="WillTotal" class="input_b" value="{{skills.willSave.stNet}}"></td>
+							<td><button class="nonprinting" onclick="SumUp('WillTotal',['WillBase','WillAbility','WillMisc'])" title="Click to calculate total save.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="WillBase" class="input_b" value="{{skills.willSave.stBaseBon}}"></td>
+							<td>+</td>
+							<td><input type="text" id="WillAbility" class="input_b UseWisMod" value="{{skills.willSave.stAbScModifier}}"></td>
+							<td>+</td>
+							<td><input type="text" id="WillMisc" class="input_b"></td>
+						</tr>
+						<tr>
+							<td colspan="8"><input type="text" id="SaveNotes" class="input_u"><br />Save Modifiers</td>
+						</tr>
+					</table>
+					<h3>Attack Bonuses</h3>
+					<table class="bordered">
+						<tr>
+							<td rowspan="2">Melee or<br>Thrown<br>Attack</td>
+							<th>Total</th>
+							<td></td>
+							<th>BAB</th>
+							<td></td>
+							<th>Str Mod</th>
+							<td></td>
+							<th>Misc Mod</th>
+						</tr>
+						<tr>
+							<td><input type="text" id="MeleeTotal" class="input_b"></td>
+							<td><button class="nonprinting" onclick="SumUp('MeleeTotal',['MeleeBAB','MeleeAbility','MeleeMisc'])" title="Click to calculate total attack bonus.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="MeleeBAB" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="MeleeAbility" class="input_b UseStrMod"></td>
+							<td>+</td>
+							<td><input type="text" id="MeleeMisc" class="input_b"></td>
+						</tr>
+						<tr>
+							<td rowspan="2">Ranged<br>Attack</td>
+							<th>Total</th>
+							<td></td>
+							<th>BAB</th>
+							<td></td>
+							<th>Dex Mod</th>
+							<td></td>
+							<th>Misc Mod</th>
+						</tr>
+						<tr>
+							<td><input type="text" id="RangedTotal" class="input_b"></td>
+							<td><button class="nonprinting" onclick="SumUp('RangedTotal',['RangedBAB','RangedAbility','RangedMisc'])" title="Click to calculate total attack bonus.">=</button><span class="printonly">=</span></td>
+							<td><input type="text" id="RangedBAB" class="input_b"></td>
+							<td>+</td>
+							<td><input type="text" id="RangedAbility" class="input_b UseDexMod"></td>
+							<td>+</td>
+							<td><input type="text" id="RangedMisc" class="input_b"></td>
+						</tr>
+					</table>
+					<h3>Weapons</h3>
+					<table class="bordered">
+						<tr>
+							<td colspan="3"><input type="text" id="Weap1Name" class="input_u"><br /><sup>Weapon</sup></td>
+							<td><input type="text" id="Weap1Level" class="input_u"><br /><sup>Level</sup></td>
+							<td><input type="text" id="Weap1Bonus" class="input_u"><br /><sup>Attack Bonus</sup></td>
+							<td><input type="text" id="Weap1Damage" class="input_u"><br /><sup>Damage</sup></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="Weap1Critical" class="input_u"><br /><sup>Critical</sup></td>
+							<td><input type="text" id="Weap1Range" class="input_u"><br /><sup>Range</sup></td>
+							<td><input type="text" id="Weap1Type" class="input_u"><br /><sup>Type</sup></td>
+							<td><input type="text" id="Weap1Ammo" class="input_u"><br /><sup>Ammo/Usage</sup></td>
+							<td colspan="2"><input type="text" id="Weap1Special" class="input_u"><br /><sup>Special</sup></td>
+					</table>
+					<table class="bordered">
+						<tr>
+							<td colspan="3"><input type="text" id="Weap2Name" class="input_u"><br /><sup>Weapon</sup></td>
+							<td><input type="text" id="Weap2Level" class="input_u"><br /><sup>Level</sup></td>
+							<td><input type="text" id="Weap2Bonus" class="input_u"><br /><sup>Attack Bonus</sup></td>
+							<td><input type="text" id="Weap2Damage" class="input_u"><br /><sup>Damage</sup></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="Weap2Critical" class="input_u"><br /><sup>Critical</sup></td>
+							<td><input type="text" id="Weap2Range" class="input_u"><br /><sup>Range</sup></td>
+							<td><input type="text" id="Weap2Type" class="input_u"><br /><sup>Type</sup></td>
+							<td><input type="text" id="Weap2Ammo" class="input_u"><br /><sup>Ammo/Usage</sup></td>
+							<td colspan="2"><input type="text" id="Weap2Special" class="input_u"><br /><sup>Special</sup></td>
+					</table>
+					<table class="bordered">
+						<tr>
+							<td colspan="3"><input type="text" id="Weap3Name" class="input_u"><br /><sup>Weapon</sup></td>
+							<td><input type="text" id="Weap3Level" class="input_u"><br /><sup>Level</sup></td>
+							<td><input type="text" id="Weap3Bonus" class="input_u"><br /><sup>Attack Bonus</sup></td>
+							<td><input type="text" id="Weap3Damage" class="input_u"><br /><sup>Damage</sup></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="Weap3Critical" class="input_u"><br /><sup>Critical</sup></td>
+							<td><input type="text" id="Weap3Range" class="input_u"><br /><sup>Range</sup></td>
+							<td><input type="text" id="Weap3Type" class="input_u"><br /><sup>Type</sup></td>
+							<td><input type="text" id="Weap3Ammo" class="input_u"><br /><sup>Ammo/Usage</sup></td>
+							<td colspan="2"><input type="text" id="Weap3Special" class="input_u"><br /><sup>Special</sup></td>
+					</table>
+					<table class="bordered">
+						<tr>
+							<td colspan="3"><input type="text" id="Weap4Name" class="input_u"><br /><sup>Weapon</sup></td>
+							<td><input type="text" id="Weap4Level" class="input_u"><br /><sup>Level</sup></td>
+							<td><input type="text" id="Weap4Bonus" class="input_u"><br /><sup>Attack Bonus</sup></td>
+							<td><input type="text" id="Weap4Damage" class="input_u"><br /><sup>Damage</sup></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="Weap4Critical" class="input_u"><br /><sup>Critical</sup></td>
+							<td><input type="text" id="Weap4Range" class="input_u"><br /><sup>Range</sup></td>
+							<td><input type="text" id="Weap4Type" class="input_u"><br /><sup>Type</sup></td>
+							<td><input type="text" id="Weap4Ammo" class="input_u"><br /><sup>Ammo/Usage</sup></td>
+							<td colspan="2"><input type="text" id="Weap4Special" class="input_u"><br /><sup>Special</sup></td>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<p style='overflow:hidden;page-break-before:always;'></p>
+		<table class="fullwidth">
+			<tr>
+				<td><h2>Starfinder</h2></td>
+				<td><input type="text" id="Charname2" class="input_ubig" disabled><br />Character Name</td>
+				<td><input type="text" id="SFSID2" class="input_ubig" disabled><br />Starfinder Society #</td>
+				<td class="right-aligned"><h2>Page 2</h2></td>
+			</tr>
+		</table>
+		<table class="fullwidth">
+			<tr>
+				<td colspan="2">
+					<h3>Abilities</h3><br>
+					<textarea rows="42" cols="80" id="AbilityTextArea"></textarea>
+				</td>
+				<td rowspan="2" class="onethirdwidth" style="display: none;">
+					<h3>Spells</h3>
+					<table>
+						<tr>
+							<th>0</th>
+							<td>Spells Known</td>
+							<td><input type="text" id="SpellsKnown0" class="input_b"></td>
+						</tr>
+					</table>
+					<input type="text" id="SpellText01" class="input_u"><br>
+					<input type="text" id="SpellText02" class="input_u"><br>
+					<input type="text" id="SpellText03" class="input_u"><br>
+					<input type="text" id="SpellText04" class="input_u"><br>
+					<input type="text" id="SpellText05" class="input_u"><br>
+					<input type="text" id="SpellText06" class="input_u">
+					<table>
+						<tr>
+							<th rowspan="2">1</th>
+							<td>Spells Known</td>
+							<td>Spells Per Day</td>
+							<td>Spells Used</td>
+						</tr>
+						<tr>
+							<td><input type="text" id="SpellsKnown1" class="input_b"></td>
+							<td><input type="text" id="SpellsDaily1" class="input_b"></td>
+							<td><input type="text" id="SpellsUsed1" class="input_b"></td>
+						</tr>
+					</table>
+					<input type="text" id="SpellText11" class="input_u"><br>
+					<input type="text" id="SpellText12" class="input_u"><br>
+					<input type="text" id="SpellText13" class="input_u"><br>
+					<input type="text" id="SpellText14" class="input_u"><br>
+					<input type="text" id="SpellText15" class="input_u"><br>
+					<input type="text" id="SpellText16" class="input_u"><br>
+					<input type="text" id="SpellText17" class="input_u">
+					<table>
+						<tr>
+							<th rowspan="2">2</th>
+							<td>Spells Known</td>
+							<td>Spells Per Day</td>
+							<td>Spells Used</td>
+						</tr>
+						<tr>
+							<td><input type="text" id="SpellsKnown2" class="input_b"></td>
+							<td><input type="text" id="SpellsDaily2" class="input_b"></td>
+							<td><input type="text" id="SpellsUsed2" class="input_b"></td>
+						</tr>
+					</table>
+					<input type="text" id="SpellText21" class="input_u"><br>
+					<input type="text" id="SpellText22" class="input_u"><br>
+					<input type="text" id="SpellText23" class="input_u"><br>
+					<input type="text" id="SpellText24" class="input_u"><br>
+					<input type="text" id="SpellText25" class="input_u"><br>
+					<input type="text" id="SpellText26" class="input_u"><br>
+					<input type="text" id="SpellText27" class="input_u">
+					<table>
+						<tr>
+							<th rowspan="2">3</th>
+							<td>Spells Known</td>
+							<td>Spells Per Day</td>
+							<td>Spells Used</td>
+						</tr>
+						<tr>
+							<td><input type="text" id="SpellsKnown3" class="input_b"></td>
+							<td><input type="text" id="SpellsDaily3" class="input_b"></td>
+							<td><input type="text" id="SpellsUsed3" class="input_b"></td>
+						</tr>
+					</table>
+					<input type="text" id="SpellText31" class="input_u"><br>
+					<input type="text" id="SpellText32" class="input_u"><br>
+					<input type="text" id="SpellText33" class="input_u"><br>
+					<input type="text" id="SpellText34" class="input_u"><br>
+					<input type="text" id="SpellText35" class="input_u"><br>
+					<input type="text" id="SpellText36" class="input_u"><br>
+					<input type="text" id="SpellText37" class="input_u">
+					<table>
+						<tr>
+							<th rowspan="2">4</th>
+							<td>Spells Known</td>
+							<td>Spells Per Day</td>
+							<td>Spells Used</td>
+						</tr>
+						<tr>
+							<td><input type="text" id="SpellsKnown4" class="input_b"></td>
+							<td><input type="text" id="SpellsDaily4" class="input_b"></td>
+							<td><input type="text" id="SpellsUsed4" class="input_b"></td>
+						</tr>
+					</table>
+					<input type="text" id="SpellText41" class="input_u"><br>
+					<input type="text" id="SpellText42" class="input_u"><br>
+					<input type="text" id="SpellText43" class="input_u"><br>
+					<input type="text" id="SpellText44" class="input_u"><br>
+					<input type="text" id="SpellText45" class="input_u"><br>
+					<input type="text" id="SpellText46" class="input_u">
+					<table>
+						<tr>
+							<th rowspan="2">5</th>
+							<td>Spells Known</td>
+							<td>Spells Per Day</td>
+							<td>Spells Used</td>
+						</tr>
+						<tr>
+							<td><input type="text" id="SpellsKnown5" class="input_b"></td>
+							<td><input type="text" id="SpellsDaily5" class="input_b"></td>
+							<td><input type="text" id="SpellsUsed5" class="input_b"></td>
+						</tr>
+					</table>
+					<input type="text" id="SpellText51" class="input_u"><br>
+					<input type="text" id="SpellText52" class="input_u"><br>
+					<input type="text" id="SpellText53" class="input_u"><br>
+					<input type="text" id="SpellText54" class="input_u"><br>
+					<input type="text" id="SpellText55" class="input_u">
+					<table>
+						<tr>
+							<th rowspan="2">6</th>
+							<td>Spells Known</td>
+							<td>Spells Per Day</td>
+							<td>Spells Used</td>
+						</tr>
+						<tr>
+							<td><input type="text" id="SpellsKnown6" class="input_b"></td>
+							<td><input type="text" id="SpellsDaily6" class="input_b"></td>
+							<td><input type="text" id="SpellsUsed6" class="input_b"></td>
+						</tr>
+					</table>
+					<input type="text" id="SpellText61" class="input_u"><br>
+					<input type="text" id="SpellText62" class="input_u"><br>
+					<input type="text" id="SpellText63" class="input_u"><br>
+					<input type="text" id="SpellText64" class="input_u"><br>
+					<input type="text" id="SpellText65" class="input_u">
+				</td>
+			</tr>
+			<tr>
+				<td class="onethirdwidth top-aligned">
+					<h3>Feats</h3><br>
+					<textarea rows="22" cols="40" id="FeatTextArea"></textarea>
+				</td>
+				<td class="top-aligned">
+					<h3>Languages</h3><br>
+					<textarea rows="5" cols="80" id="LanguagesTextArea"></textarea><br>
+					<h3>Proficiencies</h3>
+					<table>
+						<tr>
+							<td><input type="checkbox" id="ProfLightArmor"></td>
+							<td>Light Armor</td>
+							<td><input type="checkbox" id="ProfHeavyArmor"></td>
+							<td>Heavy Armor</td>
+						</tr>
+						<tr>
+							<td><input type="checkbox" id="ProfPowerArmor"></td>
+							<td>Power Armor</td>
+							<td><input type="checkbox" id="ProfGrenades"></td>
+							<td>Grenades</td>
+						</tr>
+						<tr>
+							<td><input type="checkbox" id="ProfBasicMelee"></td>
+							<td>Basic Melee</td>
+							<td><input type="checkbox" id="ProfAdvmelee"></td>
+							<td>Advanced Melee</td>
+						</tr>
+						<tr>
+							<td><input type="checkbox" id="ProfSmallArms"></td>
+							<td>Small Arms</td>
+							<td><input type="checkbox" id="ProfLongarms"></td>
+							<td>Longarms</td>
+						</tr>
+						<tr>
+							<td><input type="checkbox" id="ProfHeavyWeapons"></td>
+							<td>Heavy Weapons</td>
+							<td><input type="checkbox" id="ProfSniper"></td>
+							<td>Sniper Weapons</td>
+						</tr>
+						<tr>
+							<td class="top-aligned"><input type="checkbox" id="ProfSpecial1"></td>
+							<td><input type="text" id="Special1Type" class="input_u"><br /><sup>Special</sup></td>
+							<td class="top-aligned"><input type="checkbox" id="ProfSpecial2"></td>
+							<td><input type="text" id="Special2Type" class="input_u"><br /><sup>Special</sup></td>
+						</tr>
+					</table>
+					<h3>Experience</h3>
+					<table>
+						<tr>
+							<td><input type="text" id="XPCurrent" class="input_u"><br>
+							XP Earned</td>
+							<td><input type="text" id="XPNext" class="input_u"><br>
+							Next Level</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<p style='overflow:hidden;page-break-before:always;'></p>
+		<table class="fullwidth">
+			<tr>
+				<td><h2>Starfinder</h2></td>
+				<td><input type="text" id="Charname3" class="input_ubig" disabled><br />Character Name</td>
+				<td><input type="text" id="SFSID3" class="input_ubig" disabled><br />Starfinder Society #</td>
+				<td class="right-aligned"><h2>Page 3</h2></td>
+			</tr>
+		</table>
+		<table class="fullwidth"> 
+			<tr>
+				<td class="right-aligned"><h3>Credits</h3></td>
+				<td><input type="text" id="Credits" class="input_b"></td>
+				<td class="right-aligned"><h3>Other Wealth</h3></td>
+				<td>
+					<input type="text" id="OtherWealth1" class="input_u"><br>
+					<input type="text" id="OtherWealth2" class="input_u"><br>
+					<input type="text" id="OtherWealth3" class="input_u">
+				</td>
+			</tr>
+		</table>
+		<table class="fullwidth bordered">
+			<tr>
+				<td class="halfwidth"><h3>Equipment</h3></td>
+				<th>Current Ammo/Charge</th>
+				<th>Ammo/Charge Capacity</th>
+				<th>Level</th>
+				<th>Value</th>
+				<th>Bulk</th>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName1" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge1" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity1" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel1" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue1" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk1" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName2" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge2" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity2" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel2" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue2" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk2" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName3" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge3" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity3" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel3" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue3" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk3" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName4" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge4" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity4" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel4" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue4" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk4" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName5" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge5" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity5" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel5" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue5" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk5" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName6" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge6" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity6" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel6" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue6" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk6" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName7" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge7" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity7" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel7" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue7" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk7" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName8" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge8" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity8" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel8" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue8" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk8" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName9" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge9" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity9" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel9" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue9" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk9" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName10" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge10" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity10" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel10" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue10" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk10" class="input_u"><br></td>
+			</tr>			
+			<tr>
+				<td><input type="text" id="ItemName11" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge11" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity11" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel11" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue11" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk11" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName12" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge12" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity12" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel12" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue12" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk12" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName13" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge13" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity13" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel13" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue13" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk13" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName14" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge14" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity14" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel14" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue14" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk14" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName15" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge15" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity15" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel15" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue15" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk15" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName16" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge16" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity16" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel16" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue16" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk16" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName17" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge17" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity17" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel17" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue17" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk17" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName18" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge18" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity18" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel18" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue18" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk18" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName19" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge19" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity19" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel19" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue19" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk19" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName20" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge20" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity20" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel20" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue20" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk20" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName21" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge21" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity21" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel21" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue21" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk21" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName22" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge22" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity22" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel22" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue22" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk22" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName23" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge23" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity23" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel23" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue23" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk23" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName24" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge24" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity24" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel24" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue24" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk24" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName25" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge25" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity25" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel25" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue25" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk25" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName26" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge26" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity26" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel26" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue26" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk26" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName27" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge27" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity27" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel27" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue27" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk27" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName28" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge28" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity28" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel28" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue28" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk28" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName29" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge29" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity29" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel29" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue29" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk29" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName30" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge30" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity30" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel30" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue30" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk30" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName31" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge31" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity31" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel31" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue31" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk31" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName32" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge32" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity32" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel32" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue32" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk32" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName33" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge33" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity33" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel33" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue33" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk33" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName34" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge34" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity34" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel34" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue34" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk34" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName35" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge35" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity35" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel35" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue35" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk35" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName36" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge36" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity36" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel36" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue36" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk36" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName37" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge37" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity37" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel37" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue37" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk37" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName38" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge38" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity38" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel38" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue38" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk38" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName39" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge39" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity39" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel39" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue39" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk39" class="input_u"><br></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="ItemName40" class="input_u"><br></td>
+				<td><input type="text" id="ItemCharge40" class="input_u"><br></td>
+				<td><input type="text" id="ItemCapacity40" class="input_u"><br></td>
+				<td><input type="text" id="ItemLevel40" class="input_u"><br></td>
+				<td><input type="text" id="ItemValue40" class="input_u"><br></td>
+				<td><input type="text" id="ItemBulk40" class="input_u"><br></td>
+			</tr>						
+		</table>
+		<table class="fullwidth">
+			<tr>
+				<td class="halfwidth top-aligned">
+					<h3>Other Notes</h3><br>
+					<textarea rows="6" cols="50" id="OtherNotes"></textarea>
+				</td>
+				
+				<td class="halfwidth top-aligned">
+					<h3>Carrying Capacity</h3>
+					<table>
+						<tr>
+							<th>Unencumbered</th>							
+							<td><input type="text" id="CapacityU" class="input_b"></td>
+							<th>Current</th>
+							<td><input type="text" id="CapacityC" class="input_b"></td>
+						</tr>
+						<tr>
+							<th>Encumbered</th>
+							<td><input type="text" id="CapacityE" class="input_b"></td>
+							<td></td>
+							<th><button class="nonprinting" onclick="CalculateBulk()" title="Click to calculate current carried bulk.">Calculate</button></th>
+						</tr>
+						<tr>
+							<th>Overburdened</th>
+							<td><input type="text" id="CapacityO" class="input_b"></td>
+							<th><span class="nonprinting">Backpack</span></th>
+							<td>
+								<select id="BackPack" class="nonprinting">
+									<option value="0">None</option>
+									<option value="1">Consumer</option>
+									<option value="2">Industrial</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<th><button class="nonprinting" onclick="CalculateCarry()" title="Click to calculate carrying capacity.">Calculate</button></th>						
+							<th><span class="nonprinting">6th Level Mercenary</span></th>
+							<td><input class="nonprinting" type="checkbox" id="Mercenary6"></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<p style='overflow:hidden;page-break-before:always;'></p>
+		<table class="fullwidth">
+			<tr>
+				<td><h2>Starfinder</h2></td>
+				<td><input type="text" id="Charname4" class="input_ubig" disabled><br />Character Name</td>
+				<td><input type="text" id="SFSID4" class="input_ubig" disabled><br />Starfinder Society #</td>
+				<td class="right-aligned"><h2>Page 4</h2></td>
+			</tr>
+		</table>
+		<table class="fullwidth">
+		<tr>
+			<td><h3>Reputation</h3></td>
+			<th>Fame</th>
+			<td><input type="text" id="Fame" class="input_uc"></td>
+			<th>Infamy</th>
+			<td><input type="text" id="Infamy" class="input_uc"></td>
+		</tr>
+		</table>
+		<h3>Factions</h3><br>
+			<table>
+				<tr>
+					<th>Faction</th>
+					<td><input type="text" id="Faction1" class="input_uc" value="Acquisitives"></td>					
+					<td><input type="text" id="Faction2" class="input_uc" value="Dataphiles"></td>
+					<td><input type="text" id="Faction3" class="input_uc" value="Exo-guardians"></td>
+					<td><input type="text" id="Faction4" class="input_uc" value="Second Seekers ( )"></td>
+					<td><input type="text" id="Faction5" class="input_uc" value="Wayfinders"></td>
+					<td><input type="text" id="Faction6" class="input_uc" value="Other"></td>
+					<td><input type="text" id="Faction7" class="input_uc" value="Other"></td>
+				</tr>
+				<tr>
+					<th>Reputation</th>
+					<td><input type="text" id="Faction1Rep" class="input_b"></td>
+					<td><input type="text" id="Faction2Rep" class="input_b"></td>
+					<td><input type="text" id="Faction3Rep" class="input_b"></td>
+					<td><input type="text" id="Faction4Rep" class="input_b"></td>
+					<td><input type="text" id="Faction5Rep" class="input_b"></td>
+					<td><input type="text" id="Faction6Rep" class="input_b"></td>
+					<td><input type="text" id="Faction7Rep" class="input_b"></td>
+				</tr>
+			</table>
+		<h3>Inventory Log</h3>
+		<table class="fullwidth bordered">
+			<tr>
+				<td class="halfwidth">
+					<table>
+						<tr>
+							<th class="halfwidth">Item</th>
+							<th>Cost</th>
+							<th>Bought</th>
+							<th>Sold</th>
+							<th>Expended</th>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName1" class="input_u"></td>
+							<td><input type="text" id="LogCost1" class="input_u"></td>
+							<td><input type="text" id="LogBought1" class="input_b"></td>
+							<td><input type="text" id="LogSold1" class="input_b"></td>
+							<td><input type="text" id="LogUsed1" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName2" class="input_u"></td>
+							<td><input type="text" id="LogCost2" class="input_u"></td>
+							<td><input type="text" id="LogBought2" class="input_b"></td>
+							<td><input type="text" id="LogSold2" class="input_b"></td>
+							<td><input type="text" id="LogUsed2" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName3" class="input_u"></td>
+							<td><input type="text" id="LogCost3" class="input_u"></td>
+							<td><input type="text" id="LogBought3" class="input_b"></td>
+							<td><input type="text" id="LogSold3" class="input_b"></td>
+							<td><input type="text" id="LogUsed3" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName4" class="input_u"></td>
+							<td><input type="text" id="LogCost4" class="input_u"></td>
+							<td><input type="text" id="LogBought4" class="input_b"></td>
+							<td><input type="text" id="LogSold4" class="input_b"></td>
+							<td><input type="text" id="LogUsed4" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName5" class="input_u"></td>
+							<td><input type="text" id="LogCost5" class="input_u"></td>
+							<td><input type="text" id="LogBought5" class="input_b"></td>
+							<td><input type="text" id="LogSold5" class="input_b"></td>
+							<td><input type="text" id="LogUsed5" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName6" class="input_u"></td>
+							<td><input type="text" id="LogCost6" class="input_u"></td>
+							<td><input type="text" id="LogBought6" class="input_b"></td>
+							<td><input type="text" id="LogSold6" class="input_b"></td>
+							<td><input type="text" id="LogUsed6" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName7" class="input_u"></td>
+							<td><input type="text" id="LogCost7" class="input_u"></td>
+							<td><input type="text" id="LogBought7" class="input_b"></td>
+							<td><input type="text" id="LogSold7" class="input_b"></td>
+							<td><input type="text" id="LogUsed7" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName8" class="input_u"></td>
+							<td><input type="text" id="LogCost8" class="input_u"></td>
+							<td><input type="text" id="LogBought8" class="input_b"></td>
+							<td><input type="text" id="LogSold8" class="input_b"></td>
+							<td><input type="text" id="LogUsed8" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName9" class="input_u"></td>
+							<td><input type="text" id="LogCost9" class="input_u"></td>
+							<td><input type="text" id="LogBought9" class="input_b"></td>
+							<td><input type="text" id="LogSold9" class="input_b"></td>
+							<td><input type="text" id="LogUsed9" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName10" class="input_u"></td>
+							<td><input type="text" id="LogCost10" class="input_u"></td>
+							<td><input type="text" id="LogBought10" class="input_b"></td>
+							<td><input type="text" id="LogSold10" class="input_b"></td>
+							<td><input type="text" id="LogUsed10" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName11" class="input_u"></td>
+							<td><input type="text" id="LogCost11" class="input_u"></td>
+							<td><input type="text" id="LogBought11" class="input_b"></td>
+							<td><input type="text" id="LogSold11" class="input_b"></td>
+							<td><input type="text" id="LogUsed11" class="input_b"></td>
+						</tr>	
+						<tr>
+							<td><input type="text" id="LogName12" class="input_u"></td>
+							<td><input type="text" id="LogCost12" class="input_u"></td>
+							<td><input type="text" id="LogBought12" class="input_b"></td>
+							<td><input type="text" id="LogSold12" class="input_b"></td>
+							<td><input type="text" id="LogUsed12" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName13" class="input_u"></td>
+							<td><input type="text" id="LogCost13" class="input_u"></td>
+							<td><input type="text" id="LogBought13" class="input_b"></td>
+							<td><input type="text" id="LogSold13" class="input_b"></td>
+							<td><input type="text" id="LogUsed13" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName14" class="input_u"></td>
+							<td><input type="text" id="LogCost14" class="input_u"></td>
+							<td><input type="text" id="LogBought14" class="input_b"></td>
+							<td><input type="text" id="LogSold14" class="input_b"></td>
+							<td><input type="text" id="LogUsed14" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName15" class="input_u"></td>
+							<td><input type="text" id="LogCost15" class="input_u"></td>
+							<td><input type="text" id="LogBought15" class="input_b"></td>
+							<td><input type="text" id="LogSold15" class="input_b"></td>
+							<td><input type="text" id="LogUsed15" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName16" class="input_u"></td>
+							<td><input type="text" id="LogCost16" class="input_u"></td>
+							<td><input type="text" id="LogBought16" class="input_b"></td>
+							<td><input type="text" id="LogSold16" class="input_b"></td>
+							<td><input type="text" id="LogUsed16" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName17" class="input_u"></td>
+							<td><input type="text" id="LogCost17" class="input_u"></td>
+							<td><input type="text" id="LogBought17" class="input_b"></td>
+							<td><input type="text" id="LogSold17" class="input_b"></td>
+							<td><input type="text" id="LogUsed17" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName18" class="input_u"></td>
+							<td><input type="text" id="LogCost18" class="input_u"></td>
+							<td><input type="text" id="LogBought18" class="input_b"></td>
+							<td><input type="text" id="LogSold18" class="input_b"></td>
+							<td><input type="text" id="LogUsed18" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName19" class="input_u"></td>
+							<td><input type="text" id="LogCost19" class="input_u"></td>
+							<td><input type="text" id="LogBought19" class="input_b"></td>
+							<td><input type="text" id="LogSold19" class="input_b"></td>
+							<td><input type="text" id="LogUsed19" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName20" class="input_u"></td>
+							<td><input type="text" id="LogCost20" class="input_u"></td>
+							<td><input type="text" id="LogBought20" class="input_b"></td>
+							<td><input type="text" id="LogSold20" class="input_b"></td>
+							<td><input type="text" id="LogUsed20" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName21" class="input_u"></td>
+							<td><input type="text" id="LogCost21" class="input_u"></td>
+							<td><input type="text" id="LogBought21" class="input_b"></td>
+							<td><input type="text" id="LogSold21" class="input_b"></td>
+							<td><input type="text" id="LogUsed21" class="input_b"></td>
+						</tr>
+				</table>
+					
+				</td>
+				<td class="halfwidth">
+					<table>
+						<tr>
+							<th class="halfwidth">Item</th>
+							<th>Cost</th>
+							<th>Bought</th>
+							<th>Sold</th>
+							<th>Expended</th>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName22" class="input_u"></td>
+							<td><input type="text" id="LogCost22" class="input_u"></td>
+							<td><input type="text" id="LogBought22" class="input_b"></td>
+							<td><input type="text" id="LogSold22" class="input_b"></td>
+							<td><input type="text" id="LogUsed22" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName23" class="input_u"></td>
+							<td><input type="text" id="LogCost23" class="input_u"></td>
+							<td><input type="text" id="LogBought23" class="input_b"></td>
+							<td><input type="text" id="LogSold23" class="input_b"></td>
+							<td><input type="text" id="LogUsed23" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName24" class="input_u"></td>
+							<td><input type="text" id="LogCost24" class="input_u"></td>
+							<td><input type="text" id="LogBought24" class="input_b"></td>
+							<td><input type="text" id="LogSold24" class="input_b"></td>
+							<td><input type="text" id="LogUsed24" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName25" class="input_u"></td>
+							<td><input type="text" id="LogCost25" class="input_u"></td>
+							<td><input type="text" id="LogBought25" class="input_b"></td>
+							<td><input type="text" id="LogSold25" class="input_b"></td>
+							<td><input type="text" id="LogUsed25" class="input_b"></td>
+						</tr>						
+
+						<tr>
+							<td><input type="text" id="LogName26" class="input_u"></td>
+							<td><input type="text" id="LogCost26" class="input_u"></td>
+							<td><input type="text" id="LogBought26" class="input_b"></td>
+							<td><input type="text" id="LogSold26" class="input_b"></td>
+							<td><input type="text" id="LogUsed26" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName27" class="input_u"></td>
+							<td><input type="text" id="LogCost27" class="input_u"></td>
+							<td><input type="text" id="LogBought27" class="input_b"></td>
+							<td><input type="text" id="LogSold27" class="input_b"></td>
+							<td><input type="text" id="LogUsed27" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName28" class="input_u"></td>
+							<td><input type="text" id="LogCost28" class="input_u"></td>
+							<td><input type="text" id="LogBought28" class="input_b"></td>
+							<td><input type="text" id="LogSold28" class="input_b"></td>
+							<td><input type="text" id="LogUsed28" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName29" class="input_u"></td>
+							<td><input type="text" id="LogCost29" class="input_u"></td>
+							<td><input type="text" id="LogBought29" class="input_b"></td>
+							<td><input type="text" id="LogSold29" class="input_b"></td>
+							<td><input type="text" id="LogUsed29" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName30" class="input_u"></td>
+							<td><input type="text" id="LogCost30" class="input_u"></td>
+							<td><input type="text" id="LogBought30" class="input_b"></td>
+							<td><input type="text" id="LogSold30" class="input_b"></td>
+							<td><input type="text" id="LogUsed30" class="input_b"></td>
+						</tr>						
+						<tr>
+							<td><input type="text" id="LogName31" class="input_u"></td>
+							<td><input type="text" id="LogCost31" class="input_u"></td>
+							<td><input type="text" id="LogBought31" class="input_b"></td>
+							<td><input type="text" id="LogSold31" class="input_b"></td>
+							<td><input type="text" id="LogUsed31" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName32" class="input_u"></td>
+							<td><input type="text" id="LogCost32" class="input_u"></td>
+							<td><input type="text" id="LogBought32" class="input_b"></td>
+							<td><input type="text" id="LogSold32" class="input_b"></td>
+							<td><input type="text" id="LogUsed32" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName33" class="input_u"></td>
+							<td><input type="text" id="LogCost33" class="input_u"></td>
+							<td><input type="text" id="LogBought33" class="input_b"></td>
+							<td><input type="text" id="LogSold33" class="input_b"></td>
+							<td><input type="text" id="LogUsed33" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName34" class="input_u"></td>
+							<td><input type="text" id="LogCost34" class="input_u"></td>
+							<td><input type="text" id="LogBought34" class="input_b"></td>
+							<td><input type="text" id="LogSold34" class="input_b"></td>
+							<td><input type="text" id="LogUsed34" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName35" class="input_u"></td>
+							<td><input type="text" id="LogCost35" class="input_u"></td>
+							<td><input type="text" id="LogBought35" class="input_b"></td>
+							<td><input type="text" id="LogSold35" class="input_b"></td>
+							<td><input type="text" id="LogUsed35" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName36" class="input_u"></td>
+							<td><input type="text" id="LogCost36" class="input_u"></td>
+							<td><input type="text" id="LogBought36" class="input_b"></td>
+							<td><input type="text" id="LogSold36" class="input_b"></td>
+							<td><input type="text" id="LogUsed36" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName37" class="input_u"></td>
+							<td><input type="text" id="LogCost37" class="input_u"></td>
+							<td><input type="text" id="LogBought37" class="input_b"></td>
+							<td><input type="text" id="LogSold37" class="input_b"></td>
+							<td><input type="text" id="LogUsed37" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName38" class="input_u"></td>
+							<td><input type="text" id="LogCost38" class="input_u"></td>
+							<td><input type="text" id="LogBought38" class="input_b"></td>
+							<td><input type="text" id="LogSold38" class="input_b"></td>
+							<td><input type="text" id="LogUsed38" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName39" class="input_u"></td>
+							<td><input type="text" id="LogCost39" class="input_u"></td>
+							<td><input type="text" id="LogBought39" class="input_b"></td>
+							<td><input type="text" id="LogSold39" class="input_b"></td>
+							<td><input type="text" id="LogUsed39" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName40" class="input_u"></td>
+							<td><input type="text" id="LogCost40" class="input_u"></td>
+							<td><input type="text" id="LogBought40" class="input_b"></td>
+							<td><input type="text" id="LogSold40" class="input_b"></td>
+							<td><input type="text" id="LogUsed40" class="input_b"></td>
+						</tr>						
+						<tr>
+							<td><input type="text" id="LogName41" class="input_u"></td>
+							<td><input type="text" id="LogCost41" class="input_u"></td>
+							<td><input type="text" id="LogBought41" class="input_b"></td>
+							<td><input type="text" id="LogSold41" class="input_b"></td>
+							<td><input type="text" id="LogUsed41" class="input_b"></td>
+						</tr>
+						<tr>
+							<td><input type="text" id="LogName42" class="input_u"></td>
+							<td><input type="text" id="LogCost42" class="input_u"></td>
+							<td><input type="text" id="LogBought42" class="input_b"></td>
+							<td><input type="text" id="LogSold42" class="input_b"></td>
+							<td><input type="text" id="LogUsed42" class="input_b"></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<h3>Ammunition and Charges</h3>
+		<table class="fullwidth bordered">
+			<tr>
+				<th class="twentyfive">Item</th>
+				<th>Cost</th>
+				<th>Bought</th>
+				<th>Sold</th>
+				<th>Capacity</th>
+				<td class="halfwidth"></td>
+			</tr>
+			<tr>
+				<td><input type="text" id="AmmoName1" class="input_u"></td>
+				<td><input type="text" id="AmmoCost1" class="input_u"></td>
+				<td><input type="text" id="AmmoBought1" class="input_b"></td>
+				<td><input type="text" id="AmmoSold1" class="input_b"></td>
+				<td><input type="text" id="AmmoCapacity1" class="input_b" value="20" onchange="ModCapacity(1)"></td>
+				<th class="thinbordered">
+					<span class="nobreak">
+						<span id="AmmoUsed1_1o"><input type="checkbox" id="AmmoUsed1_1"></span>
+						<span id="AmmoUsed1_2o"><input type="checkbox" id="AmmoUsed1_2"></span>
+						<span id="AmmoUsed1_3o"><input type="checkbox" id="AmmoUsed1_3"></span>
+						<span id="AmmoUsed1_4o"><input type="checkbox" id="AmmoUsed1_4"></span>
+						<span id="AmmoUsed1_5o"><input type="checkbox" id="AmmoUsed1_5">&nbsp;</span>
+					</span>
+					<span class="nobreak">
+						<span id="AmmoUsed1_6o"><input type="checkbox" id="AmmoUsed1_6"></span>
+						<span id="AmmoUsed1_7o"><input type="checkbox" id="AmmoUsed1_7"></span>
+						<span id="AmmoUsed1_8o"><input type="checkbox" id="AmmoUsed1_8"></span>
+						<span id="AmmoUsed1_9o"><input type="checkbox" id="AmmoUsed1_9"></span>
+						<span id="AmmoUsed1_10o"><input type="checkbox" id="AmmoUsed1_10">&nbsp;</span>
+					</span>
+					<span class="nobreak">
+						<span id="AmmoUsed1_11o"><input type="checkbox" id="AmmoUsed1_11"></span>
+						<span id="AmmoUsed1_12o"><input type="checkbox" id="AmmoUsed1_12"></span>
+						<span id="AmmoUsed1_13o"><input type="checkbox" id="AmmoUsed1_13"></span>
+						<span id="AmmoUsed1_14o"><input type="checkbox" id="AmmoUsed1_14"></span>
+						<span id="AmmoUsed1_15o"><input type="checkbox" id="AmmoUsed1_15">&nbsp;</span>
+					</span>
+					<span class="nobreak">
+						<span id="AmmoUsed1_16o"><input type="checkbox" id="AmmoUsed1_16"></span>
+						<span id="AmmoUsed1_17o"><input type="checkbox" id="AmmoUsed1_17"></span>
+						<span id="AmmoUsed1_18o"><input type="checkbox" id="AmmoUsed1_18"></span>
+						<span id="AmmoUsed1_19o"><input type="checkbox" id="AmmoUsed1_19"></span>
+						<span id="AmmoUsed1_20o"><input type="checkbox" id="AmmoUsed1_20">&nbsp;</span>
+					</span>
+					<span class="nobreak">
+						<span id="AmmoUsed1_21o"><input type="checkbox" id="AmmoUsed1_21"></span>
+						<span id="AmmoUsed1_22o"><input type="checkbox" id="AmmoUsed1_22"></span>
+						<span id="AmmoUsed1_23o"><input type="checkbox" id="AmmoUsed1_23"></span>
+						<span id="AmmoUsed1_24o"><input type="checkbox" id="AmmoUsed1_24"></span>
+						<span id="AmmoUsed1_25o"><input type="checkbox" id="AmmoUsed1_25">&nbsp;</span>
+					</span>
+					<span class="nobreak">
+						<span id="AmmoUsed1_26o"><input type="checkbox" id="AmmoUsed1_26"></span>
+						<span id="AmmoUsed1_27o"><input type="checkbox" id="AmmoUsed1_27"></span>
+						<span id="AmmoUsed1_28o"><input type="checkbox" id="AmmoUsed1_28"></span>
+						<span id="AmmoUsed1_29o"><input type="checkbox" id="AmmoUsed1_29"></span>
+						<span id="AmmoUsed1_30o"><input type="checkbox" id="AmmoUsed1_30">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_31o"><input type="checkbox" id="AmmoUsed1_31"></span>
+						<span id="AmmoUsed1_32o"><input type="checkbox" id="AmmoUsed1_32"></span>
+						<span id="AmmoUsed1_33o"><input type="checkbox" id="AmmoUsed1_33"></span>
+						<span id="AmmoUsed1_34o"><input type="checkbox" id="AmmoUsed1_34"></span>
+						<span id="AmmoUsed1_35o"><input type="checkbox" id="AmmoUsed1_35">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_36o"><input type="checkbox" id="AmmoUsed1_36"></span>
+						<span id="AmmoUsed1_37o"><input type="checkbox" id="AmmoUsed1_37"></span>
+						<span id="AmmoUsed1_38o"><input type="checkbox" id="AmmoUsed1_38"></span>
+						<span id="AmmoUsed1_39o"><input type="checkbox" id="AmmoUsed1_39"></span>
+						<span id="AmmoUsed1_40o"><input type="checkbox" id="AmmoUsed1_40">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_41o"><input type="checkbox" id="AmmoUsed1_41"></span>
+						<span id="AmmoUsed1_42o"><input type="checkbox" id="AmmoUsed1_42"></span>
+						<span id="AmmoUsed1_43o"><input type="checkbox" id="AmmoUsed1_43"></span>
+						<span id="AmmoUsed1_44o"><input type="checkbox" id="AmmoUsed1_44"></span>
+						<span id="AmmoUsed1_45o"><input type="checkbox" id="AmmoUsed1_45">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_46o"><input type="checkbox" id="AmmoUsed1_46"></span>
+						<span id="AmmoUsed1_47o"><input type="checkbox" id="AmmoUsed1_47"></span>
+						<span id="AmmoUsed1_48o"><input type="checkbox" id="AmmoUsed1_48"></span>
+						<span id="AmmoUsed1_49o"><input type="checkbox" id="AmmoUsed1_49"></span>
+						<span id="AmmoUsed1_50o"><input type="checkbox" id="AmmoUsed1_50">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_51o"><input type="checkbox" id="AmmoUsed1_51"></span>
+						<span id="AmmoUsed1_52o"><input type="checkbox" id="AmmoUsed1_52"></span>
+						<span id="AmmoUsed1_53o"><input type="checkbox" id="AmmoUsed1_53"></span>
+						<span id="AmmoUsed1_54o"><input type="checkbox" id="AmmoUsed1_54"></span>
+						<span id="AmmoUsed1_55o"><input type="checkbox" id="AmmoUsed1_55">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_56o"><input type="checkbox" id="AmmoUsed1_56"></span>
+						<span id="AmmoUsed1_57o"><input type="checkbox" id="AmmoUsed1_57"></span>
+						<span id="AmmoUsed1_58o"><input type="checkbox" id="AmmoUsed1_58"></span>
+						<span id="AmmoUsed1_59o"><input type="checkbox" id="AmmoUsed1_59"></span>
+						<span id="AmmoUsed1_60o"><input type="checkbox" id="AmmoUsed1_60">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_61o"><input type="checkbox" id="AmmoUsed1_61"></span>
+						<span id="AmmoUsed1_62o"><input type="checkbox" id="AmmoUsed1_62"></span>
+						<span id="AmmoUsed1_63o"><input type="checkbox" id="AmmoUsed1_63"></span>
+						<span id="AmmoUsed1_64o"><input type="checkbox" id="AmmoUsed1_64"></span>
+						<span id="AmmoUsed1_65o"><input type="checkbox" id="AmmoUsed1_65">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_66o"><input type="checkbox" id="AmmoUsed1_66"></span>
+						<span id="AmmoUsed1_67o"><input type="checkbox" id="AmmoUsed1_67"></span>
+						<span id="AmmoUsed1_68o"><input type="checkbox" id="AmmoUsed1_68"></span>
+						<span id="AmmoUsed1_69o"><input type="checkbox" id="AmmoUsed1_69"></span>
+						<span id="AmmoUsed1_70o"><input type="checkbox" id="AmmoUsed1_70">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_71o"><input type="checkbox" id="AmmoUsed1_71"></span>
+						<span id="AmmoUsed1_72o"><input type="checkbox" id="AmmoUsed1_72"></span>
+						<span id="AmmoUsed1_73o"><input type="checkbox" id="AmmoUsed1_73"></span>
+						<span id="AmmoUsed1_74o"><input type="checkbox" id="AmmoUsed1_74"></span>
+						<span id="AmmoUsed1_75o"><input type="checkbox" id="AmmoUsed1_75">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_76o"><input type="checkbox" id="AmmoUsed1_76"></span>
+						<span id="AmmoUsed1_77o"><input type="checkbox" id="AmmoUsed1_77"></span>
+						<span id="AmmoUsed1_78o"><input type="checkbox" id="AmmoUsed1_78"></span>
+						<span id="AmmoUsed1_79o"><input type="checkbox" id="AmmoUsed1_79"></span>
+						<span id="AmmoUsed1_80o"><input type="checkbox" id="AmmoUsed1_80">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_81o"><input type="checkbox" id="AmmoUsed1_81"></span>
+						<span id="AmmoUsed1_82o"><input type="checkbox" id="AmmoUsed1_82"></span>
+						<span id="AmmoUsed1_83o"><input type="checkbox" id="AmmoUsed1_83"></span>
+						<span id="AmmoUsed1_84o"><input type="checkbox" id="AmmoUsed1_84"></span>
+						<span id="AmmoUsed1_85o"><input type="checkbox" id="AmmoUsed1_85">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_86o"><input type="checkbox" id="AmmoUsed1_86"></span>
+						<span id="AmmoUsed1_87o"><input type="checkbox" id="AmmoUsed1_87"></span>
+						<span id="AmmoUsed1_88o"><input type="checkbox" id="AmmoUsed1_88"></span>
+						<span id="AmmoUsed1_89o"><input type="checkbox" id="AmmoUsed1_89"></span>
+						<span id="AmmoUsed1_90o"><input type="checkbox" id="AmmoUsed1_90">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_91o"><input type="checkbox" id="AmmoUsed1_91"></span>
+						<span id="AmmoUsed1_92o"><input type="checkbox" id="AmmoUsed1_92"></span>
+						<span id="AmmoUsed1_93o"><input type="checkbox" id="AmmoUsed1_93"></span>
+						<span id="AmmoUsed1_94o"><input type="checkbox" id="AmmoUsed1_94"></span>
+						<span id="AmmoUsed1_95o"><input type="checkbox" id="AmmoUsed1_95">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed1_96o"><input type="checkbox" id="AmmoUsed1_96"></span>
+						<span id="AmmoUsed1_97o"><input type="checkbox" id="AmmoUsed1_97"></span>
+						<span id="AmmoUsed1_98o"><input type="checkbox" id="AmmoUsed1_98"></span>
+						<span id="AmmoUsed1_99o"><input type="checkbox" id="AmmoUsed1_99"></span>
+						<span id="AmmoUsed1_100o"><input type="checkbox" id="AmmoUsed1_100">&nbsp;</span>
+					</span>
+				</th>				
+			</tr>
+			<tr>
+				<td><input type="text" id="AmmoName2" class="input_u"></td>
+				<td><input type="text" id="AmmoCost2" class="input_u"></td>
+				<td><input type="text" id="AmmoBought2" class="input_b"></td>
+				<td><input type="text" id="AmmoSold2" class="input_b"></td>
+				<td><input type="text" id="AmmoCapacity2" class="input_b" value="20" onchange="ModCapacity(2)"></td>
+				<th class="thinbordered">
+					<span class="nobreak">
+						<span id="AmmoUsed2_1o"><input type="checkbox" id="AmmoUsed2_1"></span>
+						<span id="AmmoUsed2_2o"><input type="checkbox" id="AmmoUsed2_2"></span>
+						<span id="AmmoUsed2_3o"><input type="checkbox" id="AmmoUsed2_3"></span>
+						<span id="AmmoUsed2_4o"><input type="checkbox" id="AmmoUsed2_4"></span>
+						<span id="AmmoUsed2_5o"><input type="checkbox" id="AmmoUsed2_5">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_6o"><input type="checkbox" id="AmmoUsed2_6"></span>
+						<span id="AmmoUsed2_7o"><input type="checkbox" id="AmmoUsed2_7"></span>
+						<span id="AmmoUsed2_8o"><input type="checkbox" id="AmmoUsed2_8"></span>
+						<span id="AmmoUsed2_9o"><input type="checkbox" id="AmmoUsed2_9"></span>
+						<span id="AmmoUsed2_10o"><input type="checkbox" id="AmmoUsed2_10">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_11o"><input type="checkbox" id="AmmoUsed2_11"></span>
+						<span id="AmmoUsed2_12o"><input type="checkbox" id="AmmoUsed2_12"></span>
+						<span id="AmmoUsed2_13o"><input type="checkbox" id="AmmoUsed2_13"></span>
+						<span id="AmmoUsed2_14o"><input type="checkbox" id="AmmoUsed2_14"></span>
+						<span id="AmmoUsed2_15o"><input type="checkbox" id="AmmoUsed2_15">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_16o"><input type="checkbox" id="AmmoUsed2_16"></span>
+						<span id="AmmoUsed2_17o"><input type="checkbox" id="AmmoUsed2_17"></span>
+						<span id="AmmoUsed2_18o"><input type="checkbox" id="AmmoUsed2_18"></span>
+						<span id="AmmoUsed2_19o"><input type="checkbox" id="AmmoUsed2_19"></span>
+						<span id="AmmoUsed2_20o"><input type="checkbox" id="AmmoUsed2_20">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_21o"><input type="checkbox" id="AmmoUsed2_21"></span>
+						<span id="AmmoUsed2_22o"><input type="checkbox" id="AmmoUsed2_22"></span>
+						<span id="AmmoUsed2_23o"><input type="checkbox" id="AmmoUsed2_23"></span>
+						<span id="AmmoUsed2_24o"><input type="checkbox" id="AmmoUsed2_24"></span>
+						<span id="AmmoUsed2_25o"><input type="checkbox" id="AmmoUsed2_25">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_26o"><input type="checkbox" id="AmmoUsed2_26"></span>
+						<span id="AmmoUsed2_27o"><input type="checkbox" id="AmmoUsed2_27"></span>
+						<span id="AmmoUsed2_28o"><input type="checkbox" id="AmmoUsed2_28"></span>
+						<span id="AmmoUsed2_29o"><input type="checkbox" id="AmmoUsed2_29"></span>
+						<span id="AmmoUsed2_30o"><input type="checkbox" id="AmmoUsed2_30">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_31o"><input type="checkbox" id="AmmoUsed2_31"></span>
+						<span id="AmmoUsed2_32o"><input type="checkbox" id="AmmoUsed2_32"></span>
+						<span id="AmmoUsed2_33o"><input type="checkbox" id="AmmoUsed2_33"></span>
+						<span id="AmmoUsed2_34o"><input type="checkbox" id="AmmoUsed2_34"></span>
+						<span id="AmmoUsed2_35o"><input type="checkbox" id="AmmoUsed2_35">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_36o"><input type="checkbox" id="AmmoUsed2_36"></span>
+						<span id="AmmoUsed2_37o"><input type="checkbox" id="AmmoUsed2_37"></span>
+						<span id="AmmoUsed2_38o"><input type="checkbox" id="AmmoUsed2_38"></span>
+						<span id="AmmoUsed2_39o"><input type="checkbox" id="AmmoUsed2_39"></span>
+						<span id="AmmoUsed2_40o"><input type="checkbox" id="AmmoUsed2_40">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_41o"><input type="checkbox" id="AmmoUsed2_41"></span>
+						<span id="AmmoUsed2_42o"><input type="checkbox" id="AmmoUsed2_42"></span>
+						<span id="AmmoUsed2_43o"><input type="checkbox" id="AmmoUsed2_43"></span>
+						<span id="AmmoUsed2_44o"><input type="checkbox" id="AmmoUsed2_44"></span>
+						<span id="AmmoUsed2_45o"><input type="checkbox" id="AmmoUsed2_45">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_46o"><input type="checkbox" id="AmmoUsed2_46"></span>
+						<span id="AmmoUsed2_47o"><input type="checkbox" id="AmmoUsed2_47"></span>
+						<span id="AmmoUsed2_48o"><input type="checkbox" id="AmmoUsed2_48"></span>
+						<span id="AmmoUsed2_49o"><input type="checkbox" id="AmmoUsed2_49"></span>
+						<span id="AmmoUsed2_50o"><input type="checkbox" id="AmmoUsed2_50">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_51o"><input type="checkbox" id="AmmoUsed2_51"></span>
+						<span id="AmmoUsed2_52o"><input type="checkbox" id="AmmoUsed2_52"></span>
+						<span id="AmmoUsed2_53o"><input type="checkbox" id="AmmoUsed2_53"></span>
+						<span id="AmmoUsed2_54o"><input type="checkbox" id="AmmoUsed2_54"></span>
+						<span id="AmmoUsed2_55o"><input type="checkbox" id="AmmoUsed2_55">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_56o"><input type="checkbox" id="AmmoUsed2_56"></span>
+						<span id="AmmoUsed2_57o"><input type="checkbox" id="AmmoUsed2_57"></span>
+						<span id="AmmoUsed2_58o"><input type="checkbox" id="AmmoUsed2_58"></span>
+						<span id="AmmoUsed2_59o"><input type="checkbox" id="AmmoUsed2_59"></span>
+						<span id="AmmoUsed2_60o"><input type="checkbox" id="AmmoUsed2_60">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_61o"><input type="checkbox" id="AmmoUsed2_61"></span>
+						<span id="AmmoUsed2_62o"><input type="checkbox" id="AmmoUsed2_62"></span>
+						<span id="AmmoUsed2_63o"><input type="checkbox" id="AmmoUsed2_63"></span>
+						<span id="AmmoUsed2_64o"><input type="checkbox" id="AmmoUsed2_64"></span>
+						<span id="AmmoUsed2_65o"><input type="checkbox" id="AmmoUsed2_65">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_66o"><input type="checkbox" id="AmmoUsed2_66"></span>
+						<span id="AmmoUsed2_67o"><input type="checkbox" id="AmmoUsed2_67"></span>
+						<span id="AmmoUsed2_68o"><input type="checkbox" id="AmmoUsed2_68"></span>
+						<span id="AmmoUsed2_69o"><input type="checkbox" id="AmmoUsed2_69"></span>
+						<span id="AmmoUsed2_70o"><input type="checkbox" id="AmmoUsed2_70">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_71o"><input type="checkbox" id="AmmoUsed2_71"></span>
+						<span id="AmmoUsed2_72o"><input type="checkbox" id="AmmoUsed2_72"></span>
+						<span id="AmmoUsed2_73o"><input type="checkbox" id="AmmoUsed2_73"></span>
+						<span id="AmmoUsed2_74o"><input type="checkbox" id="AmmoUsed2_74"></span>
+						<span id="AmmoUsed2_75o"><input type="checkbox" id="AmmoUsed2_75">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_76o"><input type="checkbox" id="AmmoUsed2_76"></span>
+						<span id="AmmoUsed2_77o"><input type="checkbox" id="AmmoUsed2_77"></span>
+						<span id="AmmoUsed2_78o"><input type="checkbox" id="AmmoUsed2_78"></span>
+						<span id="AmmoUsed2_79o"><input type="checkbox" id="AmmoUsed2_79"></span>
+						<span id="AmmoUsed2_80o"><input type="checkbox" id="AmmoUsed2_80">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_81o"><input type="checkbox" id="AmmoUsed2_81"></span>
+						<span id="AmmoUsed2_82o"><input type="checkbox" id="AmmoUsed2_82"></span>
+						<span id="AmmoUsed2_83o"><input type="checkbox" id="AmmoUsed2_83"></span>
+						<span id="AmmoUsed2_84o"><input type="checkbox" id="AmmoUsed2_84"></span>
+						<span id="AmmoUsed2_85o"><input type="checkbox" id="AmmoUsed2_85">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_86o"><input type="checkbox" id="AmmoUsed2_86"></span>
+						<span id="AmmoUsed2_87o"><input type="checkbox" id="AmmoUsed2_87"></span>
+						<span id="AmmoUsed2_88o"><input type="checkbox" id="AmmoUsed2_88"></span>
+						<span id="AmmoUsed2_89o"><input type="checkbox" id="AmmoUsed2_89"></span>
+						<span id="AmmoUsed2_90o"><input type="checkbox" id="AmmoUsed2_90">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_91o"><input type="checkbox" id="AmmoUsed2_91"></span>
+						<span id="AmmoUsed2_92o"><input type="checkbox" id="AmmoUsed2_92"></span>
+						<span id="AmmoUsed2_93o"><input type="checkbox" id="AmmoUsed2_93"></span>
+						<span id="AmmoUsed2_94o"><input type="checkbox" id="AmmoUsed2_94"></span>
+						<span id="AmmoUsed2_95o"><input type="checkbox" id="AmmoUsed2_95">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed2_96o"><input type="checkbox" id="AmmoUsed2_96"></span>
+						<span id="AmmoUsed2_97o"><input type="checkbox" id="AmmoUsed2_97"></span>
+						<span id="AmmoUsed2_98o"><input type="checkbox" id="AmmoUsed2_98"></span>
+						<span id="AmmoUsed2_99o"><input type="checkbox" id="AmmoUsed2_99"></span>
+						<span id="AmmoUsed2_100o"><input type="checkbox" id="AmmoUsed2_100">&nbsp;</span>
+					</span>
+				</th>
+			</tr>
+			<tr>
+				<td><input type="text" id="AmmoName3" class="input_u"></td>
+				<td><input type="text" id="AmmoCost3" class="input_u"></td>
+				<td><input type="text" id="AmmoBought3" class="input_b"></td>
+				<td><input type="text" id="AmmoSold3" class="input_b"></td>
+				<td><input type="text" id="AmmoCapacity3" class="input_b" value="20" onchange="ModCapacity(3)"></td>
+				<th class="thinbordered">
+					<span class="nobreak">
+						<span id="AmmoUsed3_1o"><input type="checkbox" id="AmmoUsed3_1"></span>
+						<span id="AmmoUsed3_2o"><input type="checkbox" id="AmmoUsed3_2"></span>
+						<span id="AmmoUsed3_3o"><input type="checkbox" id="AmmoUsed3_3"></span>
+						<span id="AmmoUsed3_4o"><input type="checkbox" id="AmmoUsed3_4"></span>
+						<span id="AmmoUsed3_5o"><input type="checkbox" id="AmmoUsed3_5">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_6o"><input type="checkbox" id="AmmoUsed3_6"></span>
+						<span id="AmmoUsed3_7o"><input type="checkbox" id="AmmoUsed3_7"></span>
+						<span id="AmmoUsed3_8o"><input type="checkbox" id="AmmoUsed3_8"></span>
+						<span id="AmmoUsed3_9o"><input type="checkbox" id="AmmoUsed3_9"></span>
+						<span id="AmmoUsed3_10o"><input type="checkbox" id="AmmoUsed3_10">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_11o"><input type="checkbox" id="AmmoUsed3_11"></span>
+						<span id="AmmoUsed3_12o"><input type="checkbox" id="AmmoUsed3_12"></span>
+						<span id="AmmoUsed3_13o"><input type="checkbox" id="AmmoUsed3_13"></span>
+						<span id="AmmoUsed3_14o"><input type="checkbox" id="AmmoUsed3_14"></span>
+						<span id="AmmoUsed3_15o"><input type="checkbox" id="AmmoUsed3_15">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_16o"><input type="checkbox" id="AmmoUsed3_16"></span>
+						<span id="AmmoUsed3_17o"><input type="checkbox" id="AmmoUsed3_17"></span>
+						<span id="AmmoUsed3_18o"><input type="checkbox" id="AmmoUsed3_18"></span>
+						<span id="AmmoUsed3_19o"><input type="checkbox" id="AmmoUsed3_19"></span>
+						<span id="AmmoUsed3_20o"><input type="checkbox" id="AmmoUsed3_20">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_21o"><input type="checkbox" id="AmmoUsed3_21"></span>
+						<span id="AmmoUsed3_22o"><input type="checkbox" id="AmmoUsed3_22"></span>
+						<span id="AmmoUsed3_23o"><input type="checkbox" id="AmmoUsed3_23"></span>
+						<span id="AmmoUsed3_24o"><input type="checkbox" id="AmmoUsed3_24"></span>
+						<span id="AmmoUsed3_25o"><input type="checkbox" id="AmmoUsed3_25">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_26o"><input type="checkbox" id="AmmoUsed3_26"></span>
+						<span id="AmmoUsed3_27o"><input type="checkbox" id="AmmoUsed3_27"></span>
+						<span id="AmmoUsed3_28o"><input type="checkbox" id="AmmoUsed3_28"></span>
+						<span id="AmmoUsed3_29o"><input type="checkbox" id="AmmoUsed3_29"></span>
+						<span id="AmmoUsed3_30o"><input type="checkbox" id="AmmoUsed3_30">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_31o"><input type="checkbox" id="AmmoUsed3_31"></span>
+						<span id="AmmoUsed3_32o"><input type="checkbox" id="AmmoUsed3_32"></span>
+						<span id="AmmoUsed3_33o"><input type="checkbox" id="AmmoUsed3_33"></span>
+						<span id="AmmoUsed3_34o"><input type="checkbox" id="AmmoUsed3_34"></span>
+						<span id="AmmoUsed3_35o"><input type="checkbox" id="AmmoUsed3_35">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_36o"><input type="checkbox" id="AmmoUsed3_36"></span>
+						<span id="AmmoUsed3_37o"><input type="checkbox" id="AmmoUsed3_37"></span>
+						<span id="AmmoUsed3_38o"><input type="checkbox" id="AmmoUsed3_38"></span>
+						<span id="AmmoUsed3_39o"><input type="checkbox" id="AmmoUsed3_39"></span>
+						<span id="AmmoUsed3_40o"><input type="checkbox" id="AmmoUsed3_40">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_41o"><input type="checkbox" id="AmmoUsed3_41"></span>
+						<span id="AmmoUsed3_42o"><input type="checkbox" id="AmmoUsed3_42"></span>
+						<span id="AmmoUsed3_43o"><input type="checkbox" id="AmmoUsed3_43"></span>
+						<span id="AmmoUsed3_44o"><input type="checkbox" id="AmmoUsed3_44"></span>
+						<span id="AmmoUsed3_45o"><input type="checkbox" id="AmmoUsed3_45">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_46o"><input type="checkbox" id="AmmoUsed3_46"></span>
+						<span id="AmmoUsed3_47o"><input type="checkbox" id="AmmoUsed3_47"></span>
+						<span id="AmmoUsed3_48o"><input type="checkbox" id="AmmoUsed3_48"></span>
+						<span id="AmmoUsed3_49o"><input type="checkbox" id="AmmoUsed3_49"></span>
+						<span id="AmmoUsed3_50o"><input type="checkbox" id="AmmoUsed3_50">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_51o"><input type="checkbox" id="AmmoUsed3_51"></span>
+						<span id="AmmoUsed3_52o"><input type="checkbox" id="AmmoUsed3_52"></span>
+						<span id="AmmoUsed3_53o"><input type="checkbox" id="AmmoUsed3_53"></span>
+						<span id="AmmoUsed3_54o"><input type="checkbox" id="AmmoUsed3_54"></span>
+						<span id="AmmoUsed3_55o"><input type="checkbox" id="AmmoUsed3_55">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_56o"><input type="checkbox" id="AmmoUsed3_56"></span>
+						<span id="AmmoUsed3_57o"><input type="checkbox" id="AmmoUsed3_57"></span>
+						<span id="AmmoUsed3_58o"><input type="checkbox" id="AmmoUsed3_58"></span>
+						<span id="AmmoUsed3_59o"><input type="checkbox" id="AmmoUsed3_59"></span>
+						<span id="AmmoUsed3_60o"><input type="checkbox" id="AmmoUsed3_60">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_61o"><input type="checkbox" id="AmmoUsed3_61"></span>
+						<span id="AmmoUsed3_62o"><input type="checkbox" id="AmmoUsed3_62"></span>
+						<span id="AmmoUsed3_63o"><input type="checkbox" id="AmmoUsed3_63"></span>
+						<span id="AmmoUsed3_64o"><input type="checkbox" id="AmmoUsed3_64"></span>
+						<span id="AmmoUsed3_65o"><input type="checkbox" id="AmmoUsed3_65">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_66o"><input type="checkbox" id="AmmoUsed3_66"></span>
+						<span id="AmmoUsed3_67o"><input type="checkbox" id="AmmoUsed3_67"></span>
+						<span id="AmmoUsed3_68o"><input type="checkbox" id="AmmoUsed3_68"></span>
+						<span id="AmmoUsed3_69o"><input type="checkbox" id="AmmoUsed3_69"></span>
+						<span id="AmmoUsed3_70o"><input type="checkbox" id="AmmoUsed3_70">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_71o"><input type="checkbox" id="AmmoUsed3_71"></span>
+						<span id="AmmoUsed3_72o"><input type="checkbox" id="AmmoUsed3_72"></span>
+						<span id="AmmoUsed3_73o"><input type="checkbox" id="AmmoUsed3_73"></span>
+						<span id="AmmoUsed3_74o"><input type="checkbox" id="AmmoUsed3_74"></span>
+						<span id="AmmoUsed3_75o"><input type="checkbox" id="AmmoUsed3_75">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_76o"><input type="checkbox" id="AmmoUsed3_76"></span>
+						<span id="AmmoUsed3_77o"><input type="checkbox" id="AmmoUsed3_77"></span>
+						<span id="AmmoUsed3_78o"><input type="checkbox" id="AmmoUsed3_78"></span>
+						<span id="AmmoUsed3_79o"><input type="checkbox" id="AmmoUsed3_79"></span>
+						<span id="AmmoUsed3_80o"><input type="checkbox" id="AmmoUsed3_80">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_81o"><input type="checkbox" id="AmmoUsed3_81"></span>
+						<span id="AmmoUsed3_82o"><input type="checkbox" id="AmmoUsed3_82"></span>
+						<span id="AmmoUsed3_83o"><input type="checkbox" id="AmmoUsed3_83"></span>
+						<span id="AmmoUsed3_84o"><input type="checkbox" id="AmmoUsed3_84"></span>
+						<span id="AmmoUsed3_85o"><input type="checkbox" id="AmmoUsed3_85">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_86o"><input type="checkbox" id="AmmoUsed3_86"></span>
+						<span id="AmmoUsed3_87o"><input type="checkbox" id="AmmoUsed3_87"></span>
+						<span id="AmmoUsed3_88o"><input type="checkbox" id="AmmoUsed3_88"></span>
+						<span id="AmmoUsed3_89o"><input type="checkbox" id="AmmoUsed3_89"></span>
+						<span id="AmmoUsed3_90o"><input type="checkbox" id="AmmoUsed3_90">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_91o"><input type="checkbox" id="AmmoUsed3_91"></span>
+						<span id="AmmoUsed3_92o"><input type="checkbox" id="AmmoUsed3_92"></span>
+						<span id="AmmoUsed3_93o"><input type="checkbox" id="AmmoUsed3_93"></span>
+						<span id="AmmoUsed3_94o"><input type="checkbox" id="AmmoUsed3_94"></span>
+						<span id="AmmoUsed3_95o"><input type="checkbox" id="AmmoUsed3_95">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed3_96o"><input type="checkbox" id="AmmoUsed3_96"></span>
+						<span id="AmmoUsed3_97o"><input type="checkbox" id="AmmoUsed3_97"></span>
+						<span id="AmmoUsed3_98o"><input type="checkbox" id="AmmoUsed3_98"></span>
+						<span id="AmmoUsed3_99o"><input type="checkbox" id="AmmoUsed3_99"></span>
+						<span id="AmmoUsed3_100o"><input type="checkbox" id="AmmoUsed3_100">&nbsp;</span>
+					</span>
+				</th>
+			</tr>	
+			<tr>
+				<td><input type="text" id="AmmoName4" class="input_u"></td>
+				<td><input type="text" id="AmmoCost4" class="input_u"></td>
+				<td><input type="text" id="AmmoBought4" class="input_b"></td>
+				<td><input type="text" id="AmmoSold4" class="input_b"></td>
+				<td><input type="text" id="AmmoCapacity4" class="input_b" value="20" onchange="ModCapacity(4)"></td>
+				<th class="thinbordered">
+					<span class="nobreak">
+						<span id="AmmoUsed4_1o"><input type="checkbox" id="AmmoUsed4_1"></span>
+						<span id="AmmoUsed4_2o"><input type="checkbox" id="AmmoUsed4_2"></span>
+						<span id="AmmoUsed4_3o"><input type="checkbox" id="AmmoUsed4_3"></span>
+						<span id="AmmoUsed4_4o"><input type="checkbox" id="AmmoUsed4_4"></span>
+						<span id="AmmoUsed4_5o"><input type="checkbox" id="AmmoUsed4_5">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_6o"><input type="checkbox" id="AmmoUsed4_6"></span>
+						<span id="AmmoUsed4_7o"><input type="checkbox" id="AmmoUsed4_7"></span>
+						<span id="AmmoUsed4_8o"><input type="checkbox" id="AmmoUsed4_8"></span>
+						<span id="AmmoUsed4_9o"><input type="checkbox" id="AmmoUsed4_9"></span>
+						<span id="AmmoUsed4_10o"><input type="checkbox" id="AmmoUsed4_10">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_11o"><input type="checkbox" id="AmmoUsed4_11"></span>
+						<span id="AmmoUsed4_12o"><input type="checkbox" id="AmmoUsed4_12"></span>
+						<span id="AmmoUsed4_13o"><input type="checkbox" id="AmmoUsed4_13"></span>
+						<span id="AmmoUsed4_14o"><input type="checkbox" id="AmmoUsed4_14"></span>
+						<span id="AmmoUsed4_15o"><input type="checkbox" id="AmmoUsed4_15">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_16o"><input type="checkbox" id="AmmoUsed4_16"></span>
+						<span id="AmmoUsed4_17o"><input type="checkbox" id="AmmoUsed4_17"></span>
+						<span id="AmmoUsed4_18o"><input type="checkbox" id="AmmoUsed4_18"></span>
+						<span id="AmmoUsed4_19o"><input type="checkbox" id="AmmoUsed4_19"></span>
+						<span id="AmmoUsed4_20o"><input type="checkbox" id="AmmoUsed4_20">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_21o"><input type="checkbox" id="AmmoUsed4_21"></span>
+						<span id="AmmoUsed4_22o"><input type="checkbox" id="AmmoUsed4_22"></span>
+						<span id="AmmoUsed4_23o"><input type="checkbox" id="AmmoUsed4_23"></span>
+						<span id="AmmoUsed4_24o"><input type="checkbox" id="AmmoUsed4_24"></span>
+						<span id="AmmoUsed4_25o"><input type="checkbox" id="AmmoUsed4_25">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_26o"><input type="checkbox" id="AmmoUsed4_26"></span>
+						<span id="AmmoUsed4_27o"><input type="checkbox" id="AmmoUsed4_27"></span>
+						<span id="AmmoUsed4_28o"><input type="checkbox" id="AmmoUsed4_28"></span>
+						<span id="AmmoUsed4_29o"><input type="checkbox" id="AmmoUsed4_29"></span>
+						<span id="AmmoUsed4_30o"><input type="checkbox" id="AmmoUsed4_30">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_31o"><input type="checkbox" id="AmmoUsed4_31"></span>
+						<span id="AmmoUsed4_32o"><input type="checkbox" id="AmmoUsed4_32"></span>
+						<span id="AmmoUsed4_33o"><input type="checkbox" id="AmmoUsed4_33"></span>
+						<span id="AmmoUsed4_34o"><input type="checkbox" id="AmmoUsed4_34"></span>
+						<span id="AmmoUsed4_35o"><input type="checkbox" id="AmmoUsed4_35">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_36o"><input type="checkbox" id="AmmoUsed4_36"></span>
+						<span id="AmmoUsed4_37o"><input type="checkbox" id="AmmoUsed4_37"></span>
+						<span id="AmmoUsed4_38o"><input type="checkbox" id="AmmoUsed4_38"></span>
+						<span id="AmmoUsed4_39o"><input type="checkbox" id="AmmoUsed4_39"></span>
+						<span id="AmmoUsed4_40o"><input type="checkbox" id="AmmoUsed4_40">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_41o"><input type="checkbox" id="AmmoUsed4_41"></span>
+						<span id="AmmoUsed4_42o"><input type="checkbox" id="AmmoUsed4_42"></span>
+						<span id="AmmoUsed4_43o"><input type="checkbox" id="AmmoUsed4_43"></span>
+						<span id="AmmoUsed4_44o"><input type="checkbox" id="AmmoUsed4_44"></span>
+						<span id="AmmoUsed4_45o"><input type="checkbox" id="AmmoUsed4_45">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_46o"><input type="checkbox" id="AmmoUsed4_46"></span>
+						<span id="AmmoUsed4_47o"><input type="checkbox" id="AmmoUsed4_47"></span>
+						<span id="AmmoUsed4_48o"><input type="checkbox" id="AmmoUsed4_48"></span>
+						<span id="AmmoUsed4_49o"><input type="checkbox" id="AmmoUsed4_49"></span>
+						<span id="AmmoUsed4_50o"><input type="checkbox" id="AmmoUsed4_50">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_51o"><input type="checkbox" id="AmmoUsed4_51"></span>
+						<span id="AmmoUsed4_52o"><input type="checkbox" id="AmmoUsed4_52"></span>
+						<span id="AmmoUsed4_53o"><input type="checkbox" id="AmmoUsed4_53"></span>
+						<span id="AmmoUsed4_54o"><input type="checkbox" id="AmmoUsed4_54"></span>
+						<span id="AmmoUsed4_55o"><input type="checkbox" id="AmmoUsed4_55">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_56o"><input type="checkbox" id="AmmoUsed4_56"></span>
+						<span id="AmmoUsed4_57o"><input type="checkbox" id="AmmoUsed4_57"></span>
+						<span id="AmmoUsed4_58o"><input type="checkbox" id="AmmoUsed4_58"></span>
+						<span id="AmmoUsed4_59o"><input type="checkbox" id="AmmoUsed4_59"></span>
+						<span id="AmmoUsed4_60o"><input type="checkbox" id="AmmoUsed4_60">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_61o"><input type="checkbox" id="AmmoUsed4_61"></span>
+						<span id="AmmoUsed4_62o"><input type="checkbox" id="AmmoUsed4_62"></span>
+						<span id="AmmoUsed4_63o"><input type="checkbox" id="AmmoUsed4_63"></span>
+						<span id="AmmoUsed4_64o"><input type="checkbox" id="AmmoUsed4_64"></span>
+						<span id="AmmoUsed4_65o"><input type="checkbox" id="AmmoUsed4_65">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_66o"><input type="checkbox" id="AmmoUsed4_66"></span>
+						<span id="AmmoUsed4_67o"><input type="checkbox" id="AmmoUsed4_67"></span>
+						<span id="AmmoUsed4_68o"><input type="checkbox" id="AmmoUsed4_68"></span>
+						<span id="AmmoUsed4_69o"><input type="checkbox" id="AmmoUsed4_69"></span>
+						<span id="AmmoUsed4_70o"><input type="checkbox" id="AmmoUsed4_70">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_71o"><input type="checkbox" id="AmmoUsed4_71"></span>
+						<span id="AmmoUsed4_72o"><input type="checkbox" id="AmmoUsed4_72"></span>
+						<span id="AmmoUsed4_73o"><input type="checkbox" id="AmmoUsed4_73"></span>
+						<span id="AmmoUsed4_74o"><input type="checkbox" id="AmmoUsed4_74"></span>
+						<span id="AmmoUsed4_75o"><input type="checkbox" id="AmmoUsed4_75">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_76o"><input type="checkbox" id="AmmoUsed4_76"></span>
+						<span id="AmmoUsed4_77o"><input type="checkbox" id="AmmoUsed4_77"></span>
+						<span id="AmmoUsed4_78o"><input type="checkbox" id="AmmoUsed4_78"></span>
+						<span id="AmmoUsed4_79o"><input type="checkbox" id="AmmoUsed4_79"></span>
+						<span id="AmmoUsed4_80o"><input type="checkbox" id="AmmoUsed4_80">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_81o"><input type="checkbox" id="AmmoUsed4_81"></span>
+						<span id="AmmoUsed4_82o"><input type="checkbox" id="AmmoUsed4_82"></span>
+						<span id="AmmoUsed4_83o"><input type="checkbox" id="AmmoUsed4_83"></span>
+						<span id="AmmoUsed4_84o"><input type="checkbox" id="AmmoUsed4_84"></span>
+						<span id="AmmoUsed4_85o"><input type="checkbox" id="AmmoUsed4_85">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_86o"><input type="checkbox" id="AmmoUsed4_86"></span>
+						<span id="AmmoUsed4_87o"><input type="checkbox" id="AmmoUsed4_87"></span>
+						<span id="AmmoUsed4_88o"><input type="checkbox" id="AmmoUsed4_88"></span>
+						<span id="AmmoUsed4_89o"><input type="checkbox" id="AmmoUsed4_89"></span>
+						<span id="AmmoUsed4_90o"><input type="checkbox" id="AmmoUsed4_90">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_91o"><input type="checkbox" id="AmmoUsed4_91"></span>
+						<span id="AmmoUsed4_92o"><input type="checkbox" id="AmmoUsed4_92"></span>
+						<span id="AmmoUsed4_93o"><input type="checkbox" id="AmmoUsed4_93"></span>
+						<span id="AmmoUsed4_94o"><input type="checkbox" id="AmmoUsed4_94"></span>
+						<span id="AmmoUsed4_95o"><input type="checkbox" id="AmmoUsed4_95">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed4_96o"><input type="checkbox" id="AmmoUsed4_96"></span>
+						<span id="AmmoUsed4_97o"><input type="checkbox" id="AmmoUsed4_97"></span>
+						<span id="AmmoUsed4_98o"><input type="checkbox" id="AmmoUsed4_98"></span>
+						<span id="AmmoUsed4_99o"><input type="checkbox" id="AmmoUsed4_99"></span>
+						<span id="AmmoUsed4_100o"><input type="checkbox" id="AmmoUsed4_100">&nbsp;</span>
+					</span>
+				</th>
+			</tr>
+			<tr>
+				<td><input type="text" id="AmmoName5" class="input_u"></td>
+				<td><input type="text" id="AmmoCost5" class="input_u"></td>
+				<td><input type="text" id="AmmoBought5" class="input_b"></td>
+				<td><input type="text" id="AmmoSold5" class="input_b"></td>
+				<td><input type="text" id="AmmoCapacity5" class="input_b" value="20" onchange="ModCapacity(5)"></td>
+				<th class="thinbordered">
+					<span class="nobreak">
+						<span id="AmmoUsed5_1o"><input type="checkbox" id="AmmoUsed5_1"></span>
+						<span id="AmmoUsed5_2o"><input type="checkbox" id="AmmoUsed5_2"></span>
+						<span id="AmmoUsed5_3o"><input type="checkbox" id="AmmoUsed5_3"></span>
+						<span id="AmmoUsed5_4o"><input type="checkbox" id="AmmoUsed5_4"></span>
+						<span id="AmmoUsed5_5o"><input type="checkbox" id="AmmoUsed5_5">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_6o"><input type="checkbox" id="AmmoUsed5_6"></span>
+						<span id="AmmoUsed5_7o"><input type="checkbox" id="AmmoUsed5_7"></span>
+						<span id="AmmoUsed5_8o"><input type="checkbox" id="AmmoUsed5_8"></span>
+						<span id="AmmoUsed5_9o"><input type="checkbox" id="AmmoUsed5_9"></span>
+						<span id="AmmoUsed5_10o"><input type="checkbox" id="AmmoUsed5_10">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_11o"><input type="checkbox" id="AmmoUsed5_11"></span>
+						<span id="AmmoUsed5_12o"><input type="checkbox" id="AmmoUsed5_12"></span>
+						<span id="AmmoUsed5_13o"><input type="checkbox" id="AmmoUsed5_13"></span>
+						<span id="AmmoUsed5_14o"><input type="checkbox" id="AmmoUsed5_14"></span>
+						<span id="AmmoUsed5_15o"><input type="checkbox" id="AmmoUsed5_15">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_16o"><input type="checkbox" id="AmmoUsed5_16"></span>
+						<span id="AmmoUsed5_17o"><input type="checkbox" id="AmmoUsed5_17"></span>
+						<span id="AmmoUsed5_18o"><input type="checkbox" id="AmmoUsed5_18"></span>
+						<span id="AmmoUsed5_19o"><input type="checkbox" id="AmmoUsed5_19"></span>
+						<span id="AmmoUsed5_20o"><input type="checkbox" id="AmmoUsed5_20">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_21o"><input type="checkbox" id="AmmoUsed5_21"></span>
+						<span id="AmmoUsed5_22o"><input type="checkbox" id="AmmoUsed5_22"></span>
+						<span id="AmmoUsed5_23o"><input type="checkbox" id="AmmoUsed5_23"></span>
+						<span id="AmmoUsed5_24o"><input type="checkbox" id="AmmoUsed5_24"></span>
+						<span id="AmmoUsed5_25o"><input type="checkbox" id="AmmoUsed5_25">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_26o"><input type="checkbox" id="AmmoUsed5_26"></span>
+						<span id="AmmoUsed5_27o"><input type="checkbox" id="AmmoUsed5_27"></span>
+						<span id="AmmoUsed5_28o"><input type="checkbox" id="AmmoUsed5_28"></span>
+						<span id="AmmoUsed5_29o"><input type="checkbox" id="AmmoUsed5_29"></span>
+						<span id="AmmoUsed5_30o"><input type="checkbox" id="AmmoUsed5_30">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_31o"><input type="checkbox" id="AmmoUsed5_31"></span>
+						<span id="AmmoUsed5_32o"><input type="checkbox" id="AmmoUsed5_32"></span>
+						<span id="AmmoUsed5_33o"><input type="checkbox" id="AmmoUsed5_33"></span>
+						<span id="AmmoUsed5_34o"><input type="checkbox" id="AmmoUsed5_34"></span>
+						<span id="AmmoUsed5_35o"><input type="checkbox" id="AmmoUsed5_35">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_36o"><input type="checkbox" id="AmmoUsed5_36"></span>
+						<span id="AmmoUsed5_37o"><input type="checkbox" id="AmmoUsed5_37"></span>
+						<span id="AmmoUsed5_38o"><input type="checkbox" id="AmmoUsed5_38"></span>
+						<span id="AmmoUsed5_39o"><input type="checkbox" id="AmmoUsed5_39"></span>
+						<span id="AmmoUsed5_40o"><input type="checkbox" id="AmmoUsed5_40">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_41o"><input type="checkbox" id="AmmoUsed5_41"></span>
+						<span id="AmmoUsed5_42o"><input type="checkbox" id="AmmoUsed5_42"></span>
+						<span id="AmmoUsed5_43o"><input type="checkbox" id="AmmoUsed5_43"></span>
+						<span id="AmmoUsed5_44o"><input type="checkbox" id="AmmoUsed5_44"></span>
+						<span id="AmmoUsed5_45o"><input type="checkbox" id="AmmoUsed5_45">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_46o"><input type="checkbox" id="AmmoUsed5_46"></span>
+						<span id="AmmoUsed5_47o"><input type="checkbox" id="AmmoUsed5_47"></span>
+						<span id="AmmoUsed5_48o"><input type="checkbox" id="AmmoUsed5_48"></span>
+						<span id="AmmoUsed5_49o"><input type="checkbox" id="AmmoUsed5_49"></span>
+						<span id="AmmoUsed5_50o"><input type="checkbox" id="AmmoUsed5_50">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_51o"><input type="checkbox" id="AmmoUsed5_51"></span>
+						<span id="AmmoUsed5_52o"><input type="checkbox" id="AmmoUsed5_52"></span>
+						<span id="AmmoUsed5_53o"><input type="checkbox" id="AmmoUsed5_53"></span>
+						<span id="AmmoUsed5_54o"><input type="checkbox" id="AmmoUsed5_54"></span>
+						<span id="AmmoUsed5_55o"><input type="checkbox" id="AmmoUsed5_55">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_56o"><input type="checkbox" id="AmmoUsed5_56"></span>
+						<span id="AmmoUsed5_57o"><input type="checkbox" id="AmmoUsed5_57"></span>
+						<span id="AmmoUsed5_58o"><input type="checkbox" id="AmmoUsed5_58"></span>
+						<span id="AmmoUsed5_59o"><input type="checkbox" id="AmmoUsed5_59"></span>
+						<span id="AmmoUsed5_60o"><input type="checkbox" id="AmmoUsed5_60">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_61o"><input type="checkbox" id="AmmoUsed5_61"></span>
+						<span id="AmmoUsed5_62o"><input type="checkbox" id="AmmoUsed5_62"></span>
+						<span id="AmmoUsed5_63o"><input type="checkbox" id="AmmoUsed5_63"></span>
+						<span id="AmmoUsed5_64o"><input type="checkbox" id="AmmoUsed5_64"></span>
+						<span id="AmmoUsed5_65o"><input type="checkbox" id="AmmoUsed5_65">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_66o"><input type="checkbox" id="AmmoUsed5_66"></span>
+						<span id="AmmoUsed5_67o"><input type="checkbox" id="AmmoUsed5_67"></span>
+						<span id="AmmoUsed5_68o"><input type="checkbox" id="AmmoUsed5_68"></span>
+						<span id="AmmoUsed5_69o"><input type="checkbox" id="AmmoUsed5_69"></span>
+						<span id="AmmoUsed5_70o"><input type="checkbox" id="AmmoUsed5_70">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_71o"><input type="checkbox" id="AmmoUsed5_71"></span>
+						<span id="AmmoUsed5_72o"><input type="checkbox" id="AmmoUsed5_72"></span>
+						<span id="AmmoUsed5_73o"><input type="checkbox" id="AmmoUsed5_73"></span>
+						<span id="AmmoUsed5_74o"><input type="checkbox" id="AmmoUsed5_74"></span>
+						<span id="AmmoUsed5_75o"><input type="checkbox" id="AmmoUsed5_75">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_76o"><input type="checkbox" id="AmmoUsed5_76"></span>
+						<span id="AmmoUsed5_77o"><input type="checkbox" id="AmmoUsed5_77"></span>
+						<span id="AmmoUsed5_78o"><input type="checkbox" id="AmmoUsed5_78"></span>
+						<span id="AmmoUsed5_79o"><input type="checkbox" id="AmmoUsed5_79"></span>
+						<span id="AmmoUsed5_80o"><input type="checkbox" id="AmmoUsed5_80">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_81o"><input type="checkbox" id="AmmoUsed5_81"></span>
+						<span id="AmmoUsed5_82o"><input type="checkbox" id="AmmoUsed5_82"></span>
+						<span id="AmmoUsed5_83o"><input type="checkbox" id="AmmoUsed5_83"></span>
+						<span id="AmmoUsed5_84o"><input type="checkbox" id="AmmoUsed5_84"></span>
+						<span id="AmmoUsed5_85o"><input type="checkbox" id="AmmoUsed5_85">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_86o"><input type="checkbox" id="AmmoUsed5_86"></span>
+						<span id="AmmoUsed5_87o"><input type="checkbox" id="AmmoUsed5_87"></span>
+						<span id="AmmoUsed5_88o"><input type="checkbox" id="AmmoUsed5_88"></span>
+						<span id="AmmoUsed5_89o"><input type="checkbox" id="AmmoUsed5_89"></span>
+						<span id="AmmoUsed5_90o"><input type="checkbox" id="AmmoUsed5_90">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_91o"><input type="checkbox" id="AmmoUsed5_91"></span>
+						<span id="AmmoUsed5_92o"><input type="checkbox" id="AmmoUsed5_92"></span>
+						<span id="AmmoUsed5_93o"><input type="checkbox" id="AmmoUsed5_93"></span>
+						<span id="AmmoUsed5_94o"><input type="checkbox" id="AmmoUsed5_94"></span>
+						<span id="AmmoUsed5_95o"><input type="checkbox" id="AmmoUsed5_95">&nbsp;</span>
+					</span>
+
+					<span class="nobreak">
+						<span id="AmmoUsed5_96o"><input type="checkbox" id="AmmoUsed5_96"></span>
+						<span id="AmmoUsed5_97o"><input type="checkbox" id="AmmoUsed5_97"></span>
+						<span id="AmmoUsed5_98o"><input type="checkbox" id="AmmoUsed5_98"></span>
+						<span id="AmmoUsed5_99o"><input type="checkbox" id="AmmoUsed5_99"></span>
+						<span id="AmmoUsed5_100o"><input type="checkbox" id="AmmoUsed5_100">&nbsp;</span>
+					</span>
+				</th>
+		</table>
+		{%endwith%}
+		<h3>Community Use Policy</h3><br>This character sheet uses trademarks and/or copyrights owned by Paizo Inc., which are used under Paizo's Community Use Policy. We are expressly prohibited from charging you to use or access this content. This character sheet is not published, endorsed, or specifically approved by Paizo Inc. For more information about Paizo's Community Use Policy, please visit <a href="http://paizo.com/paizo/about/communityuse">paizo.com/communityuse</a>. For more information about Paizo Inc. and Paizo products, please visit <a href="http://paizo.com/">paizo.com</a>.
+	<script>AttachListeners()</script>
+	<script>ModCapacity(1)</script>
+	<script>ModCapacity(2)</script>
+	<script>ModCapacity(3)</script>
+	<script>ModCapacity(4)</script>
+	<script>ModCapacity(5)</script>
+	</body>
+</html>
+

@@ -1,0 +1,32 @@
+{%load custom_filters%}
+
+{{ hero_lab_data }}
+
+<br>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <td>{{hero_lab_data.name}}</td>
+    </tr>
+    <tr>
+        <th>Level</th>
+        <td>{{hero_lab_data.gameValues.actLevelNet}}</td>
+    </tr>
+    <tr>
+        <th>XP</th>
+        <td>{{hero_lab_data.gameValues.actXPNet}}</td>
+    </tr>
+    <tr>
+        <th>Speed</th>
+        <td>
+            {% with speed=hero_lab_data.items|get_json_value:'mvSpeed.128' %}
+                {{speed.stNet}}
+            {% endwith %}
+        </td>
+    </tr>
+    <tr>
+        <th>strength</th>
+        <td>{{strength.stNet}}</td>
+    </tr>
+</table>

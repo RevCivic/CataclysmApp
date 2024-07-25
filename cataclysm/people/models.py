@@ -4,7 +4,8 @@ from django.db import models
 class Person(models.Model):
     name = models.CharField(max_length=50)
     age = models.IntegerField()
-    species = models.ForeignKey('species.Species', on_delete=models.CASCADE)
+    sex = models.CharField(max_length=50, default='None')
+    species = models.ForeignKey('species.Species', on_delete=models.CASCADE, blank=True, null=True)
     faction = models.ForeignKey('factions.Faction', on_delete=models.SET_NULL, blank=True, null=True)
     rank = models.CharField(max_length=50, blank=True)
     position = models.CharField(max_length=50, blank=True)
@@ -14,6 +15,20 @@ class Person(models.Model):
     image = models.ImageField(upload_to='people/images', blank=True)
     stats = models.ForeignKey('Statset', on_delete=models.SET_NULL, blank=True, null=True)
     skills = models.ForeignKey('Skillset', on_delete=models.SET_NULL, blank=True, null=True)
+    tactician = models.BooleanField(default=False)
+    medical = models.BooleanField(default=False)
+    scientist = models.BooleanField(default=False)
+    engineer = models.BooleanField(default=False)
+    strong = models.BooleanField(default=False)
+    tough = models.BooleanField(default=False)
+    agile = models.BooleanField(default=False)
+    stealthy = models.BooleanField(default=False)
+    cybernetic = models.BooleanField(default=False)
+    leader = models.BooleanField(default=False)
+    genius = models.BooleanField(default=False)
+    psychic = models.BooleanField(default=False)
+    flier = models.BooleanField(default=False)
+    mutant = models.BooleanField(default=False)
     location = models.CharField(max_length=50, blank=True)
     hidden = models.BooleanField(default=False)
 
@@ -61,3 +76,17 @@ class Skillset(models.Model):
             return f'Skills for {self.linked_person.name}'
         else:
             return 'Unlinked Skills'
+        
+class Character(models.Model):
+    name = models.CharField(max_length=50)
+    age = models.IntegerField()
+    species = models.ForeignKey('species.Species', on_delete=models.CASCADE)
+    alignment = models.CharField(max_length=50)
+    deity = models.CharField(max_length=50)
+    gender = models.CharField(max_length=50)
+    bio = models.TextField(blank=True)
+    image = models.ImageField(upload_to='people/images', blank=True)
+    hero_lab_json = models.JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
