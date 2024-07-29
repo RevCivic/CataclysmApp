@@ -19,7 +19,7 @@ def species_page(request, id):
     }
     return render(request, 'species.html', context)
 
-def add_species(request):
+def add(request):
     if request.method == 'POST':
         form = SpeciesForm(request.POST)
         if form.is_valid():

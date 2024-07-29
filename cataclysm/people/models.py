@@ -12,7 +12,7 @@ class Person(models.Model):
     weapons = models.ManyToManyField('weapons.Weapon', blank=True)
     armors = models.ManyToManyField('armor.Armor', blank=True)
     bio = models.TextField(blank=True)
-    image = models.ImageField(upload_to='people/images', blank=True)
+    image = models.ImageField(upload_to='people/images/', blank=True)
     stats = models.ForeignKey('Statset', on_delete=models.SET_NULL, blank=True, null=True)
     skills = models.ForeignKey('Skillset', on_delete=models.SET_NULL, blank=True, null=True)
     tactician = models.BooleanField(default=False)
@@ -30,6 +30,7 @@ class Person(models.Model):
     flier = models.BooleanField(default=False)
     mutant = models.BooleanField(default=False)
     location = models.CharField(max_length=50, blank=True)
+    additional_images = models.ManyToManyField('PersonImage', blank=True)
     hidden = models.BooleanField(default=False)
 
     def __str__(self):
@@ -77,16 +78,14 @@ class Skillset(models.Model):
         else:
             return 'Unlinked Skills'
         
-class Character(models.Model):
-    name = models.CharField(max_length=50)
-    age = models.IntegerField()
-    species = models.ForeignKey('species.Species', on_delete=models.CASCADE)
-    alignment = models.CharField(max_length=50)
-    deity = models.CharField(max_length=50)
-    gender = models.CharField(max_length=50)
-    bio = models.TextField(blank=True)
-    image = models.ImageField(upload_to='people/images', blank=True)
-    hero_lab_json = models.JSONField(blank=True, null=True)
+
+class PersonImage(models.Model):
+    linked_person = models.ForeignKey('Person', on_delete=models.CASCADE, blank=True, null=True)
+    additional_image = models.ImageField(upload_to='people/images/additional_images/', blank=True)
+    description = models.TextField(blank=True)
+
+    def person_name(self):
+        return self.linked_person.name
 
     def __str__(self):
-        return self.name
+        return f'Image for {self.linked_person.name}'
