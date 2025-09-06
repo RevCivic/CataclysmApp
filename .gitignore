@@ -1,2 +1,8 @@
 cataclysm/cataclysm/management/commands/Client_Secret.json
 cataclysm/token.json
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+
+# Ignore SQLite database
+db.sqlite3
