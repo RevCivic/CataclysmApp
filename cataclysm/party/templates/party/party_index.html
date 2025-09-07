@@ -1,0 +1,63 @@
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+
+{% block content %}
+    <h1 class="app_name">Party Index</h1>
+    <h2 class="index_menu"><a href="{% url 'add_party' %}">Add a Party</a></h2>
+
+    <table class="sci-fi-list">
+        <thead>
+            <tr>
+                <th class="center"><a href="?order_by=id">ID</a></th>
+                <th class="center"><a href="?order_by=name">Name</a></th>
+                <th class="center"><a href="?order_by=type">Type</a></th>
+                <th class="center"><a href="?order_by=leader">Leader</a></th>
+                <th class="center"><a href="?order_by=faction">Faction</a></th>
+                <th class="center"><a href="?order_by=location">Location</a></th>
+                <th class="center"><a href="?order_by=purpose">Purpose</a></th>
+                <th class="center">Members</th>
+                <th class="crew-image">Picture</th>
+                {% if request.user|has_group:'admins' %}
+                    <th><a href="?order_by=hidden">Hidden</a></th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for party in party_list %}
+                {% if not party.hidden %}
+                    <tr>
+                        <td><a href="{% url 'party_page' party.id %}">{{ party.id }}</a></td>
+                        <td>{{ party.name }}</td>
+                        <td>{{ party.type }}</td>
+                        <td>{{ party.leader }}</td>
+                        <td>{{ party.faction }}</td>
+                        <td>{{ party.location }}</td>
+                        <td>{{ party.purpose }}</td>
+                        <td>
+                            <ul>
+                                {% for member in party.members.all %}
+                                    <li>{{ member.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        {% if party.image %}
+                            <td>
+                                <img src="{{ party.image.url }}" alt="{{ party.name }}" class="crew_list_image"></img>
+                            </td>
+                        {% else %}
+                            <td>No image available</td>
+                        {% endif %}
+                        {% if request.user|has_group:'admins' %}
+                            <td>{{ party.hidden }}</td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <td colspan="3">No parties found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -14,7 +14,9 @@ urlpatterns = [
     path('species/', include("species.urls")),
     path('weapons/', include("weapons.urls")),
     path('worlds/', include("worlds.urls")),
+    path('party/', include("party.urls")),
     path('adminflow/', include("adminflow.urls")),
+    path('mindmaps/', include("mindmaps.urls")),
 ]
 
 if settings.DEBUG:

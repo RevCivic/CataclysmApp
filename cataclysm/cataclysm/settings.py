@@ -40,16 +40,23 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cataclysm',
     'mathfilters',
+    'crispy_forms',
+    'crispy_bootstrap4',
     'adminflow',
     'armor',
     'events',
     'factions',
     'landing',
     'people',
+    'party',
+    'mindmaps',
     'species',
     'weapons',
     'worlds',
 ]
+
+# Crispy Forms settings
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

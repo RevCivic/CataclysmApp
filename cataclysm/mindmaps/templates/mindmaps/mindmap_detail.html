@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ mindmap.title }}</h1>
+<p>{{ mindmap.description }}</p>
+<p>Created: {{ mindmap.created_at }} | Updated: {{ mindmap.updated_at }}</p>
+<a href="{% url 'mindmap_edit' mindmap.pk %}" class="btn btn-secondary">Edit Mind Map</a>
+<h2>Nodes</h2>
+<ul>
+  {% for node in mindmap.nodes.all %}
+    <li>{{ node.label }} {% if node.parent %}(Parent: {{ node.parent.label }}){% endif %} <a href="{% url 'mindmapnode_edit' node.pk %}">Edit</a></li>
+  {% empty %}
+    <li>No nodes yet.</li>
+  {% endfor %}
+</ul>
+<a href="{% url 'mindmapnode_add' %}" class="btn btn-primary">Add Node</a>
+{% endblock %}

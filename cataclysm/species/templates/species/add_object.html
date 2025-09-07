@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="species-form-container" style="max-width: 80%; width: 80%; margin: 2vw auto; background: rgba(20,30,50,0.97); border-radius: 1.2em; box-shadow: 0 0 32px #0ff, 0 0 12px #09f inset; padding: 2.5em 2vw 2em 2vw; color: #fff; font-family: 'Orbitron', 'Segoe UI', Arial, sans-serif; border: 2.5px solid #00f0ff;">
+    <h1 style="text-align:center; letter-spacing: 0.12em; color: #0ff; text-shadow: 0 0 10px #0ff, 0 0 2px #fff; font-size:2.2rem;">Add New Species</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="sci-fi-form-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5em 3em; align-items: start;">
+            <div class="sci-fi-form-section" style="grid-column: 1;">
+                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">General</h4>
+                {{ form.name|as_crispy_field }}
+                {{ form.home_world|as_crispy_field }}
+                {{ form.society|as_crispy_field }}
+                {{ form.accord_status|as_crispy_field }}
+                {{ form.size|as_crispy_field }}
+                {{ form.type|as_crispy_field }}
+                {{ form.air|as_crispy_field }}
+                {{ form.gravity|as_crispy_field }}
+            </div>
+            <div class="sci-fi-form-section" style="grid-column: 2;">
+                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Biology & Society</h4>
+                {{ form.background|as_crispy_field }}
+                {{ form.sociology|as_crispy_field }}
+                {{ form.physiology|as_crispy_field }}
+                {{ form.racial_traits|as_crispy_field }}
+                {{ form.reproduction_method|as_crispy_field }}
+                {{ form.hours_of_sleep|as_crispy_field }}
+                {{ form.days_without_food|as_crispy_field }}
+                {{ form.days_without_water|as_crispy_field }}
+                {{ form.locomotion_method|as_crispy_field }}
+            </div>
+            <div class="sci-fi-form-section" style="grid-column: 3;">
+                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Abilities & Traits</h4>
+                {{ form.strength_rating|as_crispy_field }}
+                {{ form.toughness_rating|as_crispy_field }}
+                {{ form.speed_rating|as_crispy_field }}
+                {{ form.intelligence_rating|as_crispy_field }}
+                {{ form.natural_weapons|as_crispy_field }}
+                {{ form.natural_armor|as_crispy_field }}
+                {{ form.can_fly|as_crispy_field }}
+                {{ form.aquatic|as_crispy_field }}
+                {{ form.amphibious|as_crispy_field }}
+                {{ form.telepathic|as_crispy_field }}
+                {{ form.psionic|as_crispy_field }}
+                {{ form.special_abilities|as_crispy_field }}
+                {{ form.image|as_crispy_field }}
+                {{ form.hidden|as_crispy_field }}
+            </div>
+        </div>
+        <div style="text-align:center; margin-top: 2.5em;">
+            <button type="submit" class="btn btn-primary" style="background: linear-gradient(90deg, #0ff 0%, #09f 100%); border: none; color: #222; font-weight: bold; font-size: 1.2em; padding: 0.5em 2em; border-radius: 0.5em; box-shadow: 0 0 12px #0ff; transition: background 0.3s;">Engage</button>
+        </div>
+    </form>
+    <p style="text-align:center; margin-top:2em; color:#0ff; font-size:1.1em; letter-spacing:0.05em;">"To boldly go where no species has gone before..."</p>
+</div>
+<style>
+    .species-form-container input, .species-form-container select, .species-form-container textarea {
+        background: rgba(10,20,40,0.85);
+        color: #0ff;
+        border: 1.5px solid #0ff;
+        border-radius: 0.35em;
+        margin-bottom: 0.7em;
+        font-family: 'Orbitron', 'Segoe UI', Arial, sans-serif;
+        box-shadow: 0 0 6px #0ff44 inset;
+        font-size: 1em;
+    }
+    .species-form-container label {
+        color: #fff;
+        font-weight: bold;
+        letter-spacing: 0.06em;
+        text-shadow: 0 0 2px #0ff;
+    }
+    .species-form-container .btn-primary:hover {
+        background: linear-gradient(90deg, #09f 0%, #0ff 100%);
+        color: #fff;
+        box-shadow: 0 0 18px #0ff;
+    }
+    .sci-fi-form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2.5em 3em;
+        align-items: start;
+    }
+    .sci-fi-form-section h4 {
+        margin-top: 0;
+        margin-bottom: 0.7em;
+        color: #00f0ff;
+        font-size: 1.1rem;
+        letter-spacing: 0.04em;
+        text-shadow: 0 0 4px #00f0ff99;
+    }
+</style>
+{% endblock %}
