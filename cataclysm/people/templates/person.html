@@ -61,36 +61,20 @@
     <div>
         <table class="sci-fi-list">
             <tr>
-                <th class="boolean">Agile</th>
-                <th class="boolean">Cybernetic</th>
-                <th class="boolean">Engineer</th>
-                <th class="boolean">Flier</th>
-                <th class="boolean">Genius</th>
-                <th class="boolean">Leader</th>
-                <th class="boolean">Medical</th>
-                <th class="boolean">Mutant</th>
-                <th class="boolean">Psychic</th>
-                <th class="boolean">Scientist</th>
-                <th class="boolean">Stealthy</th>
-                <th class="boolean">Strong</th>
-                <th class="boolean">Tactician</th>
-                <th class="boolean">Tough</th>
+                {% for trait in traits %}
+                    <th class="boolean">{{ trait.name }}</th>
+                {% endfor %}
             </tr>
             <tr>
-                <td style="background-color: {% if current_person.agile %}darkgreen{% endif %}">{{ current_person.agile }}</td>
-                <td style="background-color: {% if current_person.cybernetic %}darkgreen{% endif %}">{{ current_person.cybernetic }}</td>
-                <td style="background-color: {% if current_person.engineer %}darkgreen{% endif %}">{{ current_person.engineer }}</td>
-                <td style="background-color: {% if current_person.flier %}darkgreen{% endif %}">{{ current_person.flier }}</td>
-                <td style="background-color: {% if current_person.genius %}darkgreen{% endif %}">{{ current_person.genius }}</td>
-                <td style="background-color: {% if current_person.leader %}darkgreen{% endif %}">{{ current_person.leader }}</td>
-                <td style="background-color: {% if current_person.medical %}darkgreen{% endif %}">{{ current_person.medical }}</td>
-                <td style="background-color: {% if current_person.mutant %}darkgreen{% endif %}">{{ current_person.mutant }}</td>
-                <td style="background-color: {% if current_person.psychic %}darkgreen{% endif %}">{{ current_person.psychic }}</td>
-                <td style="background-color: {% if current_person.scientist %}darkgreen{% endif %}">{{ current_person.scientist }}</td>
-                <td style="background-color: {% if current_person.stealthy %}darkgreen{% endif %}">{{ current_person.stealthy }}</td>
-                <td style="background-color: {% if current_person.strong %}darkgreen{% endif %}">{{ current_person.strong }}</td>
-                <td style="background-color: {% if current_person.tactician %}darkgreen{% endif %}">{{ current_person.tactician }}</td>
-                <td style="background-color: {% if current_person.tough %}darkgreen{% endif %}">{{ current_person.tough }}</td>
+                {% for trait in traits %}
+                    <td class="boolean {{ trait.name|slugify }}">
+                        {% if trait in current_person.traits.all %}
+                            <span class="green-checkmark">&#10004;</span>
+                        {% else %}
+                            <span class="gray-x">&#10006;</span>
+                        {% endif %}
+                    </td>
+                {% endfor %}
             </tr>
         </table>
     </div>

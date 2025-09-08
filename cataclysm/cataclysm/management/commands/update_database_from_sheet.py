@@ -11,7 +11,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from django.core.management.base import BaseCommand
-from people.models import Person
+from people.models import Person, Trait
 
 
 # If modifying these scopes, delete the file token.json.
@@ -62,6 +62,22 @@ def main():
       return
 
     print("Name, Major:")
+    trait_columns = {
+      4: 'Tactician',
+      5: 'Medical',
+      6: 'Scientist',
+      7: 'Engineer',
+      8: 'Strong',
+      9: 'Tough',
+      10: 'Agile',
+      11: 'Stealthy',
+      12: 'Cybernetic',
+      13: 'Leader',
+      14: 'Genius',
+      15: 'Psychic',
+      16: 'Flier',
+      17: 'Mutant',
+    }
     for row in values:
       # Print columns A and E, which correspond to indices 0 and 4.
       print(f"{row[0]}, {row[4]}")
@@ -69,24 +85,14 @@ def main():
         name=row[0],
         age=row[2] if row[2].isdigit() else 1,
         sex=row[3],
-        tactician=bool(row[4]),
-        medical=bool(row[5]),
-        scientist=bool(row[6]),
-        engineer=bool(row[7]),
-        strong=bool(row[8]),
-        tough=bool(row[9]),
-        agile=bool(row[10]),
-        stealthy=bool(row[11]),
-        cybernetic=bool(row[12]),
-        leader=bool(row[13]),
-        genius=bool(row[14]),
-        psychic=bool(row[15]),
-        flier=bool(row[16]),
-        mutant=bool(row[17]),
         rank=row[18],
         position=row[19],
         hidden=False
       )
+      for index, trait_name in trait_columns.items():
+        if index < len(row) and bool(row[index]):
+          trait, _ = Trait.objects.get_or_create(name=trait_name)
+          person.traits.add(trait)
       person.save()
   except HttpError as err:
     print(err)
@@ -97,3 +103,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         main()
         pass
+
