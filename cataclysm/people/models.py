@@ -1,5 +1,13 @@
 from django.db import models
 
+
+class Trait(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 # Create your models here.
 class Person(models.Model):
     name = models.CharField(max_length=50)
@@ -15,20 +23,7 @@ class Person(models.Model):
     image = models.ImageField(upload_to='people/images/', blank=True)
     stats = models.ForeignKey('Statset', on_delete=models.SET_NULL, blank=True, null=True)
     skills = models.ForeignKey('Skillset', on_delete=models.SET_NULL, blank=True, null=True)
-    tactician = models.BooleanField(default=False)
-    medical = models.BooleanField(default=False)
-    scientist = models.BooleanField(default=False)
-    engineer = models.BooleanField(default=False)
-    strong = models.BooleanField(default=False)
-    tough = models.BooleanField(default=False)
-    agile = models.BooleanField(default=False)
-    stealthy = models.BooleanField(default=False)
-    cybernetic = models.BooleanField(default=False)
-    leader = models.BooleanField(default=False)
-    genius = models.BooleanField(default=False)
-    psychic = models.BooleanField(default=False)
-    flier = models.BooleanField(default=False)
-    mutant = models.BooleanField(default=False)
+    traits = models.ManyToManyField('Trait', blank=True)
     location = models.CharField(max_length=50, blank=True)
     additional_images = models.ManyToManyField('PersonImage', blank=True)
     hidden = models.BooleanField(default=False)
