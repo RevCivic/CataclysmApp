@@ -1,5 +1,3 @@
-from django.http import HttpResponse
+from cataclysm.view_helpers import make_index_view
 
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the worlds index.")
+index = make_index_view("worlds")
