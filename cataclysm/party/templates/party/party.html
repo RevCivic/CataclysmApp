@@ -1,0 +1,96 @@
+{% include 'navbar.html' %}
+{% load mathfilters %}
+{% load group_check %}
+
+{% block content %}
+<h1 class="app_name">{{ current_party.name }}</h1>
+<h2 class="index_menu"><a href="{% url 'edit_party' current_party.id%}">Edit {{current_party.name}}</a></h2>
+	<div style="width: 100%;">
+		<table class="sci-fi-list">
+			<tr style="vertical-align: top;">
+				<td rowspan="3" style="vertical-align: middle; width: 250px;">
+					{%if current_party.image %}
+						<center><img src="{{current_party.image.url}}" class="crew_image"></center>
+					{% endif %}
+				</td>
+				<td colspan="3">
+					<table style="vertical-align: top; width: 100%;">
+						<th colspan="2" style="text-align: center;">Basic Info</th>
+						<tr>
+							<th>Name</th>
+							<td>{{ current_party.name }}</td>
+						</tr>
+						<tr>
+							<th>Type</th>
+							<td>{{ current_party.type }}</td>
+						</tr>
+						<tr>
+							<th>Leader</th>
+							<td>{{ current_party.leader }}</td>
+						</tr>
+						<tr>
+							<th>Members</th>
+							<td>{{ current_party.members.count }}</td>
+						</tr>
+					</table>
+				</td>
+				<td colspan="2">
+					<table style="vertical-align: top; width: 100%;">
+						<th colspan="2" style="text-align: center;">Details</th>
+						<tr>
+							<th>Faction</th>
+							<td>{{ current_party.faction }}</td>
+						</tr>
+						<tr>
+							<th>Location</th>
+							<td>{{ current_party.location }}</td>
+						</tr>
+						<tr>
+							<th>Purpose</th>
+							<td>{{ current_party.purpose }}</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div>
+		<table class="sci-fi-list">
+			<tr>
+				<th>Members</th>
+			</tr>
+			<tr>
+				<td>
+					<ul>
+						{% for member in current_party.members.all %}
+							<li>{{ member.name }}</li>
+						{% endfor %}
+					</ul>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div>
+		<table class="sci-fi-list">
+			<tr>
+				<th><a href="{% url 'add_party_images' current_party.id%}"> Add Images</a></th>
+			</tr>
+			{% if current_party.additional_images.count > 0 %}
+				<tr>
+					<th colspan="2" style="text-align: center;">Additional Images</th>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<table>
+						   <tr>
+							{% for image in current_party.additional_images.all %}
+								<td><img src="{{ image.additional_image.url }}" class="crew_list_additional_images"></td>
+							{% endfor %}
+						   </tr>
+						</table>
+					</td>
+				</tr>
+			{% endif %}
+		</table>
+	</div>
+{% endblock %}

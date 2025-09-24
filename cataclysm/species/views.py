@@ -28,7 +28,7 @@ def add(request):
     else:
         form = SpeciesForm()
 
-    return render(request, 'add_object.html', {'form': form})
+    return render(request, 'species/add_object.html', {'form': form})
 
 def edit_species(request, id):
     species = Species.objects.get(id=id)
@@ -40,4 +40,4 @@ def edit_species(request, id):
     else:
         form = SpeciesForm(instance=species)
 
-    return render(request, 'add_object.html', {'form': form})
+    return render(request, 'species/add_object.html', {'form': form})
