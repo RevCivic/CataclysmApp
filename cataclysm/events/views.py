@@ -1,3 +1,3 @@
-from cataclysm.view_helpers import make_index_view
+from cataclysm.cataclysm.views import StaticIndexView
 
-index = make_index_view("events")
+index = StaticIndexView.as_view(app_label="events")
