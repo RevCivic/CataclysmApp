@@ -1,5 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Welcome to the Armor Page</h1>
-<p>This is a placeholder template for the armor app.</p>
+<link rel="stylesheet" href="/static/css/sci-fi-form.css">
+<div class="container" style="margin-top:20px;">
+  <div class="list-header index_menu">
+    <h1 class="app_name">Armor</h1>
+    <a class="btn btn-primary" href="{% url 'armor:add' %}">Add Armor</a>
+  </div>
+  <table class="sci-fi-list" style="margin-top:12px; width:100%;">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Base AC</th>
+        <th>Max Dex</th>
+        <th>AC Penalty</th>
+        <th>Speed Penalty</th>
+        <th>Weight</th>
+        <th>Hidden</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for obj in object_list %}
+      <tr>
+        <td>{{ obj.name }}</td>
+        <td>{{ obj.armor_type|default:'' }}</td>
+        <td>{{ obj.base_armor_class|default:'-' }}</td>
+        <td>{{ obj.max_dexterity_bonus|default:'-' }}</td>
+        <td>{{ obj.armor_check_penalty|default:'-' }}</td>
+        <td>{{ obj.speed_penalty|default:'-' }}</td>
+        <td>{{ obj.weight|default:'-' }}</td>
+        <td>{{ obj.hidden }}</td>
+        <td><a href="{% url 'armor:detail' obj.pk %}">View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9">No armor found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

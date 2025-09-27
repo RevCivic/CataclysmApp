@@ -1,5 +1,3 @@
-from django.http import HttpResponse
+from cataclysm.cataclysm.views import StaticIndexView
 
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the armor index.")
+index = StaticIndexView.as_view(app_label="armor")

@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.http import HttpResponse  # Import HttpResponse class
 from people.forms import PersonForm, PersonImageForm
-from people.models import Person, Trait
+from people.models import Person, Skillset
 
 
 def index(request):
@@ -34,7 +34,18 @@ def add_person(request):
     else:
         form = PersonForm()
 
-    return render(request, 'add_object.html', {'form': form})
+    # Build a flat list of skill name/value pairs from all Skillset objects
+    skill_fields = [
+        'athletics', 'acrobatics', 'bluff', 'computers', 'culture', 'disguise', 'engineering',
+        'intimidate', 'medicine', 'perception', 'piloting', 'sense_motive', 'life_science',
+        'physical_science', 'slight_of_hand', 'survival', 'stealth', 'diplomacy'
+    ]
+    skills = []
+    for skillset in Skillset.objects.all():
+        for field in skill_fields:
+            value = getattr(skillset, field, None)
+            skills.append({'id': f'{skillset.id}_{field}', 'name': field.replace('_', ' ').title(), 'value': value})
+    return render(request, 'add_object.html', {'form': form, 'skills': skills})
 
 def edit_person(request, id):
     person = Person.objects.get(id=id)
@@ -46,7 +57,17 @@ def edit_person(request, id):
     else:
         form = PersonForm(instance=person)
 
-    return render(request, 'add_object.html', {'form': form})
+    skill_fields = [
+        'athletics', 'acrobatics', 'bluff', 'computers', 'culture', 'disguise', 'engineering',
+        'intimidate', 'medicine', 'perception', 'piloting', 'sense_motive', 'life_science',
+        'physical_science', 'slight_of_hand', 'survival', 'stealth', 'diplomacy'
+    ]
+    skills = []
+    for skillset in Skillset.objects.all():
+        for field in skill_fields:
+            value = getattr(skillset, field, None)
+            skills.append({'id': f'{skillset.id}_{field}', 'name': field.replace('_', ' ').title(), 'value': value})
+    return render(request, 'add_object.html', {'form': form, 'skills': skills})
 
 def delete_person(request, id):
     person = Person.objects.get(id=id)
@@ -63,4 +84,5 @@ def add_images(request, id):
     else:
         form = PersonImageForm(initial={'linked_person': person})
 
-    return render(request, 'add_object.html', {'form': form})
+    # Always pass skills, even if empty
+    return render(request, 'add_object.html', {'form': form, 'skills': []})

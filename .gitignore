@@ -11,3 +11,5 @@ db.sqlite3
 cataclysm/adminflow/__pycache__/__init__.cpython-312.pyc
 cataclysm/adminflow/__pycache__/admin.cpython-312.pyc
 
+cataclysm/cataclysm/management/commands/Client_Secret_1.json
+cataclysm/cataclysm/secrets/service_account.json

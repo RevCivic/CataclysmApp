@@ -1,0 +1,66 @@
+/* Sci-Fi Form Styles - reusable for all forms */
+.sci-fi-form-container {
+    max-width: 80%;
+    width: 80%;
+    margin: 2vw auto;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: 1.2em;
+    box-shadow: none;
+    padding: 2.5em 2vw 2em 2vw;
+    color: var(--lcars-text, #fff);
+    font-family: 'Orbitron', 'Segoe UI', Arial, sans-serif;
+    border: 2.5px solid var(--lcars-panel, #00f0ff);
+}
+.sci-fi-form-container h1 {
+    text-align:center;
+    letter-spacing: 0.12em;
+    color: var(--lcars-accent-2, #0ff);
+    text-shadow: 0 0 10px rgba(0,200,255,0.15), 0 0 2px rgba(255,255,255,0.02);
+    font-size:2.2rem;
+}
+.sci-fi-form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5em 3em;
+    align-items: start;
+}
+.sci-fi-form-section h4 {
+    margin-top: 0;
+    margin-bottom: 0.7em;
+    color: var(--lcars-panel, #00f0ff);
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+}
+.sci-fi-form-container input,
+.sci-fi-form-container select,
+.sci-fi-form-container textarea {
+    background: rgba(10,10,10,0.6);
+    color: var(--lcars-text, #0ff);
+    border: 1.5px solid var(--lcars-accent-2, #0ff);
+    border-radius: 0.35em;
+    margin-bottom: 0.7em;
+    font-family: 'Orbitron', 'Segoe UI', Arial, sans-serif;
+    box-shadow: inset 0 0 6px rgba(0,200,255,0.06);
+    font-size: 1em;
+}
+.sci-fi-form-container label {
+    color: var(--lcars-text, #fff);
+    font-weight: bold;
+    letter-spacing: 0.06em;
+}
+.sci-fi-form-container .btn-primary {
+    background: linear-gradient(90deg, var(--lcars-accent-2, #0ff) 0%, #0077aa 100%);
+    border: none;
+    color: #001116;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: 0.5em 2em;
+    border-radius: 0.5em;
+    box-shadow: 0 0 8px rgba(0,200,255,0.12);
+    transition: background 0.3s;
+}
+.sci-fi-form-container .btn-primary:hover {
+    background: linear-gradient(90deg, #0077aa 0%, var(--lcars-accent-2, #0ff) 100%);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(0,200,255,0.18);
+}

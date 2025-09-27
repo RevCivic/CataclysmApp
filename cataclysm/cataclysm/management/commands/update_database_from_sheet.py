@@ -4,14 +4,20 @@
 #RANGE_NAME = 'Main Crew!A3:Z'  # Adjust the range according to your needs
 
 import os.path
-
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 from django.core.management.base import BaseCommand
-from people.models import Person, Trait
+from googleapiclient.errors import HttpError
+from people.models import Person
+
+# local helper: try importing from the inner package first (works when using either manage.py)
+try:
+  from cataclysm.utils.google_sheets import read_sheet_data, get_google_sheets_service, get_service_account_email, get_spreadsheet_meta
+except Exception:
+  # fallback to outer package layout if available
+  try:
+    from ..utils.google_sheets import read_sheet_data, get_google_sheets_service, get_service_account_email, get_spreadsheet_meta  # type: ignore
+  except Exception:
+    # re-raise a clear import error for troubleshooting
+    raise
 
 
 # If modifying these scopes, delete the file token.json.
@@ -23,84 +29,91 @@ SAMPLE_RANGE_NAME = "Other Crew!A5:Z"
 
 
 def main():
-  """Shows basic usage of the Sheets API.
-  Prints values from a sample spreadsheet.
+  """Read the sheet and create Person objects for each row.
+
+  This function uses the service-account helper found in
+  `cataclysm.utils.google_sheets`. The service-account JSON path can be
+  configured via the SERVICE_ACCOUNT_FILE environment variable or placed at
+  <BASE_DIR>/cataclysm/secrets/service_account.json.
   """
-  creds = None
-  # The file token.json stores the user's access and refresh tokens, and is
-  # created automatically when the authorization flow completes for the first
-  # time.
-  if os.path.exists("token.json"):
-    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-  # If there are no (valid) credentials available, let the user log in.
-  if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-      creds.refresh(Request())
-    else:
-      flow = InstalledAppFlow.from_client_secrets_file(
-          "C:\\Users\\mjsha\\OneDrive\\Documents\\GitHub\\CataclysmApp\\cataclysm\\cataclysm\\management\\commands\\Client_Secret.json", SCOPES
-      )
-      creds = flow.run_local_server(port=0)
-    # Save the credentials for the next run
-    with open("token.json", "w") as token:
-      token.write(creds.to_json())
-
   try:
-    service = build("sheets", "v4", credentials=creds)
+    values = read_sheet_data(SAMPLE_SPREADSHEET_ID, SAMPLE_RANGE_NAME)
+    if values is None:
+      print("Failed to read sheet data. Checking service account and sheet access...")
+      sa_email = get_service_account_email()
+      if sa_email:
+        print(f"Service account client_email: {sa_email}")
+        print("Make sure you shared the Google Sheet with that email address.")
+      else:
+        print("Could not read service account email from key file. Verify SERVICE_ACCOUNT_FILE path.")
 
-    # Call the Sheets API
-    sheet = service.spreadsheets()
-    result = (
-        sheet.values()
-        .get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=SAMPLE_RANGE_NAME)
-        .execute()
-    )
-    values = result.get("values", [])
-
-    if not values:
-      print("No data found.")
+      # Try to fetch spreadsheet metadata to produce a clearer error
+      meta = get_spreadsheet_meta(SAMPLE_SPREADSHEET_ID)
+      if isinstance(meta, tuple) and meta[0] is False:
+        print(f"Spreadsheet metadata error: {meta[1]}")
+      else:
+        print("Spreadsheet metadata fetched (unexpected) — check returned metadata and permissions.")
       return
 
-    print("Name, Major:")
-    trait_columns = {
-      4: 'Tactician',
-      5: 'Medical',
-      6: 'Scientist',
-      7: 'Engineer',
-      8: 'Strong',
-      9: 'Tough',
-      10: 'Agile',
-      11: 'Stealthy',
-      12: 'Cybernetic',
-      13: 'Leader',
-      14: 'Genius',
-      15: 'Psychic',
-      16: 'Flier',
-      17: 'Mutant',
-    }
+    if not values:
+      print("No data found in the sheet range.")
+      return
+
+    print("Processing rows from Google Sheet...")
     for row in values:
-      # Print columns A and E, which correspond to indices 0 and 4.
-      print(f"{row[0]}, {row[4]}")
+      # Safely index into row; provide defaults when values are missing
+      name = row[0] if len(row) > 0 else None
+      if not name:
+        # skip rows without a name
+        continue
+
+      age = 1
+      if len(row) > 2 and row[2].isdigit():
+        age = int(row[2])
+
+      def bool_at(i):
+        return bool(len(row) > i and row[i] and row[i].lower() not in ('0', 'false', 'no', 'n'))
+
       person = Person.objects.create(
-        name=row[0],
-        age=row[2] if row[2].isdigit() else 1,
-        sex=row[3],
-        rank=row[18],
-        position=row[19],
-        hidden=False
+        name=name,
+        age=age,
+        sex=row[3] if len(row) > 3 else '',
+        tactician=bool_at(4),
+        medical=bool_at(5),
+        scientist=bool_at(6),
+        engineer=bool_at(7),
+        strong=bool_at(8),
+        tough=bool_at(9),
+        agile=bool_at(10),
+        stealthy=bool_at(11),
+        cybernetic=bool_at(12),
+        leader=bool_at(13),
+        genius=bool_at(14),
+        psychic=bool_at(15),
+        flier=bool_at(16),
+        mutant=bool_at(17),
+        rank=row[18] if len(row) > 18 else '',
+        position=row[19] if len(row) > 19 else '',
+        hidden=False,
       )
       for index, trait_name in trait_columns.items():
         if index < len(row) and bool(row[index]):
           trait, _ = Trait.objects.get_or_create(name=trait_name)
           person.traits.add(trait)
       person.save()
+
+    print("Sheet processing complete.")
   except HttpError as err:
-    print(err)
+    print(f"Google API error: {err}")
+  except Exception as e:
+    print(f"Unexpected error while updating from sheet: {e}")
 
 class Command(BaseCommand):
-    help = 'Update database from sheet'
+  help = 'Update database from sheet'
 
-    def handle(self, *args, **options):
-        main()
-        pass
+  def handle(self, *args, **options):
+    """Django management command entry point."""
+    main()
+
+
 

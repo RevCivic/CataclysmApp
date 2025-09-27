@@ -1,42 +1,14 @@
-{% include 'navbar.html' %}
+{% extends 'base.html' %}
 {% load mathfilters %}
 {% load group_check %}
 
 {% block content %}
-<style>
-    th.center {
-        text-align: center;
-        vertical-align: middle;
-        white-space: nowrap;
-    }
-
-    th.rotate {
-    /* Something you can count on */
-    width: 10px;
-    height: 100px;
-    white-space: nowrap;
-    padding: 0px;
-    margin: 0px;
-    }
-
-    th.rotate > div {
-    transform:
-        /* Magic Numbers */
-        /* translate(25px, 51px) */
-        /* 45 is really 360 - 45 */
-        rotate(270deg);
-    /* width: 30px; */
-    }
-    td.boolean {
-        width: 10px !important;
-        padding: 0px !important;
-        margin: 0px !important;
-        text-align: center;
-    }
-
-</style>
-    <h1 class="app_name">People Index</h1>
-    <h2 class="index_menu"><a href="{% url 'add_person' %}">Add a Person</a></h2>
+<link rel="stylesheet" href="/static/css/sci-fi-form.css">
+<div class="container" style="margin-top:20px;">
+    <div class="index_menu">
+        <h1 class="app_name">People Index</h1>
+        <a class="btn btn-primary" href="{% url 'add_person' %}">Add Person</a>
+    </div>
 
     <div class="column-buttons ">
         <table class="toggle-table">
@@ -153,4 +125,5 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 {% endblock %}
