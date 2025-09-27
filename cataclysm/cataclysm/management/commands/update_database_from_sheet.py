@@ -96,6 +96,10 @@ def main():
         position=row[19] if len(row) > 19 else '',
         hidden=False,
       )
+      for index, trait_name in trait_columns.items():
+        if index < len(row) and bool(row[index]):
+          trait, _ = Trait.objects.get_or_create(name=trait_name)
+          person.traits.add(trait)
       person.save()
 
     print("Sheet processing complete.")

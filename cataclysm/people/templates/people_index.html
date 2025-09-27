@@ -13,45 +13,23 @@
     <div class="column-buttons ">
         <table class="toggle-table">
             <tr>
-                <th colspan="14" class="table-label">Active Fields</th>
+                <th colspan="{{ traits|length }}" class="table-label">Active Fields</th>
             </tr>
             <tr>
-                <th>Agile</th>
-                <th>Cybernetic</th>
-                <th>Engineer</th>
-                <th>Flier</th>
-                <th>Genius</th>
-                <th>Leader</th>
-                <th>Medical</th>
-                <th>Mutant</th>
-                <th>Psychic</th>
-                <th>Scientist</th>
-                <th>Stealthy</th>
-                <th>Strong</th>
-                <th>Tactician</th>
-                <th>Tough</th>
+                {% for trait in traits %}
+                    <th>{{ trait.name }}</th>
+                {% endfor %}
             </tr>
             <tr>
-                <td><button class="column-button toggle-button active" data-column="agile"></button></td>
-                <td><button class="column-button toggle-button active" data-column="cybernetic"></button></td>
-                <td><button class="column-button toggle-button active" data-column="engineer"></button></td>
-                <td><button class="column-button toggle-button active" data-column="flier"></button></td>
-                <td><button class="column-button toggle-button active" data-column="genius"></button></td>
-                <td><button class="column-button toggle-button active" data-column="leader"></button></td>
-                <td><button class="column-button toggle-button active" data-column="medical"></button></td>
-                <td><button class="column-button toggle-button active" data-column="mutant"></button></td>
-                <td><button class="column-button toggle-button active" data-column="psychic"></button></td>
-                <td><button class="column-button toggle-button active" data-column="scientist"></button></td>
-                <td><button class="column-button toggle-button active" data-column="stealthy"></button></td>
-                <td><button class="column-button toggle-button active" data-column="strong"></button></td>
-                <td><button class="column-button toggle-button active" data-column="tactician"></button></td>
-                <td><button class="column-button toggle-button active" data-column="tough"></button></td>
+                {% for trait in traits %}
+                    <td><button class="column-button toggle-button active" data-column="{{ trait.name|slugify }}"></button></td>
+                {% endfor %}
             </tr>
             <tr>
-                <th colspan="14" class="table-label">Toggle All</th>
+                <th colspan="{{ traits|length }}" class="table-label">Toggle All</th>
             </tr>
             <tr>
-                <td colspan="14"><button class="all-column-button toggle-button" data-column="all"></button></td>
+                <td colspan="{{ traits|length }}"><button class="all-column-button toggle-button" data-column="all"></button></td>
             </tr>
         </table>
     </div>
@@ -103,25 +81,14 @@
                 <th class="center"><a href="?order_by=faction">Faction</a></th>
                 <th class="center"><a href="?order_by=rank">Rank</a></th>
                 <th class="center"><a href="?order_by=position">Position</a></th>
-                <th class="rotate agile boolean"><div><span><a href="?order_by=agile">Agile</a></span></div></th>
-                <th class="rotate cybernetic boolean"><div><span><a href="?order_by=cybernetic">Cybernetic</a></span></div></th>
-                <th class="rotate engineer boolean"><div><span><a href="?order_by=engineer">Engineer</a></span></div></th>
-                <th class="rotate flier boolean"><div><span><a href="?order_by=flier">Flier</a></span></div></th>
-                <th class="rotate genius boolean"><div><span><a href="?order_by=genius">Genius</a></span></div></th>
-                <th class="rotate leader boolean"><div><span><a href="?order_by=leader">Leader</a></span></div></th>
-                <th class="rotate medical boolean"><div><span><a href="?order_by=medical">Medical</a></span></div></th>
-                <th class="rotate mutant boolean"><div><span><a href="?order_by=mutant">Mutant</a></span></div></th>
-                <th class="rotate psychic boolean"><div><span><a href="?order_by=psychic">Psychic</a></span></div></th>
-                <th class="rotate scientist boolean"><div><span><a href="?order_by=scientist">Scientist</a></span></div></th>
-                <th class="rotate stealthy boolean"><div><span><a href="?order_by=stealthy">Stealthy</a></span></div></th>
-                <th class="rotate strong boolean"><div><span><a href="?order_by=strong">Strong</a></span></div></th>
-                <th class="rotate tactician boolean"><div><span><a href="?order_by=tactician">Tactician</a></span></div></th>
-                <th class="rotate tough boolean"><div><span><a href="?order_by=tough">Tough</a></span></div></th>
+                {% for trait in traits %}
+                    <th class="rotate {{ trait.name|slugify }} boolean"><div><span>{{ trait.name }}</span></div></th>
+                {% endfor %}
                 <th class="crew-image">Picture</th>
                 {% if request.user|has_group:'admins' %}
                     <th><a href="?order_by=hidden">Hidden</a></th>
                 {% endif %}
-                
+
             </tr>
         </thead>
         <tbody>
@@ -136,20 +103,9 @@
                         <td>{{ person.faction }}</td>
                         <td>{{ person.rank }}</td>
                         <td>{{ person.position }}</td>
-                        <td class="boolean agile">{% if person.agile %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean cybernetic">{% if person.cybernetic %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean engineer">{% if person.engineer %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean flier">{% if person.flier %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean genius">{% if person.genius %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean leader">{% if person.leader %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean medical">{% if person.medical %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean mutant">{% if person.mutant %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean psychic">{% if person.psychic %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean scientist">{% if person.scientist %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean stealthy">{% if person.stealthy %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean strong">{% if person.strong %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean tactician">{% if person.tactician %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        <td class="boolean tough">{% if person.tough %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        {% for trait in traits %}
+                            <td class="boolean {{ trait.name|slugify }}">{% if trait in person.traits.all %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
+                        {% endfor %}
                         {% if person.image %}
                             <td>
                                 <img src="{{ person.image.url }}" alt="{{ person.name }}" class="crew_list_image"></img>
