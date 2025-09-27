@@ -1,10 +1,13 @@
-{% include 'navbar.html' %}
+{% extends 'base.html' %}
 {% load mathfilters %}
 {% load group_check %}
-
 {% block content %}
-<h1 class="app_name">{{ current_person.name }}</h1>
-<h2 class="index_menu"><a href="{% url 'edit_person' current_person.id%}">Edit {{current_person.name}}</a></h2>
+<div class="lcars-panel">
+    <div class="lcars-heading">
+        <span class="chip lcars-tab"></span>
+        <h2>{{ current_person.name }}</h2>
+    </div>
+    <div class="index_menu"><a class="lcars-btn" href="{% url 'edit_person' current_person.id%}">Edit</a></div>
     <div style="width: 100%;">
         <table class="sci-fi-list">
             <tr style="vertical-align: top;">
@@ -77,20 +80,20 @@
                 <th class="boolean">Tough</th>
             </tr>
             <tr>
-                <td style="background-color: {% if current_person.agile %}darkgreen{% endif %}">{{ current_person.agile }}</td>
-                <td style="background-color: {% if current_person.cybernetic %}darkgreen{% endif %}">{{ current_person.cybernetic }}</td>
-                <td style="background-color: {% if current_person.engineer %}darkgreen{% endif %}">{{ current_person.engineer }}</td>
-                <td style="background-color: {% if current_person.flier %}darkgreen{% endif %}">{{ current_person.flier }}</td>
-                <td style="background-color: {% if current_person.genius %}darkgreen{% endif %}">{{ current_person.genius }}</td>
-                <td style="background-color: {% if current_person.leader %}darkgreen{% endif %}">{{ current_person.leader }}</td>
-                <td style="background-color: {% if current_person.medical %}darkgreen{% endif %}">{{ current_person.medical }}</td>
-                <td style="background-color: {% if current_person.mutant %}darkgreen{% endif %}">{{ current_person.mutant }}</td>
-                <td style="background-color: {% if current_person.psychic %}darkgreen{% endif %}">{{ current_person.psychic }}</td>
-                <td style="background-color: {% if current_person.scientist %}darkgreen{% endif %}">{{ current_person.scientist }}</td>
-                <td style="background-color: {% if current_person.stealthy %}darkgreen{% endif %}">{{ current_person.stealthy }}</td>
-                <td style="background-color: {% if current_person.strong %}darkgreen{% endif %}">{{ current_person.strong }}</td>
-                <td style="background-color: {% if current_person.tactician %}darkgreen{% endif %}">{{ current_person.tactician }}</td>
-                <td style="background-color: {% if current_person.tough %}darkgreen{% endif %}">{{ current_person.tough }}</td>
+                <td class="boolean-cell {% if current_person.agile %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.agile }}</td>
+                <td class="boolean-cell {% if current_person.cybernetic %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.cybernetic }}</td>
+                <td class="boolean-cell {% if current_person.engineer %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.engineer }}</td>
+                <td class="boolean-cell {% if current_person.flier %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.flier }}</td>
+                <td class="boolean-cell {% if current_person.genius %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.genius }}</td>
+                <td class="boolean-cell {% if current_person.leader %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.leader }}</td>
+                <td class="boolean-cell {% if current_person.medical %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.medical }}</td>
+                <td class="boolean-cell {% if current_person.mutant %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.mutant }}</td>
+                <td class="boolean-cell {% if current_person.psychic %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.psychic }}</td>
+                <td class="boolean-cell {% if current_person.scientist %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.scientist }}</td>
+                <td class="boolean-cell {% if current_person.stealthy %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.stealthy }}</td>
+                <td class="boolean-cell {% if current_person.strong %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.strong }}</td>
+                <td class="boolean-cell {% if current_person.tactician %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.tactician }}</td>
+                <td class="boolean-cell {% if current_person.tough %}boolean-true{% else %}boolean-false{% endif %}">{{ current_person.tough }}</td>
             </tr>
         </table>
     </div>

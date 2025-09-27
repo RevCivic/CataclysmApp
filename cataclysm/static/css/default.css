@@ -40,8 +40,8 @@ body {
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: 100% 100%;
-    background-color: #333; /* Dark background color */
-    color: #fff; /* White text color */
+    background-color: var(--lcars-bg, #111); /* LCARS background (fallback) */
+    color: var(--lcars-text, #fff); /* Use LCARS text color when available */
 }
 
 /* Example styles for links in dark mode */
@@ -65,9 +65,8 @@ nav.main {
     display: flex;
     justify-content: space-between; /* This will evenly space the items */
     align-items: center; /* Align items vertically in the center */
-    background-color: #333; /* Background color of the navbar */
     padding: 10px; /* Add padding as needed */
-    background-color: #cc6666; /* Dark red background */
+    background: linear-gradient(90deg, var(--lcars-panel, #cc6666), var(--lcars-panel-dark, #995555));
     font-family: 'StarTrekFont';
     border-radius: 10px; /* Rounded corners */
 }
@@ -87,18 +86,18 @@ nav.main li {
 nav.main a {
     text-decoration: none;
     text-align: center; /* Center the text */
-    background-color: #9999ff; /* Light blue background */
+    background-color: var(--lcars-accent, #9999ff); /* Accent pill */
     border-radius: 25px; /* Rounded corners */
-    color: rgb(0, 0, 0); /* Black text color */
+    color: #051018; /* Dark ink for contrast on LCARS chips */
     font-size: 24px;
     padding: 5px 15px; /* Add some padding */
 }
 
 nav.main a:hover {
-    color: #0F0; /* Bright green on hover */
+    color: var(--lcars-accent-2, #0F0); /* Accent hover color */
 }
 h1.app_name {
-    color: #ff9900; /* Gold text color */
+    color: var(--lcars-panel, #ff9900); /* LCARS panel color */
     text-align: center;
     font-family: 'Rebellion';
     font-size: 72px;
@@ -110,15 +109,20 @@ h2.welcome {
     font-size: 24px;
 }
 p.app_description {
-    background-color: rgba(54, 48, 48, 0.75); /* This sets the text color to white with 50% opacity */
+    background-color: rgba(54, 48, 48, 0.75);
     padding: 25px;
-    color: #FFE81F; /* Yellow text color */
+    color: var(--lcars-panel, #FFE81F);
     text-align: center;
     font-family: 'GoodOT';
     font-size: 24px;
 }
+
 p.app_description :hover {
-    color: #0F0; /* Bright green on hover */
+    color: var(--lcars-accent-2, #0F0);
+}
+div button {
+    background-color: #555; /* Dark button background color */
+    color: #fff; /* White button text color */
 }
 .shooting-stars-container {
     position: relative;
@@ -369,6 +373,8 @@ p.app_description :hover {
     text-align: center;
     font-family: 'Rebellion';
     font-size: 24px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
 }
 .index_menu a {
     text-decoration: none;
@@ -417,4 +423,19 @@ p.app_description :hover {
 }
 .crew_list_additional_images:hover {
     transform: scale(2.5);
+}
+
+/* Boolean cell styling used by person detail template */
+.boolean-cell {
+    text-align: center;
+    padding: 8px;
+    vertical-align: middle;
+}
+.boolean-true {
+    background-color: darkgreen;
+    color: #fff;
+}
+.boolean-false {
+    background-color: transparent;
+    color: #fff;
 }

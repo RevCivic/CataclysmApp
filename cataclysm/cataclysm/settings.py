@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'species',
     'weapons',
     'worlds',
+    'ships',
+    'vehicles',
 ]
 
 # Crispy Forms settings

@@ -1,22 +1,26 @@
-{% include 'navbar.html' %}
+{% extends 'base.html' %}
 {% load mathfilters %}
 {% load group_check %}
 
 {% block content %}
-    <h1 class="app_name">Species Index</h1>
-    <h2 class="index_menu"><a href="{% url 'add' %}">Add a Species</a></h2>
+<link rel="stylesheet" href="/static/css/sci-fi-form.css">
+<div class="container" style="margin-top:20px;">
+    <div class="list-header index_menu">
+        <h1 class="app_name">Species Index</h1>
+        <a class="btn btn-primary" href="{% url 'add' %}">Add Species</a>
+    </div>
     <table class="sci-fi-list">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Size</th>
-                <th>Home World</th>
-                <th>Type</th>
-                <th>Accord Standing</th>
-                <th>Strength</th>
-                <th>Toughness</th>
-                <th>Speed</th>
-                <th>Intelligence</th>
+                <th><a href="?sort={% if current_sort_field == 'name' and current_sort_dir == 'asc' %}-name{% else %}name{% endif %}">Name {% if current_sort_field == 'name' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'size' and current_sort_dir == 'asc' %}-size{% else %}size{% endif %}">Size {% if current_sort_field == 'size' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'home_world' and current_sort_dir == 'asc' %}-home_world{% else %}home_world{% endif %}">Home World {% if current_sort_field == 'home_world' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'type' and current_sort_dir == 'asc' %}-type{% else %}type{% endif %}">Type {% if current_sort_field == 'type' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'accord_status' and current_sort_dir == 'asc' %}-accord_status{% else %}accord_status{% endif %}">Accord Standing {% if current_sort_field == 'accord_status' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'strength' and current_sort_dir == 'asc' %}-strength{% else %}strength{% endif %}">Strength {% if current_sort_field == 'strength' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'toughness' and current_sort_dir == 'asc' %}-toughness{% else %}toughness{% endif %}">Toughness {% if current_sort_field == 'toughness' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'speed' and current_sort_dir == 'asc' %}-speed{% else %}speed{% endif %}">Speed {% if current_sort_field == 'speed' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'intelligence' and current_sort_dir == 'asc' %}-intelligence{% else %}intelligence{% endif %}">Intelligence {% if current_sort_field == 'intelligence' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
                 {% if request.user|has_group:'admins' %}
                     <th>Hidden</th>
                 {% endif %}
@@ -56,4 +60,5 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 {% endblock %}

@@ -1,5 +1,40 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<h1>Welcome to the Weapons Page</h1>
-<p>This is a placeholder template for the weapons app.</p>
+<div class="list-header index_menu">
+	<h1 class="app_name">Weapons</h1>
+	<a href="{% url 'weapons:add' %}" class="btn btn-primary">Add Weapon</a>
+</div>
+<table class="table table-striped sci-fi-table">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>Type</th>
+			<th>Damage</th>
+			<th>Critical</th>
+			<th>Range</th>
+			<th>Capacity</th>
+			<th>Weight</th>
+			<th>Hidden</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for w in object_list %}
+		<tr>
+			<td>{{ w.name }}</td>
+			<td>{{ w.weapon_type }}</td>
+			<td>{{ w.damage }}</td>
+			<td>{{ w.critical }}</td>
+			<td>{{ w.range_increment }}</td>
+			<td>{{ w.capacity }}</td>
+			<td>{{ w.weight }}</td>
+			<td>{{ w.hidden }}</td>
+			<td><a href="{% url 'weapons:detail' w.pk %}">View</a></td>
+		</tr>
+	{% empty %}
+		<tr><td colspan="9">No weapons yet</td></tr>
+	{% endfor %}
+	</tbody>
+</table>
 {% endblock %}

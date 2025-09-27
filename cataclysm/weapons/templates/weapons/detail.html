@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h1>{{ object.name|default:'Weapon' }}</h1>
+  <p>{{ object.description|default:'No description available.' }}</p>
+  <a href="{% url 'weapons:index' %}">Back</a>
+</div>
+{% endblock %}

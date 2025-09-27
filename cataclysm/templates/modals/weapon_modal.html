@@ -1,0 +1,59 @@
+<!-- Bootstrap Modal for selecting weapons (reusable) -->
+<div class="modal fade" id="selectWeaponModal" tabindex="-1" role="dialog" aria-labelledby="selectWeaponModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content sci-fi-form-container">
+      <div class="modal-header">
+        <h5 class="modal-title" id="selectWeaponModalLabel">Select Weapon</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-dark table-striped">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Damage</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for weapon in weapons %}
+            <tr>
+              <td>{{ weapon.name }}</td>
+              <td>{{ weapon.type }}</td>
+              <td>{{ weapon.damage }}</td>
+              <td>
+                <button type="button" class="btn btn-primary select-weapon-btn" data-weapon-id="{{ weapon.id }}" data-weapon-name="{{ weapon.name }}">Select</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Usage: Include this modal in any template and provide a 'weapons' context variable -->
+<!-- Add a button to trigger the modal: -->
+<!-- <button type="button" class="btn btn-info" data-toggle="modal" data-target="#selectWeaponModal">Choose Weapon</button> -->
+
+<!-- JS Example: Handle selection (add to your JS bundle or template) -->
+<!--
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.select-weapon-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var weaponId = this.getAttribute('data-weapon-id');
+        var weaponName = this.getAttribute('data-weapon-name');
+        // Do something with the selected weapon (e.g., fill a hidden input)
+        // Example:
+        // document.getElementById('id_weapon').value = weaponId;
+        $('#selectWeaponModal').modal('hide');
+      });
+    });
+  });
+</script>
+-->

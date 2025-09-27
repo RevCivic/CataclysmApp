@@ -5,9 +5,41 @@ from species.forms import SpeciesForm
 
 
 def index(request):
-    species_list = Species.objects.all()
+    # Sorting support via ?sort=field or ?sort=-field (prefix '-' for descending)
+    sort_param = request.GET.get('sort', '').strip()
+    allowed = {
+        'name': 'name',
+        'size': 'size',
+        'home_world': 'home_world',
+        'type': 'type',
+        'accord_status': 'accord_status',
+        'strength': 'strength_rating',
+        'toughness': 'toughness_rating',
+        'speed': 'speed_rating',
+        'intelligence': 'intelligence_rating',
+    }
+
+    order_by = 'name'
+    current_sort_field = ''
+    current_sort_dir = 'asc'
+    if sort_param:
+        direction = 'asc'
+        field = sort_param
+        if sort_param.startswith('-'):
+            direction = 'desc'
+            field = sort_param[1:]
+
+        mapped = allowed.get(field)
+        if mapped:
+            order_by = ('-' if direction == 'desc' else '') + mapped
+            current_sort_field = field
+            current_sort_dir = direction
+
+    species_list = Species.objects.all().order_by(order_by)
     context = {
         'species_list': species_list,
+        'current_sort_field': current_sort_field,
+        'current_sort_dir': current_sort_dir,
     }
     return render(request, 'species_index.html', context)
 
