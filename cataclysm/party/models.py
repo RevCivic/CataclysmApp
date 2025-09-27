@@ -22,6 +22,12 @@ class Party(models.Model):
 		verbose_name="Leader",
 		help_text="Name of the party leader."
 	)
+	members = models.ManyToManyField(
+		'people.Person',
+		related_name='parties',
+		verbose_name="Members",
+		help_text="Select members of the party."
+	)
 	faction = models.CharField(
 		max_length=100,
 		blank=True,

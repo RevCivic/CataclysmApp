@@ -37,3 +37,12 @@ class SpeciesForm(forms.ModelForm):
             'image',
             'hidden',
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make most fields optional on the form level; keep `name` required
+        for fname, field in self.fields.items():
+            if fname == 'name':
+                field.required = True
+            else:
+                field.required = False

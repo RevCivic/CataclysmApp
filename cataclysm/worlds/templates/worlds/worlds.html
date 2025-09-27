@@ -1,5 +1,39 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% block content %}
-<h1>Welcome to the Worlds Page</h1>
-<p>This is a placeholder template for the worlds app.</p>
+<div class="list-header index_menu">
+	<h1 class="app_name">Worlds</h1>
+	<a href="{% url 'worlds:add' %}" class="btn btn-primary">Add World</a>
+</div>
+<table class="table table-hover sci-fi-table">
+	<thead>
+		<tr>
+			<th>Name</th>
+			<th>System</th>
+			<th>Class</th>
+			<th>Moons</th>
+			<th>Colonized</th>
+			<th>Terraform</th>
+			<th>Flora/Fauna</th>
+			<th>Hidden</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for w in object_list %}
+		<tr>
+			<td>{{ w.name }}</td>
+			<td>{{ w.system }}</td>
+			<td>{{ w.planet_class }}</td>
+			<td>{{ w.moons }}</td>
+			<td>{{ w.colonized }}</td>
+			<td>{{ w.terraformed }}</td>
+			<td>{% if w.contains_flora %}Flora {% endif %}{% if w.contains_fauna %}Fauna{% endif %}</td>
+			<td>{{ w.hidden }}</td>
+			<td><a href="{% url 'worlds:detail' w.pk %}">View</a></td>
+		</tr>
+	{% empty %}
+		<tr><td colspan="9">No worlds yet</td></tr>
+	{% endfor %}
+	</tbody>
+</table>
 {% endblock %}

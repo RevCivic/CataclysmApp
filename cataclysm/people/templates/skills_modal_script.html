@@ -1,0 +1,20 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.select-skill-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var skillId = this.getAttribute('data-skill-id');
+        var skillName = this.getAttribute('data-skill-name');
+        // Set the value of the skills select field (assumes it's a select input)
+        var skillsSelect = document.getElementById('id_skills');
+        if (skillsSelect) {
+          // If it's a multi-select, add the option if not present and select it
+          var option = Array.from(skillsSelect.options).find(opt => opt.value == skillId);
+          if (option) {
+            option.selected = true;
+          }
+        }
+        $('#selectSkillsModal').modal('hide');
+      });
+    });
+  });
+</script>

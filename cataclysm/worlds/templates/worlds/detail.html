@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+  <h1>{{ object.name|default:'World' }}</h1>
+  <p>System: {{ object.system|default:'-' }}</p>
+  <p>Planet class: {{ object.planet_class|default:'-' }}</p>
+  <a href="{% url 'worlds:index' %}">Back</a>
+</div>
+{% endblock %}
