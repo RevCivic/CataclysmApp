@@ -1,13 +1,72 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags custom_filters %}
 {% block content %}
-<link rel="stylesheet" href="/static/css/sci-fi-form.css">
-<div class="container sci-fi-form-container" style="max-width:900px; margin-top:20px;">
-  <h1>Add Weapon</h1>
-  <form method="post" enctype="multipart/form-data">
+<section class="lcars-panel lcars-form">
+  <div class="lcars-form__header">
+    <span class="lcars-form__chip" aria-hidden="true"></span>
+    <div>
+      <h1 class="lcars-form__title">Add Weapon</h1>
+      <p class="lcars-form__subtitle">Record the specifications for a new arsenal entry.</p>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="lcars-form__body">
     {% csrf_token %}
-    {{ form|crispy }}
-    <button type="submit" class="btn btn-primary">Save Weapon</button>
+    {% if form %}
+      {% for hidden_field in form.hidden_fields %}
+        {{ hidden_field }}
+      {% endfor %}
+
+      {% if form.non_field_errors %}
+        <div class="lcars-form__errors">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="lcars-form__grid">
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Classification</h2>
+          {% if form|has_field:'name' %}{{ form.name|as_crispy_field }}{% endif %}
+          {% if form|has_field:'weapon_type' %}{{ form.weapon_type|as_crispy_field }}{% endif %}
+          {% if form|has_field:'secondary_weapon' %}{{ form.secondary_weapon|as_crispy_field }}{% endif %}
+        </section>
+
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Combat Profile</h2>
+          {% if form|has_field:'damage' %}{{ form.damage|as_crispy_field }}{% endif %}
+          {% if form|has_field:'critical' %}{{ form.critical|as_crispy_field }}{% endif %}
+          {% if form|has_field:'range_increment' %}{{ form.range_increment|as_crispy_field }}{% endif %}
+          {% if form|has_field:'usage' %}{{ form.usage|as_crispy_field }}{% endif %}
+          {% if form|has_field:'capacity' %}{{ form.capacity|as_crispy_field }}{% endif %}
+        </section>
+
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Logistics</h2>
+          {% if form|has_field:'weight' %}{{ form.weight|as_crispy_field }}{% endif %}
+          {% if form|has_field:'hidden' %}{{ form.hidden|as_crispy_field }}{% endif %}
+        </section>
+
+        {% if form|has_field:'special_properties' %}
+          <section class="lcars-form__section lcars-form__section--full">
+            <h2 class="lcars-form__section-title">Special Systems</h2>
+            {{ form.special_properties|as_crispy_field }}
+          </section>
+        {% endif %}
+
+        {% if form|has_field:'description' %}
+          <section class="lcars-form__section lcars-form__section--full">
+            <h2 class="lcars-form__section-title">Field Notes</h2>
+            {{ form.description|as_crispy_field }}
+          </section>
+        {% endif %}
+      </div>
+    {% else %}
+      <p>Weapon creation form unavailable.</p>
+    {% endif %}
+
+    <div class="lcars-form__actions">
+      <button type="submit" class="lcars-btn lcars-form__submit">Save Weapon</button>
+    </div>
   </form>
-</div>
+</section>
 {% endblock %}

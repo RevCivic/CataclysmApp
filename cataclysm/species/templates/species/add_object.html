@@ -1,60 +1,102 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags custom_filters %}
 {% block content %}
-<link rel="stylesheet" href="/static/css/sci-fi-form.css">
-<div class="lcars-panel">
-    <div class="sci-fi-form-container">
-    <h1 style="text-align:center; letter-spacing: 0.12em; color: #0ff; text-shadow: 0 0 10px #0ff, 0 0 2px #fff; font-size:2.2rem;">Add New Species</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="sci-fi-form-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5em 3em; align-items: start;">
-            <div class="sci-fi-form-section" style="grid-column: 1;">
-                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">General</h4>
-                {{ form.name|as_crispy_field }}
-                {{ form.home_world|as_crispy_field }}
-                {{ form.society|as_crispy_field }}
-                {{ form.accord_status|as_crispy_field }}
-                {{ form.size|as_crispy_field }}
-                {{ form.type|as_crispy_field }}
-                {{ form.air|as_crispy_field }}
-                {{ form.gravity|as_crispy_field }}
-            </div>
-            <div class="sci-fi-form-section" style="grid-column: 2;">
-                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Biology & Society</h4>
-                {{ form.background|as_crispy_field }}
-                {{ form.sociology|as_crispy_field }}
-                {{ form.physiology|as_crispy_field }}
-                {{ form.racial_traits|as_crispy_field }}
-                {{ form.reproduction_method|as_crispy_field }}
-                {{ form.hours_of_sleep|as_crispy_field }}
-                {{ form.days_without_food|as_crispy_field }}
-                {{ form.days_without_water|as_crispy_field }}
-                {{ form.locomotion_method|as_crispy_field }}
-            </div>
-            <div class="sci-fi-form-section" style="grid-column: 3;">
-                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Abilities & Traits</h4>
-                {{ form.strength_rating|as_crispy_field }}
-                {{ form.toughness_rating|as_crispy_field }}
-                {{ form.speed_rating|as_crispy_field }}
-                {{ form.intelligence_rating|as_crispy_field }}
-                {{ form.natural_weapons|as_crispy_field }}
-                {{ form.natural_armor|as_crispy_field }}
-                {{ form.can_fly|as_crispy_field }}
-                {{ form.aquatic|as_crispy_field }}
-                {{ form.amphibious|as_crispy_field }}
-                {{ form.telepathic|as_crispy_field }}
-                {{ form.psionic|as_crispy_field }}
-                {{ form.special_abilities|as_crispy_field }}
-                {{ form.image|as_crispy_field }}
-                {{ form.hidden|as_crispy_field }}
-            </div>
-        </div>
-        <div style="text-align:center; margin-top: 2.5em;">
-            <button type="submit" class="btn btn-primary" style="background: linear-gradient(90deg, #0ff 0%, #09f 100%); border: none; color: #222; font-weight: bold; font-size: 1.2em; padding: 0.5em 2em; border-radius: 0.5em; box-shadow: 0 0 12px #0ff; transition: background 0.3s;">Engage</button>
-        </div>
-    </form>
-    <p style="text-align:center; margin-top:2em; color:#0ff; font-size:1.1em; letter-spacing:0.05em;">"To boldly go where no species has gone before..."</p>
+<section class="lcars-panel lcars-form">
+  <div class="lcars-form__header">
+    <span class="lcars-form__chip" aria-hidden="true"></span>
+    <div>
+      <h1 class="lcars-form__title">Add Species</h1>
+      <p class="lcars-form__subtitle">Capture the traits of a new civilization for the LCARS archive.</p>
     </div>
-</div>
-<!-- CSS moved to sci-fi-form.css -->
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="lcars-form__body">
+    {% csrf_token %}
+    {% for hidden_field in form.hidden_fields %}
+      {{ hidden_field }}
+    {% endfor %}
+
+    {% if form.non_field_errors %}
+      <div class="lcars-form__errors">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div class="lcars-form__grid">
+      <section class="lcars-form__section">
+        <h2 class="lcars-form__section-title">Identity</h2>
+        {% if form|has_field:'name' %}{{ form.name|as_crispy_field }}{% endif %}
+        {% if form|has_field:'type' %}{{ form.type|as_crispy_field }}{% endif %}
+        {% if form|has_field:'size' %}{{ form.size|as_crispy_field }}{% endif %}
+        {% if form|has_field:'accord_status' %}{{ form.accord_status|as_crispy_field }}{% endif %}
+        {% if form|has_field:'home_world' %}{{ form.home_world|as_crispy_field }}{% endif %}
+      </section>
+
+      <section class="lcars-form__section">
+        <h2 class="lcars-form__section-title">Environment</h2>
+        {% if form|has_field:'air' %}{{ form.air|as_crispy_field }}{% endif %}
+        {% if form|has_field:'gravity' %}{{ form.gravity|as_crispy_field }}{% endif %}
+        {% if form|has_field:'locomotion_method' %}{{ form.locomotion_method|as_crispy_field }}{% endif %}
+        {% if form|has_field:'reproduction_method' %}{{ form.reproduction_method|as_crispy_field }}{% endif %}
+      </section>
+
+      <section class="lcars-form__section">
+        <h2 class="lcars-form__section-title">Sustenance</h2>
+        {% if form|has_field:'hours_of_sleep' %}{{ form.hours_of_sleep|as_crispy_field }}{% endif %}
+        {% if form|has_field:'days_without_food' %}{{ form.days_without_food|as_crispy_field }}{% endif %}
+        {% if form|has_field:'days_without_water' %}{{ form.days_without_water|as_crispy_field }}{% endif %}
+      </section>
+
+      <section class="lcars-form__section lcars-form__section--full">
+        <h2 class="lcars-form__section-title">Society</h2>
+        {% if form|has_field:'society' %}{{ form.society|as_crispy_field }}{% endif %}
+        {% if form|has_field:'background' %}{{ form.background|as_crispy_field }}{% endif %}
+      </section>
+
+      <section class="lcars-form__section lcars-form__section--full">
+        <h2 class="lcars-form__section-title">Physiology</h2>
+        {% if form|has_field:'physiology' %}{{ form.physiology|as_crispy_field }}{% endif %}
+        {% if form|has_field:'racial_traits' %}{{ form.racial_traits|as_crispy_field }}{% endif %}
+      </section>
+
+      <section class="lcars-form__section">
+        <h2 class="lcars-form__section-title">Adaptations</h2>
+        {% if form|has_field:'natural_weapons' %}{{ form.natural_weapons|as_crispy_field }}{% endif %}
+        {% if form|has_field:'natural_armor' %}{{ form.natural_armor|as_crispy_field }}{% endif %}
+        {% if form|has_field:'special_abilities' %}{{ form.special_abilities|as_crispy_field }}{% endif %}
+      </section>
+
+      <section class="lcars-form__section">
+        <h2 class="lcars-form__section-title">Capabilities</h2>
+        {% if form|has_field:'strength_rating' %}{{ form.strength_rating|as_crispy_field }}{% endif %}
+        {% if form|has_field:'toughness_rating' %}{{ form.toughness_rating|as_crispy_field }}{% endif %}
+        {% if form|has_field:'speed_rating' %}{{ form.speed_rating|as_crispy_field }}{% endif %}
+        {% if form|has_field:'intelligence_rating' %}{{ form.intelligence_rating|as_crispy_field }}{% endif %}
+      </section>
+
+      <section class="lcars-form__section">
+        <h2 class="lcars-form__section-title">Traits</h2>
+        <div class="lcars-form__inline">
+          {% if form|has_field:'can_fly' %}{{ form.can_fly|as_crispy_field }}{% endif %}
+          {% if form|has_field:'aquatic' %}{{ form.aquatic|as_crispy_field }}{% endif %}
+        </div>
+        <div class="lcars-form__inline">
+          {% if form|has_field:'amphibious' %}{{ form.amphibious|as_crispy_field }}{% endif %}
+          {% if form|has_field:'telepathic' %}{{ form.telepathic|as_crispy_field }}{% endif %}
+        </div>
+        {% if form|has_field:'psionic' %}{{ form.psionic|as_crispy_field }}{% endif %}
+      </section>
+
+      <section class="lcars-form__section">
+        <h2 class="lcars-form__section-title">Records</h2>
+        {% if form|has_field:'image' %}{{ form.image|as_crispy_field }}{% endif %}
+        {% if form|has_field:'hidden' %}{{ form.hidden|as_crispy_field }}{% endif %}
+      </section>
+    </div>
+
+    <div class="lcars-form__actions">
+      <button type="submit" class="lcars-btn lcars-form__submit">Save Species</button>
+    </div>
+  </form>
+</section>
 {% endblock %}
