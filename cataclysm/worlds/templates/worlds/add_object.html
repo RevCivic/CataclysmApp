@@ -1,13 +1,72 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags custom_filters %}
 {% block content %}
-<link rel="stylesheet" href="/static/css/sci-fi-form.css">
-<div class="container sci-fi-form-container" style="max-width:900px; margin-top:24px;">
-  <h1>Add World</h1>
-  <form method="post" enctype="multipart/form-data">
+<section class="lcars-panel lcars-form">
+  <div class="lcars-form__header">
+    <span class="lcars-form__chip" aria-hidden="true"></span>
+    <div>
+      <h1 class="lcars-form__title">Add World</h1>
+      <p class="lcars-form__subtitle">Chart a new planet and its defining attributes.</p>
+    </div>
+  </div>
+
+  <form method="post" class="lcars-form__body">
     {% csrf_token %}
-    {{ form|crispy }}
-    <button type="submit" class="btn btn-primary">Save World</button>
+    {% if form %}
+      {% for hidden_field in form.hidden_fields %}
+        {{ hidden_field }}
+      {% endfor %}
+
+      {% if form.non_field_errors %}
+        <div class="lcars-form__errors">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="lcars-form__grid">
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Astrometrics</h2>
+          {% if form|has_field:'name' %}{{ form.name|as_crispy_field }}{% endif %}
+          {% if form|has_field:'system' %}{{ form.system|as_crispy_field }}{% endif %}
+          {% if form|has_field:'planet_class' %}{{ form.planet_class|as_crispy_field }}{% endif %}
+          {% if form|has_field:'moons' %}{{ form.moons|as_crispy_field }}{% endif %}
+        </section>
+
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Status</h2>
+          {% if form|has_field:'colonized' %}{{ form.colonized|as_crispy_field }}{% endif %}
+          {% if form|has_field:'terraformed' %}{{ form.terraformed|as_crispy_field }}{% endif %}
+          {% if form|has_field:'hidden' %}{{ form.hidden|as_crispy_field }}{% endif %}
+        </section>
+
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Lifeforms</h2>
+          {% if form|has_field:'contains_flora' %}{{ form.contains_flora|as_crispy_field }}{% endif %}
+          {% if form|has_field:'contains_fauna' %}{{ form.contains_fauna|as_crispy_field }}{% endif %}
+          {% if form|has_field:'contains_sentient_life' %}{{ form.contains_sentient_life|as_crispy_field }}{% endif %}
+        </section>
+
+        {% if form|has_field:'special_traits' %}
+          <section class="lcars-form__section lcars-form__section--full">
+            <h2 class="lcars-form__section-title">Notable Traits</h2>
+            {{ form.special_traits|as_crispy_field }}
+          </section>
+        {% endif %}
+
+        {% if form|has_field:'points_of_interest' %}
+          <section class="lcars-form__section lcars-form__section--full">
+            <h2 class="lcars-form__section-title">Points of Interest</h2>
+            {{ form.points_of_interest|as_crispy_field }}
+          </section>
+        {% endif %}
+      </div>
+    {% else %}
+      <p>World creation form unavailable.</p>
+    {% endif %}
+
+    <div class="lcars-form__actions">
+      <button type="submit" class="lcars-btn lcars-form__submit">Save World</button>
+    </div>
   </form>
-</div>
+</section>
 {% endblock %}

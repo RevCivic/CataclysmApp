@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, render
 from django.http import HttpResponse  # Import HttpResponse class
 from people.forms import PersonForm, PersonImageForm
-from people.models import Person, Skillset
+from people.models import Person, Skillset, Trait
 
 
 def index(request):
@@ -45,7 +45,15 @@ def add_person(request):
         for field in skill_fields:
             value = getattr(skillset, field, None)
             skills.append({'id': f'{skillset.id}_{field}', 'name': field.replace('_', ' ').title(), 'value': value})
-    return render(request, 'add_object.html', {'form': form, 'skills': skills})
+    return render(
+        request,
+        'add_object.html',
+        {
+            'form': form,
+            'skills': skills,
+            'form_mode': 'person',
+        },
+    )
 
 def edit_person(request, id):
     person = Person.objects.get(id=id)
@@ -67,7 +75,15 @@ def edit_person(request, id):
         for field in skill_fields:
             value = getattr(skillset, field, None)
             skills.append({'id': f'{skillset.id}_{field}', 'name': field.replace('_', ' ').title(), 'value': value})
-    return render(request, 'add_object.html', {'form': form, 'skills': skills})
+    return render(
+        request,
+        'add_object.html',
+        {
+            'form': form,
+            'skills': skills,
+            'form_mode': 'person',
+        },
+    )
 
 def delete_person(request, id):
     person = Person.objects.get(id=id)
@@ -85,4 +101,12 @@ def add_images(request, id):
         form = PersonImageForm(initial={'linked_person': person})
 
     # Always pass skills, even if empty
-    return render(request, 'add_object.html', {'form': form, 'skills': []})
+    return render(
+        request,
+        'add_object.html',
+        {
+            'form': form,
+            'skills': [],
+            'form_mode': 'person_image',
+        },
+    )

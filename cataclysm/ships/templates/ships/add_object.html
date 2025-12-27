@@ -1,13 +1,43 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% block content %}
-<link rel="stylesheet" href="/static/css/sci-fi-form.css">
-<div class="container sci-fi-form-container" style="max-width:1000px; margin-top:24px;">
-  <h1>Add Starship</h1>
-  <form method="post" enctype="multipart/form-data">
+<section class="lcars-panel lcars-form">
+  <div class="lcars-form__header">
+    <span class="lcars-form__chip" aria-hidden="true"></span>
+    <div>
+      <h1 class="lcars-form__title">Add Starship</h1>
+      <p class="lcars-form__subtitle">Commission a new vessel into the fleet registry.</p>
+    </div>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="lcars-form__body">
     {% csrf_token %}
-    {{ form|crispy }}
-    <button type="submit" class="btn btn-primary">Save Starship</button>
+    {% if form %}
+      {% for hidden_field in form.hidden_fields %}
+        {{ hidden_field }}
+      {% endfor %}
+
+      {% if form.non_field_errors %}
+        <div class="lcars-form__errors">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="lcars-form__grid">
+        <section class="lcars-form__section lcars-form__section--full">
+          <h2 class="lcars-form__section-title">Vessel Profile</h2>
+          {% for field in form.visible_fields %}
+            {{ field|as_crispy_field }}
+          {% endfor %}
+        </section>
+      </div>
+    {% else %}
+      <p>Starship creation form unavailable.</p>
+    {% endif %}
+
+    <div class="lcars-form__actions">
+      <button type="submit" class="lcars-btn lcars-form__submit">Save Starship</button>
+    </div>
   </form>
-</div>
+</section>
 {% endblock %}

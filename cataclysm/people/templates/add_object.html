@@ -1,58 +1,134 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags custom_filters %}
 {% block content %}
-<link rel="stylesheet" href="/static/css/sci-fi-form.css">
-<div class="sci-fi-form-container">
-    <h1 style="text-align:center; letter-spacing: 0.12em; color: #0ff; text-shadow: 0 0 10px #0ff, 0 0 2px #fff; font-size:2.2rem;">Add New Person</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="sci-fi-form-grid">
-            <div class="sci-fi-form-section">
-                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">General</h4>
-                {{ form.name|as_crispy_field }}
-                {{ form.age|as_crispy_field }}
-                {{ form.sex|as_crispy_field }}
-                {{ form.species|as_crispy_field }}
-                {{ form.faction|as_crispy_field }}
-                {{ form.rank|as_crispy_field }}
-                {{ form.position|as_crispy_field }}
-                {{ form.location|as_crispy_field }}
+<section class="lcars-panel lcars-form">
+  {% if form_mode == 'person' %}
+    <div class="lcars-form__header">
+      <span class="lcars-form__chip" aria-hidden="true"></span>
+      <div>
+        <h1 class="lcars-form__title">Add Crew Member</h1>
+        <p class="lcars-form__subtitle">Document a new operative for the Cataclysm roster.</p>
+      </div>
+    </div>
+  {% elif form_mode == 'person_image' %}
+    <div class="lcars-form__header">
+      <span class="lcars-form__chip" aria-hidden="true"></span>
+      <div>
+        <h1 class="lcars-form__title">Attach Visual Record</h1>
+        <p class="lcars-form__subtitle">Upload supporting imagery for an existing crew member.</p>
+      </div>
+    </div>
+  {% else %}
+    <div class="lcars-form__header">
+      <span class="lcars-form__chip" aria-hidden="true"></span>
+      <div>
+        <h1 class="lcars-form__title">Add Record</h1>
+        <p class="lcars-form__subtitle">Provide the details below to expand the database.</p>
+      </div>
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="lcars-form__body">
+    {% csrf_token %}
+    {% for hidden_field in form.hidden_fields %}
+      {{ hidden_field }}
+    {% endfor %}
+
+    {% if form.non_field_errors %}
+      <div class="lcars-form__errors">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {% if form_mode == 'person' %}
+      <div class="lcars-form__grid">
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Profile</h2>
+          {% if form|has_field:'name' %}{{ form.name|as_crispy_field }}{% endif %}
+          {% if form|has_field:'age' %}{{ form.age|as_crispy_field }}{% endif %}
+          {% if form|has_field:'sex' %}{{ form.sex|as_crispy_field }}{% endif %}
+          {% if form|has_field:'species' %}{{ form.species|as_crispy_field }}{% endif %}
+        </section>
+
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Assignment</h2>
+          {% if form|has_field:'faction' %}{{ form.faction|as_crispy_field }}{% endif %}
+          {% if form|has_field:'rank' %}{{ form.rank|as_crispy_field }}{% endif %}
+          {% if form|has_field:'position' %}{{ form.position|as_crispy_field }}{% endif %}
+          {% if form|has_field:'location' %}{{ form.location|as_crispy_field }}{% endif %}
+        </section>
+
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Equipment</h2>
+          {% if form|has_field:'weapons' %}{{ form.weapons|as_crispy_field }}{% endif %}
+          {% if form|has_field:'armors' %}{{ form.armors|as_crispy_field }}{% endif %}
+        </section>
+
+        {% if form|has_field:'traits' %}
+          <section class="lcars-form__section lcars-form__section--full">
+            <h2 class="lcars-form__section-title">Traits</h2>
+            {{ form.traits|as_crispy_field }}
+          </section>
+        {% endif %}
+
+        {% if form|has_field:'bio' %}
+          <section class="lcars-form__section lcars-form__section--full">
+            <h2 class="lcars-form__section-title">Background</h2>
+            {{ form.bio|as_crispy_field }}
+          </section>
+        {% endif %}
+
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Visual Records</h2>
+          {% if form|has_field:'image' %}{{ form.image|as_crispy_field }}{% endif %}
+          {% if form|has_field:'additional_images' %}{{ form.additional_images|as_crispy_field }}{% endif %}
+        </section>
+
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Attributes</h2>
+          {% if form|has_field:'stats' %}{{ form.stats|as_crispy_field }}{% endif %}
+          {% if form|has_field:'skills' %}
+            <div class="lcars-form__inline">
+              {{ form.skills|as_crispy_field }}
+              <button type="button" class="lcars-btn" data-toggle="modal" data-target="#selectSkillsModal">Browse Skillsets</button>
             </div>
-            <div class="sci-fi-form-section">
-                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Equipment & Bio</h4>
-                {{ form.weapons|as_crispy_field }}
-                {{ form.armors|as_crispy_field }}
-                {{ form.bio|as_crispy_field }}
-                {{ form.image|as_crispy_field }}
-                {{ form.additional_images|as_crispy_field }}
-            </div>
-            <div class="sci-fi-form-section">
-                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Attributes & Skills</h4>
-                {{ form.stats|as_crispy_field }}
-                                <div style="display: flex; align-items: center; gap: 1em;">
-                                    {{ form.skills|as_crispy_field }}
-                                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#selectSkillsModal" style="margin-top: 0.5em;">Select Skills</button>
-                                </div>
-                {{ form.tactician|as_crispy_field }}
-                {{ form.medical|as_crispy_field }}
-                {{ form.scientist|as_crispy_field }}
-                {{ form.engineer|as_crispy_field }}
-                {{ form.strong|as_crispy_field }}
-                {{ form.tough|as_crispy_field }}
-                {{ form.agile|as_crispy_field }}
-                {{ form.stealthy|as_crispy_field }}
-                {{ form.cybernetic|as_crispy_field }}
-                {{ form.leader|as_crispy_field }}
-                {{ form.genius|as_crispy_field }}
-                {{ form.psychic|as_crispy_field }}
-                {{ form.flier|as_crispy_field }}
-                {{ form.mutant|as_crispy_field }}
-            </div>
-        </div>
-        <div style="text-align:center; margin-top: 2.5em;">
-            <button type="submit" class="btn btn-primary">Engage</button>
-        </div>
-        {{ form.hidden|as_crispy_field }}
-    </form>
-</div>
+          {% endif %}
+          {% if form|has_field:'hidden' %}{{ form.hidden|as_crispy_field }}{% endif %}
+        </section>
+      </div>
+    {% elif form_mode == 'person_image' %}
+      <div class="lcars-form__grid">
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Link</h2>
+          {% if form|has_field:'linked_person' %}{{ form.linked_person|as_crispy_field }}{% endif %}
+        </section>
+        <section class="lcars-form__section">
+          <h2 class="lcars-form__section-title">Upload</h2>
+          {% if form|has_field:'additional_image' %}{{ form.additional_image|as_crispy_field }}{% endif %}
+        </section>
+        <section class="lcars-form__section lcars-form__section--full">
+          <h2 class="lcars-form__section-title">Caption</h2>
+          {% if form|has_field:'description' %}{{ form.description|as_crispy_field }}{% endif %}
+        </section>
+      </div>
+    {% else %}
+      <div class="lcars-form__grid">
+        {% for field in form.visible_fields %}
+          <section class="lcars-form__section">
+            {{ field|as_crispy_field }}
+          </section>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="lcars-form__actions">
+      <button type="submit" class="lcars-btn lcars-form__submit">Save Record</button>
+    </div>
+  </form>
+</section>
+
+{% if form_mode == 'person' %}
+  {% include 'modals/skills_modal.html' %}
+  {% include 'people/skills_modal_script.html' %}
+{% endif %}
 {% endblock %}
