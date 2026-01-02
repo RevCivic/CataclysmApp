@@ -1,13 +1,16 @@
 {% extends 'base_with_header.html' %}
+{% load static %}
 {% load mathfilters %}
 {% load group_check %}
 
 {% block header_title %}People Index{% endblock %}
 {% block header_actions %}
-    <a class="lcars-btn" href="{% url 'add_person' %}">Add Person</a>
+    <a class="lcars-btn" href="{% url 'people:add_person' %}">Add Person</a>
+{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/sci-fi-form.css' %}">
 {% endblock %}
 {% block content %}
-<link rel="stylesheet" href="/static/css/sci-fi-form.css">
 <div class="container" style="margin-top:20px;">
     <div class="column-buttons ">
         <table class="toggle-table">
@@ -94,7 +97,7 @@
             {% for person in people_list %}
                 {% if not person.hidden %}
                     <tr>
-                        <td><a href="{% url 'person_page' person.id %}">{{ person.id }}</a></td>
+                        <td><a href="{% url 'people:person_page' person.id %}">{{ person.id }}</a></td>
                         <td>{{ person.name }}</td>
                         <td>{{ person.age }}</td>
                         <td>{{ person.sex }}</td>

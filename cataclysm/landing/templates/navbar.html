@@ -2,23 +2,23 @@
 <div class="nav-fragment">
     <nav class="main">
         <li><img src="{% static 'images/cataclysm_logo.png' %}" alt="Cataclysm Logo" height="25px"></li>
-        <li><a href="/">Home</a></li>
-        <li><a href="/party/">Party</a></li>
-        <li><a href="/species/">Species</a></li>
-        <li><a href="/people/">People</a></li>
-        <li><a href="/worlds/">Worlds</a></li>
-        <li><a href="/factions/">Factions</a></li>
-        <li><a href="/starships/">Starships</a></li>
-        <li><a href="/vehicles/">Vehicles</a></li>
-        <li><a href="/weapons/">Weapons</a></li>
-        <li><a href="/armor/">Armor</a></li>
-        <li><a href="/events/">Events</a></li>
-        <li><a href="/mindmaps/">Mindmaps</a></li>
+        <li><a href="{% url 'landing_page' %}">Home</a></li>
+        <li><a href="{% url 'party:party_index' %}">Party</a></li>
+        <li><a href="{% url 'species:index' %}">Species</a></li>
+        <li><a href="{% url 'people:index' %}">People</a></li>
+        <li><a href="{% url 'worlds:index' %}">Worlds</a></li>
+        <li><a href="{% url 'factions:index' %}">Factions</a></li>
+        <li><a href="{% url 'ships:index' %}">Starships</a></li>
+        <li><a href="{% url 'vehicles:index' %}">Vehicles</a></li>
+        <li><a href="{% url 'weapons:index' %}">Weapons</a></li>
+        <li><a href="{% url 'armor:index' %}">Armor</a></li>
+        <li><a href="{% url 'events:index' %}">Events</a></li>
+        <li><a href="{% url 'mindmap_index' %}">Mindmaps</a></li>
         {% if user.is_authenticated %}
-            <li><a href="/admin/">Admin</a></li>
-            <li><a href="/admin/logout/">Log Out</a></li>
+            <li><a href="{% url 'admin:index' %}">Admin</a></li>
+            <li><a href="{% url 'logout' %}">Log Out</a></li>
         {% else %}
-            <li><a href="/admin/">Log In</a></li>
+            <li><a href="{% url 'login' %}">Log In</a></li>
         {% endif %}
     </nav>
 </div>

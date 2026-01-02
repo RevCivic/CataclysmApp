@@ -3,7 +3,7 @@
 {% load group_check %}
 {% block header_title %}{{ current_person.name }}{% endblock %}
 {% block header_actions %}
-    <a class="lcars-btn" href="{% url 'edit_person' current_person.id%}">Edit</a>
+    <a class="lcars-btn" href="{% url 'people:edit_person' current_person.id%}">Edit</a>
 {% endblock %}
 {% block content %}
 <div class="lcars-panel">
@@ -88,7 +88,7 @@
     <div>
         <table class="sci-fi-list">
             <tr>
-                <th><a href="{% url 'add_images' current_person.id%}"> Add Images</a></th>
+                <th><a href="{% url 'people:add_images' current_person.id%}"> Add Images</a></th>
             </tr>
             {% if current_person.additional_images.count > 0 %}
                 <tr>

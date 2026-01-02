@@ -3,7 +3,7 @@
 
 {% block header_title %}{{ current_species.name }}{% endblock %}
 {% block header_actions %}
-    <a class="lcars-btn" href="{% url 'edit_species' current_species.id %}">Edit</a>
+    <a class="lcars-btn" href="{% url 'species:edit_species' current_species.id %}">Edit</a>
 {% endblock %}
 {% block content %}
 <div class="lcars-panel">

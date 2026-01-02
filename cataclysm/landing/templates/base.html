@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{% static 'css/default.css' %}">
     <link rel="stylesheet" href="{% static 'css/lcars.css' %}">
     <link rel="stylesheet" href="{% static 'css/lcars-form.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     {% include 'navbar.html' %}
