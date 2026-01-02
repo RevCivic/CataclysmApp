@@ -50,7 +50,12 @@ body{
 .lcars-heading .chip{
   height:36px; min-width:64px; background:var(--lcars-accent); border-radius:18px; display:inline-block;
 }
-.lcars-heading h2{margin:0; font-size:1.4rem}
+.lcars-heading h2{
+  margin:0;
+  font-size:1.4rem;
+  line-height:1;
+  padding-top:2px;
+}
 
 /* Buttons */
 .lcars-btn{
