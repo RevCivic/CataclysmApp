@@ -2,38 +2,6 @@
     font-family: 'StarTrekFont';
     src: url('/static/fonts/Roddenberry.ttf') format('truetype');
 }
-@font-face {
-    font-family: 'AlienRavager';
-    src: url('/static/fonts/AlienRavager.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'AlienRavagerItalic';
-    src: url('/static/fonts/AlienRavagerItalic.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'Rebellion';
-    src: url('/static/fonts/Rebellion.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'RebellionItalic';
-    src: url('/static/fonts/RebellionItalic.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'StarTrekFuture';
-    src: url('/static/fonts/StarTrekFuture.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'StartrekenterprisefutureItalic';
-    src: url('/static/fonts/StartrekenterprisefutureItalic.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'Stacker';
-    src: url('static/fonts/Stacker.ttf') format('truetype');
-}
-@font-face {
-    font-family: 'GoodOT';
-    src: url('/static/fonts/GoodOT.otf') format('opentype');
-}
 /* Dark mode styles */
 body {
     background-image: url('../images/background.png');
@@ -42,6 +10,7 @@ body {
     background-size: 100% 100%;
     background-color: var(--lcars-bg, #111); /* LCARS background (fallback) */
     color: var(--lcars-text, #fff); /* Use LCARS text color when available */
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
 }
 
 /* Example styles for links in dark mode */
@@ -99,13 +68,13 @@ nav.main a:hover {
 h1.app_name {
     color: var(--lcars-panel, #ff9900); /* LCARS panel color */
     text-align: center;
-    font-family: 'Rebellion';
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
     font-size: 72px;
 }
 h2.welcome {
     color: #ff9900; /* Gold text color */
     text-align: center;
-    font-family: 'Rebellion';
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
     font-size: 24px;
 }
 p.app_description {
@@ -113,7 +82,7 @@ p.app_description {
     padding: 25px;
     color: var(--lcars-panel, #FFE81F);
     text-align: center;
-    font-family: 'GoodOT';
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
     font-size: 24px;
 }
 
@@ -251,7 +220,7 @@ div button {
 .sci-fi-list {
     border-collapse: collapse;
     width: 100%;
-    font-family: GoodOT;
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
     background-color: #333; /* Dark background color */
     color: #fff; /* Light text color */
 }
@@ -259,7 +228,7 @@ div button {
 .sci-fi-list-species {
     border-collapse: collapse;
     width: 80%;
-    font-family: GoodOT;
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
     background-color: #333; /* Dark background color */
     color: #fff; /* Light text color */
 }
@@ -309,7 +278,7 @@ div button {
 }
 
 .toggle-table th {
-    font-family: GoodOT;
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
     font-size: 24px;
     color: #fff;
     padding-left: 25px;
@@ -317,7 +286,7 @@ div button {
 }
 
 .toggle-table td {
-    font-family: GoodOT;
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
     font-size: 24px;
     color: #fff;
     margin-right: 10px;
@@ -366,12 +335,12 @@ div button {
     color: black;
     text-align: left;
     font-weight: bold;
-    font-family: GoodOT;
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
 }
 .index_menu {
     color: #ff9900; /* Gold text color */
     text-align: center;
-    font-family: 'Rebellion';
+    font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
     font-size: 24px;
     margin-bottom: 20px;
     padding-bottom: 20px;
