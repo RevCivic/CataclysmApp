@@ -1,8 +1,10 @@
 {% extends "base_with_header.html" %}
-{% load crispy_forms_tags %}
+{% load static crispy_forms_tags %}
 {% block header_title %}{% if form.instance.pk %}Edit Node{% else %}Add Node{% endif %}{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/sci-fi-form.css' %}">
+{% endblock %}
 {% block content %}
-<link rel="stylesheet" href="/static/css/sci-fi-form.css">
 <div class="sci-fi-form-container">
   <form method="post">
     {% csrf_token %}

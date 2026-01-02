@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = "party"
+
 urlpatterns = [
     path('', views.PartyListView.as_view(), name='party_index'),
     path('<int:pk>/', views.PartyDetailView.as_view(), name='party_page'),

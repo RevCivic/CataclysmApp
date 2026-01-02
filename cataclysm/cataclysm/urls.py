@@ -10,15 +10,15 @@ urlpatterns = [
     path('armor/', include("armor.urls")),
     path('events/', include("events.urls")),
     path('factions/', include("factions.urls")),
-    path('people/', include('people.urls')),
-    path('species/', include("species.urls")),
+    path('people/', include(("people.urls", "people"), namespace="people")),
+    path('species/', include(("species.urls", "species"), namespace="species")),
     path('weapons/', include("weapons.urls")),
     path('worlds/', include("worlds.urls")),
     path('ships/', include("ships.urls")),
     # legacy/alias route used in some templates - include with a distinct namespace to avoid duplicate registration
     path('starships/', include(("ships.urls", "ships"), namespace='starships')),
     path('vehicles/', include("vehicles.urls")),
-    path('party/', include("party.urls")),
+    path('party/', include(("party.urls", "party"), namespace="party")),
     path('adminflow/', include("adminflow.urls")),
     path('mindmaps/', include("mindmaps.urls")),
 ]

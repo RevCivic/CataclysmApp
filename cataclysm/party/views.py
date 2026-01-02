@@ -31,7 +31,7 @@ class PartyCreateView(CreateView):
     template_name = 'party/party_form.html'
 
     def get_success_url(self):
-        return reverse_lazy('party_page', kwargs={'pk': self.object.pk})
+        return reverse_lazy('party:party_page', kwargs={'pk': self.object.pk})
 
 
 class PartyUpdateView(UpdateView):
@@ -40,7 +40,7 @@ class PartyUpdateView(UpdateView):
     template_name = 'party/party_form.html'
 
     def get_success_url(self):
-        return reverse_lazy('party_page', kwargs={'pk': self.object.pk})
+        return reverse_lazy('party:party_page', kwargs={'pk': self.object.pk})
 
 
 def add_party_images(request, pk):

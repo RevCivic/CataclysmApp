@@ -1,13 +1,14 @@
 {% extends 'base_with_header.html' %}
-{% load mathfilters %}
-{% load group_check %}
+{% load static mathfilters group_check %}
 
 {% block header_title %}Species Index{% endblock %}
 {% block header_actions %}
-    <a class="lcars-btn" href="{% url 'add' %}">Add Species</a>
+    <a class="lcars-btn" href="{% url 'species:add' %}">Add Species</a>
+{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/sci-fi-form.css' %}">
 {% endblock %}
 {% block content %}
-<link rel="stylesheet" href="/static/css/sci-fi-form.css">
 <div class="container" style="margin-top:20px;">
     <table class="sci-fi-list">
         <thead>
@@ -31,7 +32,7 @@
             {% for species in species_list %}
                 {% if not species.hidden %}
                     <tr>
-                        <td><a href="{% url 'species_page' species.id %}">{{ species.name }}</a></td>
+                        <td><a href="{% url 'species:species_page' species.id %}">{{ species.name }}</a></td>
                         <td>{{ species.get_size_display }}</td>
                         <td>{{ species.home_world }}</td>
                         <td>{{ species.get_type_display }}</td>

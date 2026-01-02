@@ -61,7 +61,7 @@ def edit_person(request, id):
         form = PersonForm(request.POST, request.FILES, instance=person)
         if form.is_valid():
             form.save()
-            return redirect('person_page', id=id)  # Redirect to the object page after editing the object
+            return redirect('people:person_page', id=id)  # Redirect to the object page after editing the object
     else:
         form = PersonForm(instance=person)
 
@@ -88,7 +88,7 @@ def edit_person(request, id):
 def delete_person(request, id):
     person = Person.objects.get(id=id)
     person.delete()
-    return redirect('person_index')
+    return redirect('people:index')
 
 def add_images(request, id):
     person = Person.objects.get(id=id)
