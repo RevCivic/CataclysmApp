@@ -13,7 +13,7 @@
 body{
   background: linear-gradient(180deg, #071021 0%, #0b0b1a 100%);
   color: var(--lcars-text);
-  font-family: 'StarTrekFuture', 'Rebellion', 'Segoe UI', Arial, sans-serif;
+  font-family: 'StarTrekFont', 'Segoe UI', Arial, sans-serif;
 }
 
 /* LCARS top bar */
