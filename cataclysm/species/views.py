@@ -49,7 +49,7 @@ def species_page(request, id):
     context = {
         'current_species': current_species,
     }
-    return render(request, 'species.html', context)
+    return render(request, 'species/species.html', context)
 
 def add(request):
     if request.method == 'POST':
