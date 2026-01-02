@@ -1,9 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'base_with_header.html' %}
+{% block header_title %}{{ object.name|default:'Armor' }}{% endblock %}
+{% block header_actions %}
+  <a href="{% url 'armor:index' %}" class="lcars-btn">Back</a>
+{% endblock %}
 {% block content %}
 <div class="container">
-  <h1>{{ object.name|default:'Armor' }}</h1>
   <p>Type: {{ object.armor_type|default:'-' }}</p>
   <p>Base AC: {{ object.base_armor_class|default:'-' }}</p>
-  <a href="{% url 'armor:index' %}">Back</a>
 </div>
 {% endblock %}

@@ -1,17 +1,17 @@
-{% extends 'base.html' %}
+{% extends 'base_with_header.html' %}
 {% load static %}
 {% load mathfilters %}
 {% load group_check %}
 
 <link rel="stylesheet" href="/static/css/default.css">
 
+{% block header_title %}{{ current_party.name }}{% endblock %}
+{% block header_actions %}
+	<a class="lcars-btn" href="{% url 'edit_party' current_party.pk %}">Edit</a>
+	<a class="lcars-btn" href="{% url 'add_party_images' current_party.pk %}">Add Images</a>
+{% endblock %}
 {% block content %}
 <div class="lcars-panel">
-	<div class="lcars-heading">
-		<span class="chip lcars-tab"></span>
-		<h2>{{ current_party.name }}</h2>
-	</div>
-	<div class="index_menu"><a class="lcars-btn" href="{% url 'edit_party' current_party.pk %}">Edit</a> <a class="lcars-btn" href="{% url 'add_party_images' current_party.pk %}">Add Images</a></div>
 	<table style="width:100%; margin-top:20px;">
 		<!-- additional images and members are shown above -->
 	</table>

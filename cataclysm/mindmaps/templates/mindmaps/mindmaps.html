@@ -1,7 +1,9 @@
-{% extends "base.html" %}
+{% extends "base_with_header.html" %}
+{% block header_title %}Mind Maps{% endblock %}
+{% block header_actions %}
+  <a href="{% url 'mindmap_add' %}" class="lcars-btn">Add Mind Map</a>
+{% endblock %}
 {% block content %}
-<h1>Mind Maps</h1>
-<a href="{% url 'mindmap_add' %}" class="btn btn-primary">Add Mind Map</a>
 <ul>
   {% for mindmap in mindmaps %}
     <li><a href="{% url 'mindmap_detail' mindmap.pk %}">{{ mindmap.title }}</a></li>

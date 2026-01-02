@@ -1,10 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'base_with_header.html' %}
 {% load static %}
+{% block header_title %}Weapons{% endblock %}
+{% block header_actions %}
+	<a href="{% url 'weapons:add' %}" class="lcars-btn">Add Weapon</a>
+{% endblock %}
 {% block content %}
-<div class="list-header index_menu">
-	<h1 class="app_name">Weapons</h1>
-	<a href="{% url 'weapons:add' %}" class="btn btn-primary">Add Weapon</a>
-</div>
 <table class="table table-striped sci-fi-table">
 	<thead>
 		<tr>

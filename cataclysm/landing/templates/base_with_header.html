@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block header %}
+  <div class="lcars-page-header">
+    <div class="lcars-page-header__title">
+      <span class="chip lcars-tab" aria-hidden="true"></span>
+      <div>
+        <h1 class="lcars-page-header__heading">{% block header_title %}{% endblock %}</h1>
+        {% block header_subtitle %}{% endblock %}
+      </div>
+    </div>
+    <div class="lcars-page-header__actions">
+      {% block header_actions %}{% endblock %}
+    </div>
+  </div>
+{% endblock %}

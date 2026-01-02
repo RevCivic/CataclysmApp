@@ -1,14 +1,11 @@
-{% extends "base.html" %}
+{% extends "base_with_header.html" %}
 {% load crispy_forms_tags %}
 
+{% block header_title %}{% if party %}Edit Party{% else %}Add Party{% endif %}{% endblock %}
 {% block content %}
 <link rel="stylesheet" href="/static/css/sci-fi-form.css">
 <div class="lcars-panel">
   <div class="sci-fi-form-container">
-  <div class="lcars-heading" style="justify-content:center;">
-    <span class="chip lcars-tab"></span>
-    <h1 style="margin:0; font-size:2.2rem;">{% if party %}Edit Party{% else %}Add Party{% endif %}</h1>
-  </div>
   <form method="post">
     {% csrf_token %}
     <div class="sci-fi-form-grid" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2.5em 3em; align-items: start;">
