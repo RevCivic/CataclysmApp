@@ -1,15 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'base_with_header.html' %}
 {% load crispy_forms_tags %}
+{% block header_title %}Add Vehicle{% endblock %}
+{% block header_subtitle %}
+  <p class="lcars-page-header__subtitle">Register a new ground or atmospheric craft.</p>
+{% endblock %}
 {% block content %}
 <section class="lcars-panel lcars-form">
-  <div class="lcars-form__header">
-    <span class="lcars-form__chip" aria-hidden="true"></span>
-    <div>
-      <h1 class="lcars-form__title">Add Vehicle</h1>
-      <p class="lcars-form__subtitle">Register a new ground or atmospheric craft.</p>
-    </div>
-  </div>
-
   <form method="post" enctype="multipart/form-data" class="lcars-form__body">
     {% csrf_token %}
     {% if form %}

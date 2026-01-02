@@ -57,6 +57,41 @@ body{
   padding-top:2px;
 }
 
+.lcars-page-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1.5rem;
+  margin: 1.2rem 0;
+  flex-wrap:wrap;
+}
+
+.lcars-page-header__title{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.lcars-page-header__heading{
+  margin:0;
+  font-size:clamp(1.5rem, 3vw, 2.3rem);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.lcars-page-header__subtitle{
+  margin:.35rem 0 0;
+  color:rgba(255,255,255,0.7);
+  font-size:clamp(0.95rem, 2vw, 1.1rem);
+  letter-spacing:.04em;
+}
+
+.lcars-page-header__actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
 /* Buttons */
 .lcars-btn{
   background: linear-gradient(90deg,var(--lcars-accent-2), #0077aa);

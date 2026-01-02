@@ -1,33 +1,25 @@
-{% extends 'base.html' %}
+{% extends 'base_with_header.html' %}
 {% load crispy_forms_tags custom_filters %}
+{% block header_title %}
+  {% if form_mode == 'person' %}
+    Add Crew Member
+  {% elif form_mode == 'person_image' %}
+    Attach Visual Record
+  {% else %}
+    Add Record
+  {% endif %}
+{% endblock %}
+{% block header_subtitle %}
+  {% if form_mode == 'person' %}
+    <p class="lcars-page-header__subtitle">Document a new operative for the Cataclysm roster.</p>
+  {% elif form_mode == 'person_image' %}
+    <p class="lcars-page-header__subtitle">Upload supporting imagery for an existing crew member.</p>
+  {% else %}
+    <p class="lcars-page-header__subtitle">Provide the details below to expand the database.</p>
+  {% endif %}
+{% endblock %}
 {% block content %}
 <section class="lcars-panel lcars-form">
-  {% if form_mode == 'person' %}
-    <div class="lcars-form__header">
-      <span class="lcars-form__chip" aria-hidden="true"></span>
-      <div>
-        <h1 class="lcars-form__title">Add Crew Member</h1>
-        <p class="lcars-form__subtitle">Document a new operative for the Cataclysm roster.</p>
-      </div>
-    </div>
-  {% elif form_mode == 'person_image' %}
-    <div class="lcars-form__header">
-      <span class="lcars-form__chip" aria-hidden="true"></span>
-      <div>
-        <h1 class="lcars-form__title">Attach Visual Record</h1>
-        <p class="lcars-form__subtitle">Upload supporting imagery for an existing crew member.</p>
-      </div>
-    </div>
-  {% else %}
-    <div class="lcars-form__header">
-      <span class="lcars-form__chip" aria-hidden="true"></span>
-      <div>
-        <h1 class="lcars-form__title">Add Record</h1>
-        <p class="lcars-form__subtitle">Provide the details below to expand the database.</p>
-      </div>
-    </div>
-  {% endif %}
-
   <form method="post" enctype="multipart/form-data" class="lcars-form__body">
     {% csrf_token %}
     {% for hidden_field in form.hidden_fields %}

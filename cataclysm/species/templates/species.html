@@ -1,15 +1,12 @@
-{% extends 'base.html' %}
+{% extends 'base_with_header.html' %}
 {% load mathfilters %}
 
+{% block header_title %}{{ current_species.name }}{% endblock %}
+{% block header_actions %}
+    <a class="lcars-btn" href="{% url 'edit_species' current_species.id %}">Edit</a>
+{% endblock %}
 {% block content %}
 <div class="lcars-panel">
-    <div class="lcars-heading">
-        <span class="chip lcars-tab"></span>
-        <h2>{{ current_species.name }}</h2>
-    </div>
-    <div class="index_menu">
-        <a class="lcars-btn" href="{% url 'edit_species' current_species.id %}">Edit</a>
-    </div>
     <div style="width: 100%;">
         <table class="sci-fi-list">
             <tr style="vertical-align: top;">
