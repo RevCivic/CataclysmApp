@@ -24,49 +24,67 @@
             </tr>
             <tr>
                 {% for trait in traits %}
-                    <td><button class="column-button toggle-button active" data-column="{{ trait.name|slugify }}"></button></td>
+                    <td><button type="button" class="column-button toggle-button active" data-column="{{ trait.name|slugify }}"></button></td>
                 {% endfor %}
             </tr>
             <tr>
                 <th colspan="{{ traits|length }}" class="table-label">Toggle All</th>
             </tr>
             <tr>
-                <td colspan="{{ traits|length }}"><button class="all-column-button toggle-button" data-column="all"></button></td>
+                <td colspan="{{ traits|length }}"><button type="button" class="all-column-button toggle-button active" data-column="all"></button></td>
             </tr>
         </table>
     </div>
 
     <script>
-        var buttons = document.getElementsByClassName("column-button");
-        for (var i = 0; i < buttons.length; i++) {
-            buttons[i].addEventListener("click", function() {
-                var column = this.getAttribute("data-column");
-                var cells = document.getElementsByClassName(column);
-                for (var j = 0; j < cells.length; j++) {
-                    if (cells[j].style.display === "none") {
-                        cells[j].style.display = "table-cell";
-                    } else {
-                        cells[j].style.display = "none";
+        document.addEventListener("DOMContentLoaded", function() {
+            function setColumnVisibility(columnClassName, isVisible) {
+                var cells = document.getElementsByClassName(columnClassName);
+                for (var i = 0; i < cells.length; i++) {
+                    cells[i].style.display = isVisible ? "" : "none";
+                }
+            }
+
+            function syncAllButtonState(allButton, columnButtons) {
+                var hasInactive = false;
+                for (var i = 0; i < columnButtons.length; i++) {
+                    if (!columnButtons[i].classList.contains("active")) {
+                        hasInactive = true;
+                        break;
                     }
                 }
-                if (this.classList.contains("active")) {
-                    this.classList.remove("active");
+
+                if (hasInactive) {
+                    allButton.classList.remove("active");
                 } else {
-                    this.classList.add("active");
+                    allButton.classList.add("active");
                 }
+            }
+
+            var columnButtons = document.getElementsByClassName("column-button");
+            var allButton = document.getElementsByClassName("all-column-button")[0];
+
+            for (var i = 0; i < columnButtons.length; i++) {
+                columnButtons[i].addEventListener("click", function(event) {
+                    event.preventDefault();
+                    var column = this.getAttribute("data-column");
+                    var shouldBeVisible = !this.classList.contains("active");
+                    setColumnVisibility(column, shouldBeVisible);
+                    this.classList.toggle("active", shouldBeVisible);
+                    syncAllButtonState(allButton, columnButtons);
+                });
+            }
+
+            allButton.addEventListener("click", function(event) {
+                event.preventDefault();
+                var shouldEnableAll = !allButton.classList.contains("active");
+                for (var i = 0; i < columnButtons.length; i++) {
+                    var column = columnButtons[i].getAttribute("data-column");
+                    setColumnVisibility(column, shouldEnableAll);
+                    columnButtons[i].classList.toggle("active", shouldEnableAll);
+                }
+                allButton.classList.toggle("active", shouldEnableAll);
             });
-        }
-        var allButton = document.getElementsByClassName("all-column-button")[0];
-        allButton.addEventListener("click", function() {
-            var buttons = document.getElementsByClassName("column-button");
-            for (var i = 0; i < buttons.length; i++) {
-                buttons[i].click();
-            }
-            if (allButton.classList.contains("active")) {
-                allButton.classList.remove("active");
-            } else {
-                allButton.classList.add("active");
-            }
         });
     </script>
 
