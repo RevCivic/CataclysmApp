@@ -15,7 +15,7 @@ Run:
 docker run --rm -p 8000:8000 \
   -e PORT=8000 \
   -e DEFAULT_USERNAME=admin \
-  -e DEFAULT_PASSWORD='ChangeMe123!Secure' \
+  -e DEFAULT_PASSWORD='YourSecurePasswordHere' \
   cataclysmapp:latest
 ```
 
@@ -26,7 +26,8 @@ docker run --rm -p 8000:8000 \
 - `GUNICORN_TIMEOUT`: Optional Gunicorn timeout seconds (default: `120`)
 - `DEFAULT_USERNAME`: Optional default admin username created on startup
 - `DEFAULT_PASSWORD`: Optional default admin password used when creating the default admin
-- `DEFAULT_PASSWORD_UPDATE`: Optional (`true`/`false`, default `false`); when `true`, updates password for an existing `DEFAULT_USERNAME`
+- `DEFAULT_PASSWORD_UPDATE`: Optional (`true`/`false`, default `false`); when `true`, updates password for an existing `DEFAULT_USERNAME` (existing staff/superuser flags are preserved)
 
 Use Docker/Portainer secrets or a secure environment-variable source for credentials in production.
 `EXPOSE 8000` in the Dockerfile is informational; actual listen port is controlled by `PORT`.
+The container intentionally binds Gunicorn to `0.0.0.0` so published container ports work; place it behind a reverse proxy/TLS termination in production.
