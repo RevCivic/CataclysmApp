@@ -12,7 +12,7 @@ Set environment variables first (recommended via a local `.env` file that is not
 
 ```bash
 cat > .env <<'EOF'
-DEFAULT_USERNAME=admin
+DEFAULT_USERNAME=your_username
 DEFAULT_PASSWORD=***REPLACE-WITH-SECURE-PASSWORD***
 EOF
 ```
