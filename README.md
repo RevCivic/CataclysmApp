@@ -15,7 +15,7 @@ Run:
 docker run --rm -p 8000:8000 \
   -e PORT=8000 \
   -e DEFAULT_USERNAME=admin \
-  -e DEFAULT_PASSWORD='CHANGE_ME_INSECURE' \
+  -e DEFAULT_PASSWORD='ChangeMe123!Secure' \
   cataclysmapp:latest
 ```
 
