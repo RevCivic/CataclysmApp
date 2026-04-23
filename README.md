@@ -15,7 +15,7 @@ Run:
 docker run --rm -p 8000:8000 \
   -e PORT=8000 \
   -e DEFAULT_USERNAME=admin \
-  -e DEFAULT_PASSWORD='Use-A-Strong-Secret-Here' \
+  -e DEFAULT_PASSWORD='CHANGE_ME_INSECURE' \
   cataclysmapp:latest
 ```
 
@@ -27,3 +27,4 @@ docker run --rm -p 8000:8000 \
 - `DEFAULT_PASSWORD_UPDATE`: Optional (`true`/`false`, default `false`); when `true`, updates password for an existing `DEFAULT_USERNAME`
 
 Use Docker/Portainer secrets or a secure environment-variable source for credentials in production.
+`EXPOSE 8000` in the Dockerfile is informational; actual listen port is controlled by `PORT`.

@@ -9,6 +9,8 @@ if [ -n "${DEFAULT_USERNAME:-}" ] && [ -n "${DEFAULT_PASSWORD:-}" ]; then
 python manage.py shell <<'PY'
 import os
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 username = os.environ["DEFAULT_USERNAME"]
 password = os.environ["DEFAULT_PASSWORD"]
@@ -16,10 +18,16 @@ update_existing = os.environ.get("DEFAULT_PASSWORD_UPDATE", "").lower() in {"1",
 User = get_user_model()
 
 user, created = User.objects.get_or_create(username=username)
+try:
+    validate_password(password, user=user)
+except ValidationError as exc:
+    raise SystemExit(f"DEFAULT_PASSWORD failed Django password validation: {'; '.join(exc.messages)}")
+
 if created or update_existing:
     user.set_password(password)
-user.is_staff = True
-user.is_superuser = True
+if created:
+    user.is_staff = True
+    user.is_superuser = True
 user.save()
 PY
 fi
