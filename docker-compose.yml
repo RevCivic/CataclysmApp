@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     image: cataclysmapp:latest
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:${PORT:-8000}"
     environment:
       PORT: ${PORT:-8000}
       DEFAULT_USERNAME: ${DEFAULT_USERNAME?DEFAULT_USERNAME environment variable not set}
