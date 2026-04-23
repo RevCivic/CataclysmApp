@@ -25,7 +25,7 @@ Never commit real credentials. For production, prefer Docker/Portainer secrets o
 docker compose up --build
 ```
 
-The app will be available at `http://localhost:8000`.
+The app will be available at `http://localhost:${PORT:-8000}`.
 
 ## Run in Docker (Portainer-friendly)
 
@@ -38,8 +38,7 @@ docker build -t cataclysmapp:latest .
 Run:
 
 ```bash
-docker run --rm -p 8000:8000 \
-  -e PORT=8000 \
+docker run --rm -p 8080:8000 \
   -e DEFAULT_USERNAME=admin \
   -e DEFAULT_PASSWORD='YourSecurePasswordHere' \
   cataclysmapp:latest
@@ -47,14 +46,15 @@ docker run --rm -p 8000:8000 \
 
 ### Environment variables
 
-- `PORT`: Port Django binds to inside the container (default: `8000`)
+- `PORT`: Host port published by Docker Compose (default: `8000`). The container always listens on port `8000`.
 - `GUNICORN_WORKERS`: Optional Gunicorn worker count (default: `3`)
 - `GUNICORN_TIMEOUT`: Optional Gunicorn timeout seconds (default: `120`)
 - `DEFAULT_USERNAME`: Optional default admin username created on startup
 - `DEFAULT_PASSWORD`: Optional default admin password used when creating the default admin (must satisfy Django password validators: minimum length, non-common, non-numeric, etc.)
 - `DEFAULT_PASSWORD_UPDATE`: Optional (`true`/`false`, default `false`); when exactly `true`, updates password for an existing `DEFAULT_USERNAME` only if that user is already staff + superuser
 
+If you add more published ports later, use separate purpose-based variables (for example `APP_HTTP_PORT`, `APP_METRICS_PORT`) instead of reusing one value.
+
 Use Docker/Portainer secrets or a secure environment-variable source for credentials in production.
-`EXPOSE 8000` in the Dockerfile is informational; actual listen port is controlled by `PORT`.
-The container intentionally binds Gunicorn to `0.0.0.0` so published container ports work; place it behind a reverse proxy/TLS termination in production.
+The container intentionally binds Gunicorn to `0.0.0.0:8000`; place it behind a reverse proxy/TLS termination in production.
 Treat `DEFAULT_PASSWORD_UPDATE=true` as a privileged operation and restrict who can modify runtime environment variables.
