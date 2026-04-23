@@ -1,7 +1,8 @@
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from species.models import Species
+from django.shortcuts import get_object_or_404, redirect, render
+
 from species.forms import SpeciesForm
+from species.models import Species
 
 
 def index(request):
@@ -45,31 +46,29 @@ def index(request):
 
 
 def species_page(request, id):
-    current_species = Species.objects.get(id=id)
-    context = {
-        'current_species': current_species,
-    }
-    return render(request, 'species.html', context)
+    current_species = get_object_or_404(Species, id=id)
+    return render(request, 'species.html', {'current_species': current_species})
+
 
 def add(request):
     if request.method == 'POST':
-        form = SpeciesForm(request.POST)
+        form = SpeciesForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            return redirect('success_page')  # Redirect to a success page after adding the object
+            species = form.save()
+            return redirect('species_page', id=species.id)
     else:
         form = SpeciesForm()
-
     return render(request, 'species/add_object.html', {'form': form})
+
 
 def edit_species(request, id):
-    species = Species.objects.get(id=id)
+    species = get_object_or_404(Species, id=id)
     if request.method == 'POST':
-        form = SpeciesForm(request.POST, instance=species)
+        form = SpeciesForm(request.POST, request.FILES, instance=species)
         if form.is_valid():
             form.save()
-            return redirect('success_page')  # Redirect to a success page after adding the object
+            return redirect('species_page', id=id)
     else:
         form = SpeciesForm(instance=species)
-
     return render(request, 'species/add_object.html', {'form': form})
+
