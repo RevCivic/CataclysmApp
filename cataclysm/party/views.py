@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
@@ -64,6 +64,6 @@ class PartyUpdateView(UpdateView):
 
 def add_party_images(request, pk):
     # Images for Party are not yet modelled; redirect to the party detail.
-    party = get_object_or_404(Party, pk=pk)
-    return render(request, 'party/party.html', {'current_party': party})
+    get_object_or_404(Party, pk=pk)
+    return redirect('party_page', pk=pk)
 
