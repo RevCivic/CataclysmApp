@@ -8,5 +8,5 @@ services:
       - "8000:8000"
     environment:
       PORT: ${PORT:-8000}
-      DEFAULT_USERNAME: ${DEFAULT_USERNAME?Required environment variable not set}
-      DEFAULT_PASSWORD: ${DEFAULT_PASSWORD?Required environment variable not set}
+      DEFAULT_USERNAME: ${DEFAULT_USERNAME?DEFAULT_USERNAME environment variable not set}
+      DEFAULT_PASSWORD: ${DEFAULT_PASSWORD?DEFAULT_PASSWORD environment variable not set}
