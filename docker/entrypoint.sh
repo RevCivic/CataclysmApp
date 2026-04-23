@@ -21,12 +21,14 @@ validation_user = User(username=username)
 
 try:
     validate_password(password, user=validation_user)
-except ValidationError as exc:
-    print(f"DEFAULT_PASSWORD failed Django password validation: {'; '.join(exc.messages)}", file=sys.stderr)
+except ValidationError:
+    print("DEFAULT_PASSWORD does not meet security requirements. See README for password guidance.", file=sys.stderr)
     sys.exit(1)
 
 user, created = User.objects.get_or_create(username=username)
 if created or should_update_password:
+    if not created and should_update_password:
+        print(f"Updating password for existing user '{username}' due to DEFAULT_PASSWORD_UPDATE=true", file=sys.stderr)
     user.set_password(password)
 if created:
     user.is_staff = True
