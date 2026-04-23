@@ -12,7 +12,6 @@ Set environment variables first (recommended via a local `.env` file that is not
 
 ```bash
 cat > .env <<'EOF'
-PORT=8000
 DEFAULT_USERNAME=your_username
 DEFAULT_PASSWORD=***REPLACE-WITH-SECURE-PASSWORD***
 EOF
@@ -39,8 +38,7 @@ docker build -t cataclysmapp:latest .
 Run:
 
 ```bash
-docker run --rm -p 8080:8080 \
-  -e PORT=8080 \
+docker run --rm -p 8080:8000 \
   -e DEFAULT_USERNAME=admin \
   -e DEFAULT_PASSWORD='YourSecurePasswordHere' \
   cataclysmapp:latest
@@ -48,7 +46,7 @@ docker run --rm -p 8080:8080 \
 
 ### Environment variables
 
-- `PORT`: App HTTP port used by Gunicorn inside the container and by Compose port publishing (default: `8000`)
+- `PORT`: Host port published by Docker Compose (default: `8000`). The container always listens on port `8000`.
 - `GUNICORN_WORKERS`: Optional Gunicorn worker count (default: `3`)
 - `GUNICORN_TIMEOUT`: Optional Gunicorn timeout seconds (default: `120`)
 - `DEFAULT_USERNAME`: Optional default admin username created on startup
@@ -58,6 +56,5 @@ docker run --rm -p 8080:8080 \
 If you add more published ports later, use separate purpose-based variables (for example `APP_HTTP_PORT`, `APP_METRICS_PORT`) instead of reusing one value.
 
 Use Docker/Portainer secrets or a secure environment-variable source for credentials in production.
-`EXPOSE 8000` in the Dockerfile is informational; actual listen port is controlled by `PORT`.
-The container intentionally binds Gunicorn to `0.0.0.0` so published container ports work; place it behind a reverse proxy/TLS termination in production.
+The container intentionally binds Gunicorn to `0.0.0.0:8000`; place it behind a reverse proxy/TLS termination in production.
 Treat `DEFAULT_PASSWORD_UPDATE=true` as a privileged operation and restrict who can modify runtime environment variables.
