@@ -15,18 +15,18 @@ from django.core.exceptions import ValidationError
 
 username = os.environ["DEFAULT_USERNAME"]
 password = os.environ["DEFAULT_PASSWORD"]
-update_existing = os.environ.get("DEFAULT_PASSWORD_UPDATE", "").lower() in {"1", "true", "yes", "on"}
+should_update_password = os.environ.get("DEFAULT_PASSWORD_UPDATE", "").lower() in {"1", "true", "yes", "on"}
 User = get_user_model()
-candidate_user = User(username=username)
+validation_user = User(username=username)
 
 try:
-    validate_password(password, user=candidate_user)
+    validate_password(password, user=validation_user)
 except ValidationError as exc:
     print(f"DEFAULT_PASSWORD failed Django password validation: {'; '.join(exc.messages)}", file=sys.stderr)
     sys.exit(1)
 
 user, created = User.objects.get_or_create(username=username)
-if created or update_existing:
+if created or should_update_password:
     user.set_password(password)
 if created:
     user.is_staff = True
