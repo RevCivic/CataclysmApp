@@ -26,7 +26,7 @@ docker run --rm -p 8000:8000 \
 - `GUNICORN_TIMEOUT`: Optional Gunicorn timeout seconds (default: `120`)
 - `DEFAULT_USERNAME`: Optional default admin username created on startup
 - `DEFAULT_PASSWORD`: Optional default admin password used when creating the default admin (must satisfy Django password validators: minimum length, non-common, non-numeric, etc.)
-- `DEFAULT_PASSWORD_UPDATE`: Optional (`true`/`false`, default `false`); when `true`, updates password for an existing `DEFAULT_USERNAME` (existing staff/superuser flags are preserved)
+- `DEFAULT_PASSWORD_UPDATE`: Optional (`true`/`false`, default `false`); when exactly `true`, updates password for an existing `DEFAULT_USERNAME` (existing staff/superuser flags are preserved)
 
 Use Docker/Portainer secrets or a secure environment-variable source for credentials in production.
 `EXPOSE 8000` in the Dockerfile is informational; actual listen port is controlled by `PORT`.

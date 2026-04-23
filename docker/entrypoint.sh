@@ -15,7 +15,7 @@ from django.core.exceptions import ValidationError
 
 username = os.environ["DEFAULT_USERNAME"]
 password = os.environ["DEFAULT_PASSWORD"]
-should_update_password = os.environ.get("DEFAULT_PASSWORD_UPDATE", "").lower() in {"1", "true", "yes", "on"}
+should_update_password = os.environ.get("DEFAULT_PASSWORD_UPDATE", "").lower() == "true"
 User = get_user_model()
 validation_user = User(username=username)
 
@@ -28,7 +28,10 @@ except ValidationError:
 user, created = User.objects.get_or_create(username=username)
 if created or should_update_password:
     if not created and should_update_password:
-        print(f"Updating password for existing user '{username}' due to DEFAULT_PASSWORD_UPDATE=true", file=sys.stderr)
+        if not (user.is_staff and user.is_superuser):
+            print("DEFAULT_PASSWORD_UPDATE can only target an existing admin user.", file=sys.stderr)
+            sys.exit(1)
+        print("Updating password for existing default admin user due to DEFAULT_PASSWORD_UPDATE=true", file=sys.stderr)
     user.set_password(password)
 if created:
     user.is_staff = True
