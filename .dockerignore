@@ -1,0 +1,6 @@
+.git
+**/__pycache__/
+**/*.pyc
+cataclysm/db.sqlite3
+cataclysm/staticfiles/
+cataclysm/media/
