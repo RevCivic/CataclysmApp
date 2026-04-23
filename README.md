@@ -1,5 +1,31 @@
 # CataclysmApp
-A Django Project with a Postgres Data structure for a homebrew starfinder campaign
+A Django app for a homebrew Starfinder TTRPG campaign.
+
+## Purpose
+
+CataclysmApp is a campaign catalog for a customized Starfinder setting.  
+It documents the world timeline, custom rules, factions, people, worlds, events, ships, vehicles, gear, and other unique lore/items used in this homebrew game.
+
+## Quick start with Docker Compose
+
+Set environment variables first (recommended via a local `.env` file that is not committed):
+
+```bash
+cat > .env <<'EOF'
+DEFAULT_USERNAME=your_username
+DEFAULT_PASSWORD=***REPLACE-WITH-SECURE-PASSWORD***
+EOF
+```
+
+Or export them in your shell before running compose.
+
+Never commit real credentials. For production, prefer Docker/Portainer secrets or another secure secret-management system.
+
+```bash
+docker compose up --build
+```
+
+The app will be available at `http://localhost:8000`.
 
 ## Run in Docker (Portainer-friendly)
 
