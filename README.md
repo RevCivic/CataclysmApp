@@ -22,6 +22,8 @@ docker run --rm -p 8000:8000 \
 ### Environment variables
 
 - `PORT`: Port Django binds to inside the container (default: `8000`)
+- `GUNICORN_WORKERS`: Optional Gunicorn worker count (default: `3`)
+- `GUNICORN_TIMEOUT`: Optional Gunicorn timeout seconds (default: `120`)
 - `DEFAULT_USERNAME`: Optional default admin username created on startup
 - `DEFAULT_PASSWORD`: Optional default admin password used when creating the default admin
 - `DEFAULT_PASSWORD_UPDATE`: Optional (`true`/`false`, default `false`); when `true`, updates password for an existing `DEFAULT_USERNAME`

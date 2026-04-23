@@ -1,5 +1,5 @@
-#!/bin/sh
-set -eu
+#!/bin/bash
+set -euo pipefail
 
 cd /app/cataclysm
 
@@ -32,4 +32,7 @@ user.save()
 PY
 fi
 
-exec gunicorn cataclysm.wsgi:application --bind "0.0.0.0:${PORT:-8000}"
+exec gunicorn cataclysm.wsgi:application \
+  --bind "0.0.0.0:${PORT:-8000}" \
+  --workers "${GUNICORN_WORKERS:-3}" \
+  --timeout "${GUNICORN_TIMEOUT:-120}"
