@@ -19,6 +19,8 @@ EOF
 
 Or export them in your shell before running compose.
 
+Never commit real credentials. For production, prefer Docker/Portainer secrets or another secure secret-management system.
+
 ```bash
 docker compose up --build
 ```
