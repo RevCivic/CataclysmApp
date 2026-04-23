@@ -13,3 +13,6 @@ cataclysm/adminflow/__pycache__/admin.cpython-312.pyc
 
 cataclysm/cataclysm/management/commands/Client_Secret_1.json
 cataclysm/cataclysm/secrets/service_account.json
+
+# collectstatic output – never commit generated static assets
+cataclysm/staticfiles/

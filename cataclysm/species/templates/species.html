@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ current_species.name }} – Species{% endblock %}
+
+{% block content %}
+<div class="lcars-panel">
+    <div class="lcars-heading">
+        <span class="chip lcars-tab"></span>
+        <h2>{{ current_species.name }}</h2>
+    </div>
+    <div class="index_menu">
+        <a class="lcars-btn" href="{% url 'edit_species' current_species.id %}">Edit</a>
+        <a class="lcars-btn" href="/species/">Back to Index</a>
+    </div>
+
+    {% if current_species.image %}
+        <div style="text-align:center; margin: 1rem 0;">
+            <img src="{{ current_species.image.url }}" class="species_image" alt="{{ current_species.name }}">
+        </div>
+    {% endif %}
+
+    <div style="margin-top:20px;">
+        <table class="sci-fi-list">
+            <tr><th colspan="2" style="text-align:center;">Overview</th></tr>
+            <tr><th>Home World</th><td>{{ current_species.home_world|default:"—" }}</td></tr>
+            <tr><th>Size</th><td>{{ current_species.get_size_display|default:"—" }}</td></tr>
+            <tr><th>Type</th><td>{{ current_species.get_type_display|default:"—" }}</td></tr>
+            <tr><th>Locomotion</th><td>{{ current_species.get_locomotion_method_display|default:"—" }}</td></tr>
+            <tr><th>Accord Status</th><td>{{ current_species.get_accord_status_display|default:"—" }}</td></tr>
+            <tr><th>Society</th><td>{{ current_species.get_society_display|default:"—" }}</td></tr>
+        </table>
+    </div>
+
+    <div style="margin-top:20px;">
+        <table class="sci-fi-list">
+            <tr><th colspan="2" style="text-align:center;">Biology</th></tr>
+            <tr><th>Air Requirement</th><td>{{ current_species.get_air_display|default:"—" }}</td></tr>
+            <tr><th>Reproduction</th><td>{{ current_species.get_reproduction_method_display|default:"—" }}</td></tr>
+            <tr><th>Hours of Sleep</th><td>{{ current_species.hours_of_sleep|default:"—" }}</td></tr>
+            <tr><th>Days Without Food</th><td>{{ current_species.days_without_food|default:"—" }}</td></tr>
+            <tr><th>Days Without Water</th><td>{{ current_species.days_without_water|default:"—" }}</td></tr>
+            <tr><th>Gravity Preference</th><td>{{ current_species.get_gravity_display|default:"—" }}</td></tr>
+        </table>
+    </div>
+
+    <div style="margin-top:20px;">
+        <table class="sci-fi-list">
+            <tr><th colspan="2" style="text-align:center;">Physical Ratings</th></tr>
+            <tr>
+                <th>Strength</th><th>Toughness</th><th>Speed</th><th>Intelligence</th>
+            </tr>
+            <tr>
+                <td>{{ current_species.strength_rating|default:"—" }}</td>
+                <td>{{ current_species.toughness_rating|default:"—" }}</td>
+                <td>{{ current_species.speed_rating|default:"—" }}</td>
+                <td>{{ current_species.intelligence_rating|default:"—" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="margin-top:20px;">
+        <table class="sci-fi-list">
+            <tr><th colspan="2" style="text-align:center;">Traits</th></tr>
+            <tr>
+                <th>Natural Weapons</th><td>{% if current_species.natural_weapons %}<span class="lcars-badge-true">Yes</span>{% else %}<span class="lcars-badge-false">No</span>{% endif %}</td>
+                <th>Natural Armor</th><td>{% if current_species.natural_armor %}<span class="lcars-badge-true">Yes</span>{% else %}<span class="lcars-badge-false">No</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Can Fly</th><td>{% if current_species.can_fly %}<span class="lcars-badge-true">Yes</span>{% else %}<span class="lcars-badge-false">No</span>{% endif %}</td>
+                <th>Aquatic</th><td>{% if current_species.aquatic %}<span class="lcars-badge-true">Yes</span>{% else %}<span class="lcars-badge-false">No</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Amphibious</th><td>{% if current_species.amphibious %}<span class="lcars-badge-true">Yes</span>{% else %}<span class="lcars-badge-false">No</span>{% endif %}</td>
+                <th>Telepathic</th><td>{% if current_species.telepathic %}<span class="lcars-badge-true">Yes</span>{% else %}<span class="lcars-badge-false">No</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Psionic</th><td>{% if current_species.psionic %}<span class="lcars-badge-true">Yes</span>{% else %}<span class="lcars-badge-false">No</span>{% endif %}</td>
+                <td></td><td></td>
+            </tr>
+        </table>
+    </div>
+
+    {% if current_species.background %}
+    <div style="margin-top:20px;">
+        <h3 style="color: var(--lcars-panel);">Background</h3>
+        <p>{{ current_species.background }}</p>
+    </div>
+    {% endif %}
+
+    {% if current_species.physiology %}
+    <div style="margin-top:20px;">
+        <h3 style="color: var(--lcars-panel);">Physiology</h3>
+        <p>{{ current_species.physiology }}</p>
+    </div>
+    {% endif %}
+
+    {% if current_species.sociology %}
+    <div style="margin-top:20px;">
+        <h3 style="color: var(--lcars-panel);">Sociology</h3>
+        <p>{{ current_species.sociology }}</p>
+    </div>
+    {% endif %}
+
+    {% if current_species.racial_traits %}
+    <div style="margin-top:20px;">
+        <h3 style="color: var(--lcars-panel);">Racial Traits</h3>
+        <ul>
+            {% for trait in current_species.racial_traits %}
+                <li>{{ trait }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if current_species.special_abilities %}
+    <div style="margin-top:20px;">
+        <h3 style="color: var(--lcars-panel);">Special Abilities</h3>
+        <ul>
+            {% for ability in current_species.special_abilities %}
+                <li>{{ ability }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% block content %}
-<link rel="stylesheet" href="/static/css/sci-fi-form.css">
 <div class="sci-fi-form-container">
     <h1 style="text-align:center; letter-spacing: 0.12em; color: #0ff; text-shadow: 0 0 10px #0ff, 0 0 2px #fff; font-size:2.2rem;">Add New Person</h1>
     <form method="post" enctype="multipart/form-data">
@@ -29,24 +28,8 @@
             <div class="sci-fi-form-section">
                 <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Attributes & Skills</h4>
                 {{ form.stats|as_crispy_field }}
-                                <div style="display: flex; align-items: center; gap: 1em;">
-                                    {{ form.skills|as_crispy_field }}
-                                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#selectSkillsModal" style="margin-top: 0.5em;">Select Skills</button>
-                                </div>
-                {{ form.tactician|as_crispy_field }}
-                {{ form.medical|as_crispy_field }}
-                {{ form.scientist|as_crispy_field }}
-                {{ form.engineer|as_crispy_field }}
-                {{ form.strong|as_crispy_field }}
-                {{ form.tough|as_crispy_field }}
-                {{ form.agile|as_crispy_field }}
-                {{ form.stealthy|as_crispy_field }}
-                {{ form.cybernetic|as_crispy_field }}
-                {{ form.leader|as_crispy_field }}
-                {{ form.genius|as_crispy_field }}
-                {{ form.psychic|as_crispy_field }}
-                {{ form.flier|as_crispy_field }}
-                {{ form.mutant|as_crispy_field }}
+                {{ form.skills|as_crispy_field }}
+                {{ form.traits|as_crispy_field }}
             </div>
         </div>
         <div style="text-align:center; margin-top: 2.5em;">

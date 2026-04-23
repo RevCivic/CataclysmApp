@@ -3,14 +3,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{% block title %}Cataclysm{% endblock %}</title>
+    <!-- Bootstrap 4 – loaded first so LCARS overrides win -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{% static 'css/default.css' %}">
     <link rel="stylesheet" href="{% static 'css/lcars.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sci-fi-form.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     {% include 'navbar.html' %}
-    <div class="container">
+    <div class="container-fluid px-3">
         {% block content %}{% endblock %}
     </div>
+    <!-- jQuery + Bootstrap 4 JS (required for modals and dropdowns) -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

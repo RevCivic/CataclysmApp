@@ -1,88 +1,74 @@
-from django.shortcuts import redirect, render
-from django.http import HttpResponse  # Import HttpResponse class
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, redirect, render
+
 from people.forms import PersonForm, PersonImageForm
-from people.models import Person, Skillset
+from people.models import Person, Trait
 
 
 def index(request):
-    people_list = Person.objects.all().prefetch_related('traits')
+    qs = Person.objects.select_related('species', 'faction').prefetch_related('traits').order_by('name')
     order_by = request.GET.get('order_by')
     if order_by:
-        people_list = people_list.order_by(order_by)
+        qs = qs.order_by(order_by)
+    paginator = Paginator(qs, 50)
+    page_obj = paginator.get_page(request.GET.get('page'))
     traits = Trait.objects.all()
-    context = {
-        'people_list': people_list,
+    return render(request, 'people_index.html', {
+        'people_list': page_obj,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
         'traits': traits,
-    }
+    })
 
-    return render(request, 'people_index.html', context)
 
 def person_page(request, id):
-    current_person = Person.objects.prefetch_related('traits').get(id=id)
+    current_person = get_object_or_404(
+        Person.objects
+              .select_related('species', 'faction', 'stats', 'skills')
+              .prefetch_related('traits', 'weapons', 'armors', 'additional_images'),
+        id=id,
+    )
     traits = Trait.objects.all()
-    context = {
-        'current_person': current_person,
-        'traits': traits,
-    }
-    return render(request, 'person.html', context)
+    return render(request, 'person.html', {'current_person': current_person, 'traits': traits})
+
 
 def add_person(request):
     if request.method == 'POST':
         form = PersonForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            person = form.save()
+            return redirect('person_page', id=person.id)
     else:
         form = PersonForm()
+    return render(request, 'add_object.html', {'form': form})
 
-    # Build a flat list of skill name/value pairs from all Skillset objects
-    skill_fields = [
-        'athletics', 'acrobatics', 'bluff', 'computers', 'culture', 'disguise', 'engineering',
-        'intimidate', 'medicine', 'perception', 'piloting', 'sense_motive', 'life_science',
-        'physical_science', 'slight_of_hand', 'survival', 'stealth', 'diplomacy'
-    ]
-    skills = []
-    for skillset in Skillset.objects.all():
-        for field in skill_fields:
-            value = getattr(skillset, field, None)
-            skills.append({'id': f'{skillset.id}_{field}', 'name': field.replace('_', ' ').title(), 'value': value})
-    return render(request, 'add_object.html', {'form': form, 'skills': skills})
 
 def edit_person(request, id):
-    person = Person.objects.get(id=id)
+    person = get_object_or_404(Person, id=id)
     if request.method == 'POST':
         form = PersonForm(request.POST, request.FILES, instance=person)
         if form.is_valid():
             form.save()
-            return redirect('person_page', id=id)  # Redirect to the object page after editing the object
+            return redirect('person_page', id=id)
     else:
         form = PersonForm(instance=person)
+    return render(request, 'add_object.html', {'form': form})
 
-    skill_fields = [
-        'athletics', 'acrobatics', 'bluff', 'computers', 'culture', 'disguise', 'engineering',
-        'intimidate', 'medicine', 'perception', 'piloting', 'sense_motive', 'life_science',
-        'physical_science', 'slight_of_hand', 'survival', 'stealth', 'diplomacy'
-    ]
-    skills = []
-    for skillset in Skillset.objects.all():
-        for field in skill_fields:
-            value = getattr(skillset, field, None)
-            skills.append({'id': f'{skillset.id}_{field}', 'name': field.replace('_', ' ').title(), 'value': value})
-    return render(request, 'add_object.html', {'form': form, 'skills': skills})
 
 def delete_person(request, id):
-    person = Person.objects.get(id=id)
+    person = get_object_or_404(Person, id=id)
     person.delete()
-    return redirect('person_index')
+    return redirect('index')
+
 
 def add_images(request, id):
-    person = Person.objects.get(id=id)
+    person = get_object_or_404(Person, id=id)
     if request.method == 'POST':
         form = PersonImageForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('success_page')  # Redirect to a success page after adding the object
+            return redirect('person_page', id=id)
     else:
         form = PersonImageForm(initial={'linked_person': person})
+    return render(request, 'add_object.html', {'form': form})
 
-    # Always pass skills, even if empty
-    return render(request, 'add_object.html', {'form': form, 'skills': []})
