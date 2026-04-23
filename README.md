@@ -11,9 +11,13 @@ It documents the world timeline, custom rules, factions, people, worlds, events,
 Set environment variables first (recommended via a local `.env` file that is not committed):
 
 ```bash
-export DEFAULT_USERNAME=admin
-export DEFAULT_PASSWORD='UseAStrongPasswordHere'
+cat > .env <<'EOF'
+DEFAULT_USERNAME=admin
+DEFAULT_PASSWORD=UseAStrongPasswordHere
+EOF
 ```
+
+Or export them in your shell before running compose.
 
 ```bash
 docker compose up --build

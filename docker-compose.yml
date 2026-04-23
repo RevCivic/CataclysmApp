@@ -9,4 +9,4 @@ services:
     environment:
       PORT: ${PORT:-8000}
       DEFAULT_USERNAME: ${DEFAULT_USERNAME:-admin}
-      DEFAULT_PASSWORD: ${DEFAULT_PASSWORD:?Set DEFAULT_PASSWORD in your environment or .env file}
+      DEFAULT_PASSWORD: ${DEFAULT_PASSWORD?Set DEFAULT_PASSWORD in your environment or .env file}
