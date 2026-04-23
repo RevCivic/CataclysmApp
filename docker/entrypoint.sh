@@ -26,16 +26,16 @@ except ValidationError:
     sys.exit(1)
 
 user, created = User.objects.get_or_create(username=username)
-if created or should_update_password:
-    if not created and should_update_password:
-        if not (user.is_staff and user.is_superuser):
-            print("DEFAULT_PASSWORD_UPDATE can only target an existing admin user.", file=sys.stderr)
-            sys.exit(1)
-        print("Updating password for existing default admin user due to DEFAULT_PASSWORD_UPDATE=true", file=sys.stderr)
-    user.set_password(password)
 if created:
+    user.set_password(password)
     user.is_staff = True
     user.is_superuser = True
+elif should_update_password:
+    if not (user.is_staff and user.is_superuser):
+        print("DEFAULT_PASSWORD_UPDATE can only target an existing admin user.", file=sys.stderr)
+        sys.exit(1)
+    print("Updating password for existing default admin user due to DEFAULT_PASSWORD_UPDATE=true", file=sys.stderr)
+    user.set_password(password)
 user.save()
 PY
 fi
