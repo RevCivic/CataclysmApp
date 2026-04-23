@@ -8,6 +8,13 @@ It documents the world timeline, custom rules, factions, people, worlds, events,
 
 ## Quick start with Docker Compose
 
+Set environment variables first (recommended via a local `.env` file that is not committed):
+
+```bash
+export DEFAULT_USERNAME=admin
+export DEFAULT_PASSWORD='UseAStrongPasswordHere'
+```
+
 ```bash
 docker compose up --build
 ```

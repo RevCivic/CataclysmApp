@@ -7,6 +7,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      PORT: 8000
-      DEFAULT_USERNAME: admin
-      DEFAULT_PASSWORD: ChangeMeToAStrongPassword
+      PORT: ${PORT:-8000}
+      DEFAULT_USERNAME: ${DEFAULT_USERNAME:-admin}
+      DEFAULT_PASSWORD: ${DEFAULT_PASSWORD:-}
