@@ -8,6 +8,7 @@ python manage.py migrate --noinput
 if [ -n "${DEFAULT_USERNAME:-}" ] && [ -n "${DEFAULT_PASSWORD:-}" ]; then
 python manage.py shell <<'PY'
 import os
+import sys
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -21,7 +22,8 @@ user, created = User.objects.get_or_create(username=username)
 try:
     validate_password(password, user=user)
 except ValidationError as exc:
-    raise SystemExit(f"DEFAULT_PASSWORD failed Django password validation: {'; '.join(exc.messages)}")
+    print(f"DEFAULT_PASSWORD failed Django password validation: {'; '.join(exc.messages)}", file=sys.stderr)
+    sys.exit(1)
 
 if created or update_existing:
     user.set_password(password)
