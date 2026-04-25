@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "${PORT:-8000}:8000"
+    volumes:
+      - cataclysm_data:/app/data
     environment:
       DEFAULT_USERNAME: ${DEFAULT_USERNAME?DEFAULT_USERNAME environment variable not set}
       DEFAULT_PASSWORD: ${DEFAULT_PASSWORD?DEFAULT_PASSWORD environment variable not set}
@@ -13,3 +15,9 @@ services:
       SERVICE_ACCOUNT_JSON: ${SERVICE_ACCOUNT_JSON:-}
       SPREADSHEET_ID: ${SPREADSHEET_ID:-}
       SHEET_RANGE: ${SHEET_RANGE:-}
+      DB_PATH: ${DB_PATH:-/app/data/db.sqlite3}
+      SECRET_KEY: ${SECRET_KEY:-}
+      MEDIA_ROOT: ${MEDIA_ROOT:-/app/data/media}
+
+volumes:
+  cataclysm_data:

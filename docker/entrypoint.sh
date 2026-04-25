@@ -1,6 +1,19 @@
 #!/bin/bash
 set -euo pipefail
 
+# Ensure the persistent data directory exists (volume may be freshly created)
+mkdir -p /app/data
+
+# Generate and persist a SECRET_KEY if one was not provided via environment
+SECRET_KEY_FILE="/app/data/secret_key.txt"
+if [ -z "${SECRET_KEY:-}" ]; then
+    if [ ! -f "$SECRET_KEY_FILE" ]; then
+        python -c "import secrets; print(secrets.token_urlsafe(50))" > "$SECRET_KEY_FILE"
+        chmod 600 "$SECRET_KEY_FILE"
+    fi
+    export SECRET_KEY="$(cat "$SECRET_KEY_FILE")"
+fi
+
 cd /app/cataclysm
 
 python manage.py migrate --noinput
