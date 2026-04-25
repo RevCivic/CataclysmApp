@@ -1,8 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-  <h1>{{ object.name|default:'Faction' }}</h1>
-  <p>{{ object.description|default:'No description.' }}</p>
-  <a href="{% url 'factions:index' %}">Back</a>
+<div class="lcars-panel">
+    <div class="lcars-heading">
+        <span class="chip"></span>
+        <h2>{{ object.name|default:'Faction' }}</h2>
+    </div>
+    <p>{{ object.description|default:'No description.' }}</p>
+    <a class="lcars-btn" href="{% url 'factions:index' %}">Back</a>
 </div>
 {% endblock %}

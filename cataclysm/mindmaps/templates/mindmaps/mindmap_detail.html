@@ -1,16 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>{{ mindmap.title }}</h1>
-<p>{{ mindmap.description }}</p>
-<p>Created: {{ mindmap.created_at }} | Updated: {{ mindmap.updated_at }}</p>
-<a href="{% url 'mindmap_edit' mindmap.pk %}" class="btn btn-secondary">Edit Mind Map</a>
-<h2>Nodes</h2>
-<ul>
+<div class="lcars-panel">
+    <div class="lcars-heading">
+        <span class="chip"></span>
+        <h2>{{ mindmap.title }}</h2>
+    </div>
+    <p>{{ mindmap.description }}</p>
+    <p style="font-size:0.85rem; opacity:0.7;">
+        Created: {{ mindmap.created_at }} &nbsp;|&nbsp; Updated: {{ mindmap.updated_at }}
+    </p>
+    <a href="{% url 'mindmap_edit' mindmap.pk %}" class="lcars-btn">Edit Mind Map</a>
+</div>
+
+<div class="index_menu" style="margin-top:1.5rem;">
+    <h1 class="app_name">Nodes</h1>
+    <a href="{% url 'mindmapnode_add' %}" class="btn btn-primary">Add Node</a>
+</div>
+
+<ul style="list-style:none; padding:0; margin-top:0.75rem;">
   {% for node in mindmap.nodes.all %}
-    <li>{{ node.label }} {% if node.parent %}(Parent: {{ node.parent.label }}){% endif %} <a href="{% url 'mindmapnode_edit' node.pk %}">Edit</a></li>
+    <li style="margin-bottom:0.4rem;">
+        <span class="lcars-tab">{{ node.label }}</span>
+        {% if node.parent %}
+            <span style="font-size:0.8rem; opacity:0.6;">(Parent: {{ node.parent.label }})</span>
+        {% endif %}
+        <a class="lcars-btn" style="margin-left:0.5rem;" href="{% url 'mindmapnode_edit' node.pk %}">Edit</a>
+    </li>
   {% empty %}
-    <li>No nodes yet.</li>
+    <li style="color: var(--lcars-muted);">No nodes yet.</li>
   {% endfor %}
 </ul>
-<a href="{% url 'mindmapnode_add' %}" class="btn btn-primary">Add Node</a>
 {% endblock %}

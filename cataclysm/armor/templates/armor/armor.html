@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container" style="margin-top:20px;">
   <div class="list-header index_menu">
     <h1 class="app_name">Armor</h1>
     <a class="btn btn-primary" href="{% url 'armor:add' %}">Add Armor</a>
@@ -37,5 +36,4 @@
       {% endfor %}
     </tbody>
   </table>
-</div>
 {% endblock %}

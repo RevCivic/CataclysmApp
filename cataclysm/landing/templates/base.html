@@ -13,13 +13,53 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% include 'navbar.html' %}
-    <div class="container-fluid px-3">
-        {% block content %}{% endblock %}
-    </div>
+    <!-- ================================================================
+         LCARS CHROME  —  2-column × 2-row CSS grid layout
+         Top-left elbow  |  Header bar
+         ─────────────────────────────
+         Sidebar nav     |  Content area
+         ================================================================ -->
+    <div class="lcars-chrome">
+
+        <!-- Top-left elbow / logo -->
+        <div class="lcars-tl">
+            <img src="{% static 'images/cataclysm_logo.png' %}"
+                 alt="Cataclysm" class="lcars-logo-img">
+        </div>
+
+        <!-- Top-right header bar -->
+        <header class="lcars-topbar">
+            <span class="lcars-topbar-title">Cataclysm</span>
+            <span class="lcars-topbar-divider"></span>
+            <span class="lcars-topbar-stardate" id="lcars-stardate"></span>
+        </header>
+
+        <!-- Left sidebar navigation -->
+        {% include 'navbar.html' %}
+
+        <!-- Main content -->
+        <main class="lcars-main">
+            {% block content %}{% endblock %}
+        </main>
+
+    </div><!-- /.lcars-chrome -->
+
     <!-- jQuery + Bootstrap 4 JS (required for modals and dropdowns) -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- LCARS stardate generator -->
+    <script>
+        (function () {
+            var now = new Date();
+            var start = new Date(now.getFullYear(), 0, 1);
+            var dayFraction = (now - start) / (1000 * 60 * 60 * 24 * 365.25);
+            var stardate = ((now.getFullYear() - 1987) * 1000 + dayFraction * 1000).toFixed(1);
+            var el = document.getElementById('lcars-stardate');
+            if (el) el.textContent = 'STARDATE\u00A0' + stardate;
+        })();
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

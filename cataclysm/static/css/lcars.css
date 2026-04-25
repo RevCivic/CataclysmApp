@@ -1,75 +1,734 @@
-/* LCARS-inspired stylesheet - colors, rounded panels, and accents */
-:root{
-  --lcars-bg:#0b0b1a;
-  --lcars-panel:#ff8f00; /* amber */
-  --lcars-panel-dark:#cc6f00;
-  --lcars-accent:#ff66cc; /* magenta accents */
-  --lcars-accent-2:#00c8ff; /* cyan accents */
-  --lcars-text:#ffffff;
-  --lcars-muted:rgba(255,255,255,0.15);
+/* ============================================================
+   lcars.css  –  LCARS Design System
+   Star Trek LCARS inspired UI — single source of truth for
+   all colors, layout, and component styles.
+   ============================================================ */
+
+/* ---- CSS Custom Properties ---------------------------------------- */
+:root {
+  --lcars-bg:            #0b0b1a;
+  --lcars-panel:         #FF8C00;   /* primary amber */
+  --lcars-panel-dark:    #CC5500;   /* darker amber / sidebar */
+  --lcars-accent:        #CC77CC;   /* magenta accent */
+  --lcars-accent-2:      #99CCFF;   /* cyan accent */
+  --lcars-text:          #ffffff;
+  --lcars-muted:         rgba(255, 255, 255, 0.18);
+  --lcars-sidebar-width: 175px;
+  --lcars-topbar-height: 58px;
 }
 
-/* Page background and base font */
-body{
-  background: linear-gradient(180deg, #071021 0%, #0b0b1a 100%);
+/* ---- Reset & Base -------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { height: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--lcars-bg);
   color: var(--lcars-text);
-  font-family: 'StarTrekFuture', 'Rebellion', 'Segoe UI', Arial, sans-serif;
+  font-family: 'GoodOT', 'Segoe UI', Arial, sans-serif;
 }
 
-/* LCARS top bar */
-.lcars-topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding: .6rem 1rem;
-  background: linear-gradient(90deg,var(--lcars-panel),var(--lcars-panel-dark));
-  border-radius: 0 0 1.2rem 1.2rem;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+body a {
+  color: var(--lcars-accent-2);
+  text-decoration: none;
 }
-.lcars-logo{font-weight:700; color:#051018; letter-spacing:.08em}
 
-/* LCARS panel block */
-.lcars-panel{
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border: 4px solid var(--lcars-panel);
+body a:hover {
+  color: var(--lcars-panel);
+  text-decoration: underline;
+}
+
+body h1, body h2, body h3, body h4 { color: var(--lcars-text); }
+
+/* ====================================================================
+   LCARS CHROME LAYOUT
+   2-column × 2-row CSS grid.
+
+   ┌─────────────────┬────────────────────────────────────────────────┐
+   │  .lcars-tl      │  .lcars-topbar                                 │
+   │  (amber elbow)  │  (amber header bar — amber w/ left radius)     │
+   ├─────────────────┼────────────────────────────────────────────────┤
+   │  .lcars-sidebar │  .lcars-main                                   │
+   │  (dark amber)   │  (dark content area)                           │
+   └─────────────────┴────────────────────────────────────────────────┘
+
+   The dark --lcars-bg bleeds through the border-radius notches between
+   cells, creating the authentic LCARS elbow/curve effect.
+   ==================================================================== */
+
+.lcars-chrome {
+  display: grid;
+  grid-template-columns: var(--lcars-sidebar-width) 1fr;
+  grid-template-rows: var(--lcars-topbar-height) 1fr;
+  min-height: 100vh;
+  background: var(--lcars-bg);
+}
+
+/* Top-left: logo/elbow cell — bottom-right curve creates the LCARS elbow */
+.lcars-tl {
+  background: var(--lcars-panel);
+  border-bottom-right-radius: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.5rem;
+  overflow: hidden;
+}
+
+.lcars-logo-img {
+  height: 32px;
+  width: auto;
+}
+
+/* Top-right: main amber header bar — bottom-left curve meets the elbow */
+.lcars-topbar {
+  background: var(--lcars-panel);
+  border-bottom-left-radius: 1.8rem;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 1rem;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Scan-line shimmer over the topbar */
+@keyframes lcars-scan {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(300%); }
+}
+
+.lcars-topbar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 25%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  animation: lcars-scan 7s linear infinite;
+  pointer-events: none;
+}
+
+.lcars-topbar-title {
+  font-family: 'Rebellion', 'GoodOT', sans-serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #0a0a10;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.lcars-topbar-divider {
+  flex: 1;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 2px;
+}
+
+.lcars-topbar-stardate {
+  font-family: 'GoodOT', monospace;
+  font-size: 0.8rem;
+  color: #0a0a10;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+/* Bottom-left: sidebar — top-right & bottom-right curves give LCARS look */
+.lcars-sidebar {
+  background: var(--lcars-panel-dark);
+  border-top-right-radius: 1.8rem;
+  border-bottom-right-radius: 1.8rem;
+  padding: 1rem 0.5rem 1.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Nav pill buttons */
+.lcars-nav-pill {
+  display: block;
+  background: var(--lcars-panel);
+  color: #0a0a10 !important;
+  font-family: 'GoodOT', sans-serif;
+  font-weight: 700;
+  font-size: 0.76rem;
+  padding: 0.42rem 0.75rem;
   border-radius: 1.2rem;
-  padding: 1rem;
+  text-decoration: none !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: background 0.15s, transform 0.1s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lcars-nav-pill:hover {
+  background: var(--lcars-accent-2);
+  color: #001116 !important;
+  transform: translateX(3px);
+  text-decoration: none !important;
+}
+
+.lcars-nav-pill-accent {
+  background: var(--lcars-accent);
+  color: #0a0a10 !important;
+}
+
+.lcars-nav-pill-accent:hover {
+  background: var(--lcars-accent-2);
+  color: #001116 !important;
+}
+
+.lcars-nav-divider {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  margin: 0.4rem 0;
+}
+
+/* Bottom-right: main content area */
+.lcars-main {
+  padding: 1.5rem 1.8rem;
+  overflow-y: auto;
+  background: var(--lcars-bg);
+  position: relative;
+}
+
+/* ====================================================================
+   LCARS PANEL CARD
+   ==================================================================== */
+
+.lcars-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 3px solid var(--lcars-panel);
+  border-radius: 1.2rem;
+  padding: 1rem 1.3rem;
   margin: 1rem 0;
   position: relative;
 }
-.lcars-panel::before{
-  content:'';
-  position:absolute; left:-26px; top:12px; width:24px; height:48px;
-  background:var(--lcars-panel); border-radius:6px 6px 6px 6px;
+
+/* ====================================================================
+   LCARS HEADING
+   ==================================================================== */
+
+.lcars-heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
 }
 
-/* Accent blocks used in headings */
-.lcars-heading{
-  display:flex; align-items:center; gap:1rem; margin-bottom:.8rem;
-}
-.lcars-heading .chip{
-  height:36px; min-width:64px; background:var(--lcars-accent); border-radius:18px; display:inline-block;
-}
-.lcars-heading h2{margin:0; font-size:1.4rem}
-
-/* Buttons */
-.lcars-btn{
-  background: linear-gradient(90deg,var(--lcars-accent-2), #0077aa);
-  color:#001116; border:none; padding:.5rem 1rem; border-radius:.6rem; font-weight:700;
+.lcars-heading .chip {
+  height: 30px;
+  min-width: 56px;
+  background: var(--lcars-accent);
+  border-radius: 15px;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
-/* Form container override to match LCARS look */
-.sci-fi-form-container{ background:transparent; border: 3px solid var(--lcars-panel); box-shadow:none; padding:1rem;}
-
-/* Utility for rounded colored tabs */
-.lcars-tab{display:inline-block;padding:.6rem 1rem;border-radius:1rem;background:var(--lcars-panel);color:#051018;font-weight:700;margin-right:.5rem}
-
-/* Small responsive tweaks */
-@media (max-width:800px){
-  .lcars-panel{padding:.6rem}
-  .lcars-heading .chip{height:28px;min-width:48px}
+.lcars-heading h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--lcars-panel);
+  font-family: 'Rebellion', 'GoodOT', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-/* Provide contrasting boolean badges */
-.lcars-badge-true{background:var(--lcars-accent-2);color:#001116;padding:.25rem .5rem;border-radius:.4rem;font-weight:700}
-.lcars-badge-false{background:var(--lcars-muted);color:var(--lcars-text);padding:.25rem .5rem;border-radius:.4rem}
+/* ====================================================================
+   LCARS TABLES
+   .lcars-table is the new canonical class; .sci-fi-list and
+   .sci-fi-list-species are kept as aliases so existing templates
+   automatically inherit LCARS styling without changes.
+   ==================================================================== */
+
+.lcars-table,
+.sci-fi-list,
+.sci-fi-list-species {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: 'GoodOT', sans-serif;
+  color: var(--lcars-text);
+  background: transparent;
+}
+
+.lcars-table th,
+.sci-fi-list th,
+.sci-fi-list-species th {
+  background: var(--lcars-panel-dark);
+  color: var(--lcars-text);
+  padding: 0.55rem 0.8rem;
+  text-align: left;
+  font-family: 'GoodOT', sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: none;
+  border-bottom: 2px solid var(--lcars-panel);
+}
+
+.lcars-table tr,
+.sci-fi-list tr,
+.sci-fi-list-species tr {
+  background: rgba(255, 255, 255, 0.04);
+  transition: background 0.12s;
+}
+
+.lcars-table tr:nth-child(even),
+.sci-fi-list tr:nth-child(even),
+.sci-fi-list-species tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.lcars-table tr:hover,
+.sci-fi-list tr:hover,
+.sci-fi-list-species tr:hover {
+  background: rgba(153, 204, 255, 0.12);
+}
+
+.lcars-table td,
+.sci-fi-list td,
+.sci-fi-list-species td {
+  padding: 0.5rem 0.8rem;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  vertical-align: middle;
+}
+
+/* .sci-fi-table — used in weapons/worlds together with Bootstrap .table */
+.sci-fi-table th {
+  background: var(--lcars-panel-dark);
+  color: var(--lcars-text);
+  border-color: var(--lcars-panel);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.8rem;
+  font-family: 'GoodOT', sans-serif;
+}
+
+.sci-fi-table td {
+  color: var(--lcars-text);
+  border-color: rgba(255, 255, 255, 0.1);
+  background: transparent;
+}
+
+.sci-fi-table tr:hover td { background: rgba(153, 204, 255, 0.1); }
+
+/* Bootstrap table dark-theme overrides */
+.table                               { color: var(--lcars-text); }
+.table thead th                      { border-bottom-color: var(--lcars-panel); }
+.table-striped tbody tr:nth-of-type(odd)  { background-color: rgba(255,255,255,0.04); }
+.table-hover   tbody tr:hover        { background-color: rgba(153,204,255,0.1); color: var(--lcars-text); }
+.table-bordered td, .table-bordered th { border-color: rgba(255,255,255,0.15); }
+
+/* ====================================================================
+   BUTTONS
+   ==================================================================== */
+
+.lcars-btn {
+  display: inline-block;
+  background: linear-gradient(90deg, var(--lcars-accent-2), #0077aa);
+  color: #001116;
+  border: none;
+  padding: 0.45rem 1.1rem;
+  border-radius: 0.6rem;
+  font-weight: 700;
+  font-family: 'GoodOT', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-decoration: none !important;
+  transition: opacity 0.15s;
+}
+
+.lcars-btn:hover {
+  opacity: 0.82;
+  color: #001116 !important;
+}
+
+.lcars-btn-secondary {
+  background: linear-gradient(90deg, var(--lcars-accent), #993399);
+  color: #0a0a10;
+}
+
+/* Bootstrap .btn-primary override */
+.btn-primary, .btn.btn-primary {
+  background: linear-gradient(90deg, var(--lcars-accent-2), #0077aa);
+  border-color: var(--lcars-accent-2);
+  color: #001116;
+  font-family: 'GoodOT', sans-serif;
+  font-weight: 700;
+}
+
+.btn-primary:hover, .btn.btn-primary:hover,
+.btn-primary:focus, .btn.btn-primary:focus {
+  background: linear-gradient(90deg, #0077aa, var(--lcars-accent-2));
+  border-color: var(--lcars-accent-2);
+  color: #fff;
+  box-shadow: 0 0 0 0.2rem rgba(153,204,255,0.3);
+}
+
+.btn-secondary, .btn.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--lcars-muted);
+  color: var(--lcars-text);
+}
+
+.btn-secondary:hover, .btn.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--lcars-text);
+}
+
+/* ====================================================================
+   LCARS TABS & BADGES
+   ==================================================================== */
+
+.lcars-tab {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  background: var(--lcars-panel);
+  color: #051018;
+  font-weight: 700;
+  margin-right: 0.5rem;
+  font-family: 'GoodOT', sans-serif;
+  text-decoration: none;
+}
+
+.lcars-badge-true {
+  background: var(--lcars-accent-2);
+  color: #001116;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.4rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.lcars-badge-false {
+  background: var(--lcars-muted);
+  color: var(--lcars-text);
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.4rem;
+  font-size: 0.82rem;
+}
+
+/* ====================================================================
+   PAGE HEADERS  (.index_menu / .app_name)
+   ==================================================================== */
+
+.index_menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid var(--lcars-panel);
+}
+
+.index_menu a:not([class]) {
+  color: var(--lcars-accent-2);
+}
+
+h1.app_name {
+  margin: 0;
+  color: var(--lcars-panel);
+  font-family: 'Rebellion', 'GoodOT', sans-serif;
+  font-size: 1.7rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+/* Landing page hero title */
+h1.app_name.hero-title {
+  font-size: 3.8rem;
+  text-align: center;
+  display: block;
+  width: 100%;
+}
+
+h2.welcome {
+  color: var(--lcars-panel);
+  text-align: center;
+  font-family: 'GoodOT', sans-serif;
+  font-size: 0.9rem;
+  margin: 0 0 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* Landing narrative block */
+.app_description {
+  background: rgba(10, 10, 30, 0.82);
+  border: 2px solid var(--lcars-panel);
+  border-radius: 1rem;
+  padding: 1.5rem 2rem;
+  color: var(--lcars-text);
+  font-family: 'GoodOT', sans-serif;
+  font-size: 1rem;
+  line-height: 1.75;
+  margin: 1rem 0;
+}
+
+.app_description a {
+  color: var(--lcars-accent-2);
+  font-weight: 700;
+}
+
+.app_description a:hover {
+  color: var(--lcars-panel);
+}
+
+/* ====================================================================
+   TOGGLE TABLE / COLUMN BUTTONS  (People index)
+   ==================================================================== */
+
+.table-label {
+  background: var(--lcars-panel-dark);
+  color: var(--lcars-text);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+.toggle-table {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  overflow-x: auto;
+}
+
+.toggle-table th {
+  font-family: 'GoodOT', sans-serif;
+  font-size: 0.75rem;
+  color: var(--lcars-text);
+  padding: 0 0.5rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.toggle-table td {
+  font-family: 'GoodOT', sans-serif;
+  font-size: 0.75rem;
+  color: var(--lcars-text);
+  text-align: center;
+  padding: 0.3rem 0.5rem;
+}
+
+.toggle-button {
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  border: 1.5px solid var(--lcars-muted);
+  outline: none;
+  transition: background 0.2s;
+}
+
+.toggle-button::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  transition: transform 0.25s ease, background 0.2s;
+}
+
+.toggle-button.active {
+  background: var(--lcars-accent-2);
+  border-color: var(--lcars-accent-2);
+}
+
+.toggle-button.active::before {
+  background: #001116;
+  transform: translateX(24px);
+}
+
+/* ====================================================================
+   RATING BARS  (Species index)
+   ==================================================================== */
+
+.rating-bar {
+  height: 16px;
+  background: linear-gradient(90deg, var(--lcars-accent-2), #0077aa);
+  color: #001116;
+  text-align: left;
+  font-weight: 700;
+  font-family: 'GoodOT', sans-serif;
+  font-size: 0.72rem;
+  border-radius: 3px;
+  padding: 0 4px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+/* ====================================================================
+   IMAGES
+   ==================================================================== */
+
+.species_image {
+  width: 220px;
+  height: auto;
+  border-radius: 10px;
+  transition: transform 0.2s;
+}
+.species_image:hover { transform: scale(1.06); }
+
+.crew_image {
+  width: 220px;
+  height: auto;
+  border-radius: 10px;
+}
+
+.crew_list_image {
+  width: 50px;
+  height: auto;
+  border-radius: 6px;
+  transition: transform 0.2s;
+}
+.crew_list_image:hover {
+  transform: scale(3);
+  position: relative;
+  z-index: 10;
+}
+
+.crew_list_additional_images {
+  width: 180px;
+  height: auto;
+  border-radius: 10px;
+  transition: transform 0.2s;
+}
+.crew_list_additional_images:hover { transform: scale(1.15); }
+
+/* ====================================================================
+   BOOLEAN / TRAIT CELLS
+   ==================================================================== */
+
+.boolean           { text-align: center; }
+.rotate            { white-space: nowrap; }
+
+.boolean-cell {
+  text-align: center;
+  padding: 6px;
+  vertical-align: middle;
+}
+
+.boolean-true {
+  background: rgba(0, 180, 100, 0.18);
+  color: #66ffaa;
+}
+
+.boolean-false {
+  background: transparent;
+  color: rgba(255,255,255,0.3);
+}
+
+.green-checkmark { color: #66ffaa; }
+.gray-x          { color: rgba(255,255,255,0.3); }
+
+/* ====================================================================
+   FORM CONTAINER OVERRIDE  (to match LCARS look — sci-fi-form.css
+   handles the detailed form styles)
+   ==================================================================== */
+
+.sci-fi-form-container {
+  background: transparent;
+  border: 3px solid var(--lcars-panel);
+  box-shadow: none;
+  padding: 1rem;
+}
+
+/* ====================================================================
+   SHOOTING STARS ANIMATION  (used on landing page)
+   ==================================================================== */
+
+.shooting-star-container {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.shooting-star {
+  opacity: 0;
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,0.08),
+    0 0 15px rgba(255,255,255,0.08);
+  animation: star-shoot 3s linear infinite;
+  pointer-events: none;
+}
+
+.shooting-star::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 160px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7));
+}
+
+@keyframes star-shoot {
+  0%   { transform: rotate(315deg) translateX(0); opacity: 1; }
+  70%  { opacity: 1; }
+  100% { transform: rotate(315deg) translateX(-450px); opacity: 0; }
+}
+
+.shooting-star:nth-child(1)  { top: 0;     right: 0;      animation-delay: 0s;    animation-duration: 1s; }
+.shooting-star:nth-child(2)  { top: 0;     right: 80px;   animation-delay: 0.2s;  animation-duration: 3s; }
+.shooting-star:nth-child(3)  { top: 80px;  right: 0;      animation-delay: 0.4s;  animation-duration: 2s; }
+.shooting-star:nth-child(4)  { top: 0;     right: 180px;  animation-delay: 0.6s;  animation-duration: 1.5s; }
+.shooting-star:nth-child(5)  { top: 0;     right: 400px;  animation-delay: 0.8s;  animation-duration: 2.5s; }
+.shooting-star:nth-child(6)  { top: 0;     right: 600px;  animation-delay: 1s;    animation-duration: 3s; }
+.shooting-star:nth-child(7)  { top: 300px; right: 0;      animation-delay: 1.2s;  animation-duration: 1.75s; }
+.shooting-star:nth-child(8)  { top: 0;     right: 700px;  animation-delay: 1.4s;  animation-duration: 1.25s; }
+.shooting-star:nth-child(9)  { top: 0;     right: 1000px; animation-delay: 0.75s; animation-duration: 2.25s; }
+.shooting-star:nth-child(10) { top: 0;     right: 450px;  animation-delay: 2.75s; animation-duration: 2.75s; }
+
+/* ====================================================================
+   RESPONSIVE  — collapse sidebar to icon width on small screens
+   ==================================================================== */
+
+@media (max-width: 768px) {
+  :root {
+    --lcars-sidebar-width: 52px;
+    --lcars-topbar-height: 48px;
+  }
+
+  .lcars-nav-pill {
+    font-size: 0;
+    padding: 0.4rem;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .lcars-nav-divider { margin: 0.3rem 0; }
+  .lcars-topbar-title { font-size: 1rem; }
+  .lcars-topbar-stardate { display: none; }
+  .lcars-main { padding: 0.8rem; }
+}

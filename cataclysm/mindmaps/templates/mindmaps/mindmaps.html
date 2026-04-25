@@ -1,12 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Mind Maps</h1>
-<a href="{% url 'mindmap_add' %}" class="btn btn-primary">Add Mind Map</a>
-<ul>
+<div class="index_menu">
+    <h1 class="app_name">Mind Maps</h1>
+    <a href="{% url 'mindmap_add' %}" class="btn btn-primary">Add Mind Map</a>
+</div>
+<ul style="list-style:none; padding:0; margin-top:1rem;">
   {% for mindmap in mindmaps %}
-    <li><a href="{% url 'mindmap_detail' mindmap.pk %}">{{ mindmap.title }}</a></li>
+    <li style="margin-bottom:0.5rem;">
+        <a class="lcars-tab" href="{% url 'mindmap_detail' mindmap.pk %}">{{ mindmap.title }}</a>
+    </li>
   {% empty %}
-    <li>No mind maps found.</li>
+    <li style="color: var(--lcars-muted);">No mind maps found.</li>
   {% endfor %}
 </ul>
 {% endblock %}

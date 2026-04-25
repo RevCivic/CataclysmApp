@@ -1,24 +1,24 @@
 {% load static %}
-<div class="nav-fragment">
-    <nav class="main">
-        <li><img src="{% static 'images/cataclysm_logo.png' %}" alt="Cataclysm Logo" height="25px"></li>
-        <li><a href="/">Home</a></li>
-        <li><a href="/party/">Party</a></li>
-        <li><a href="/species/">Species</a></li>
-        <li><a href="/people/">People</a></li>
-        <li><a href="/worlds/">Worlds</a></li>
-        <li><a href="/factions/">Factions</a></li>
-        <li><a href="/starships/">Starships</a></li>
-        <li><a href="/vehicles/">Vehicles</a></li>
-        <li><a href="/weapons/">Weapons</a></li>
-        <li><a href="/armor/">Armor</a></li>
-        <li><a href="/events/">Events</a></li>
-        <li><a href="/mindmaps/">Mindmaps</a></li>
-        {% if user.is_authenticated %}
-            <li><a href="/admin/">Admin</a></li>
-            <li><a href="/admin/logout/">Log Out</a></li>
-        {% else %}
-            <li><a href="/admin/">Log In</a></li>
-        {% endif %}
-    </nav>
-</div>
+<nav class="lcars-sidebar">
+    <a href="/"           class="lcars-nav-pill">Home</a>
+    <a href="/party/"     class="lcars-nav-pill">Party</a>
+    <a href="/species/"   class="lcars-nav-pill">Species</a>
+    <a href="/people/"    class="lcars-nav-pill">People</a>
+    <a href="/worlds/"    class="lcars-nav-pill">Worlds</a>
+    <a href="/factions/"  class="lcars-nav-pill">Factions</a>
+    <a href="/starships/" class="lcars-nav-pill">Starships</a>
+    <a href="/vehicles/"  class="lcars-nav-pill">Vehicles</a>
+    <a href="/weapons/"   class="lcars-nav-pill">Weapons</a>
+    <a href="/armor/"     class="lcars-nav-pill">Armor</a>
+    <a href="/events/"    class="lcars-nav-pill">Events</a>
+    <a href="/mindmaps/"  class="lcars-nav-pill">Mindmaps</a>
+
+    <div class="lcars-nav-divider"></div>
+
+    {% if user.is_authenticated %}
+        <a href="/admin/"         class="lcars-nav-pill lcars-nav-pill-accent">Admin</a>
+        <a href="/admin/logout/"  class="lcars-nav-pill lcars-nav-pill-accent">Log Out</a>
+    {% else %}
+        <a href="/admin/"         class="lcars-nav-pill lcars-nav-pill-accent">Log In</a>
+    {% endif %}
+</nav>
