@@ -7,11 +7,14 @@ from googleapiclient.discovery import build
 # Credentials can be supplied in one of two ways (checked in order):
 #   1. SERVICE_ACCOUNT_JSON  — the full service-account JSON as a string
 #   2. SERVICE_ACCOUNT_FILE  — path to the service-account JSON file
-#      (defaults to <BASE_DIR>/cataclysm/secrets/service_account.json)
+#      (defaults to <data_dir>/service_account.json, where data_dir is derived
+#       from DB_PATH so it matches the volume storage used for the database)
 SERVICE_ACCOUNT_JSON = os.environ.get("SERVICE_ACCOUNT_JSON")
+_db_path = os.environ.get('DB_PATH', os.path.join(getattr(settings, 'BASE_DIR', ''), 'db.sqlite3'))
+_data_dir = os.path.dirname(_db_path)
 SERVICE_ACCOUNT_FILE = os.environ.get(
     "SERVICE_ACCOUNT_FILE",
-    os.path.join(getattr(settings, 'BASE_DIR', ''), 'cataclysm', 'secrets', 'service_account.json')
+    os.path.join(_data_dir, 'service_account.json')
 )
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
