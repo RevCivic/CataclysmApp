@@ -64,6 +64,20 @@ INSTALLED_APPS = [
 # Crispy Forms settings
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+# Suppress the Cross-Origin-Opener-Policy header: the app is served over plain
+# HTTP so browsers silently ignore it and log a console warning. The header
+# provides no benefit unless the origin is trustworthy (HTTPS / localhost).
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
+# Allow WhiteNoise to locate static files via Django's staticfiles finders so
+# that CSS/JS/images are served even when collectstatic has not been run (e.g.
+# during local development with gunicorn instead of manage.py runserver).
+# Without this, WhiteNoise can only serve from STATIC_ROOT; if that directory
+# is empty, static-file requests fall through to Django and return HTML 404
+# responses which the browser refuses to apply as stylesheets ("Refused to
+# apply style from '...'") because X-Content-Type-Options: nosniff is active.
+WHITENOISE_USE_FINDERS = True
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
