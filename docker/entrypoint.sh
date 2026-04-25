@@ -4,6 +4,7 @@ set -euo pipefail
 cd /app/cataclysm
 
 python manage.py migrate --noinput
+python manage.py collectstatic --noinput
 
 if [ -n "${DEFAULT_USERNAME:-}" ] && [ -n "${DEFAULT_PASSWORD:-}" ]; then
 python manage.py shell <<'PY'
