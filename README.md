@@ -14,6 +14,7 @@ Set environment variables first (recommended via a local `.env` file that is not
 cat > .env <<'EOF'
 DEFAULT_USERNAME=your_username
 DEFAULT_PASSWORD=***REPLACE-WITH-SECURE-PASSWORD***
+ALLOWED_HOSTS=localhost,127.0.0.1
 EOF
 ```
 
@@ -52,6 +53,7 @@ docker run --rm -p 8080:8000 \
 - `DEFAULT_USERNAME`: Optional default admin username created on startup
 - `DEFAULT_PASSWORD`: Optional default admin password used when creating the default admin (must satisfy Django password validators: minimum length, non-common, non-numeric, etc.)
 - `DEFAULT_PASSWORD_UPDATE`: Optional (`true`/`false`, default `false`); when exactly `true`, updates password for an existing `DEFAULT_USERNAME` only if that user is already staff + superuser
+- `ALLOWED_HOSTS`: Comma-separated Django allowed hosts list (default: `localhost,127.0.0.1,[::1]`; for example `localhost,127.0.0.1,app.example.com`)
 
 If you add more published ports later, use separate purpose-based variables (for example `APP_HTTP_PORT`, `APP_METRICS_PORT`) instead of reusing one value.
 

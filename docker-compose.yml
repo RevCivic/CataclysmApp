@@ -9,3 +9,4 @@ services:
     environment:
       DEFAULT_USERNAME: ${DEFAULT_USERNAME?DEFAULT_USERNAME environment variable not set}
       DEFAULT_PASSWORD: ${DEFAULT_PASSWORD?DEFAULT_PASSWORD environment variable not set}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,[::1]}
