@@ -4,8 +4,11 @@ from django.conf import settings
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-# Path can be provided via environment variable SERVICE_ACCOUNT_FILE
-# or will default to a sensible project-local path: <BASE_DIR>/cataclysm/secrets/service_account.json
+# Credentials can be supplied in one of two ways (checked in order):
+#   1. SERVICE_ACCOUNT_JSON  — the full service-account JSON as a string
+#   2. SERVICE_ACCOUNT_FILE  — path to the service-account JSON file
+#      (defaults to <BASE_DIR>/cataclysm/secrets/service_account.json)
+SERVICE_ACCOUNT_JSON = os.environ.get("SERVICE_ACCOUNT_JSON")
 SERVICE_ACCOUNT_FILE = os.environ.get(
     "SERVICE_ACCOUNT_FILE",
     os.path.join(getattr(settings, 'BASE_DIR', ''), 'cataclysm', 'secrets', 'service_account.json')
@@ -14,17 +17,23 @@ SERVICE_ACCOUNT_FILE = os.environ.get(
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 
+def _load_service_account_info():
+    """Return the parsed service-account dict from JSON env var or file."""
+    if SERVICE_ACCOUNT_JSON:
+        return json.loads(SERVICE_ACCOUNT_JSON)
+    with open(SERVICE_ACCOUNT_FILE, 'r', encoding='utf-8') as fh:
+        return json.load(fh)
+
+
 def get_service_account_email():
     """Return the client_email from the service account key JSON if available."""
     try:
-        with open(SERVICE_ACCOUNT_FILE, 'r', encoding='utf-8') as fh:
-            jd = json.load(fh)
-            return jd.get('client_email')
+        return _load_service_account_info().get('client_email')
     except FileNotFoundError:
         print(f"Service account file not found: {SERVICE_ACCOUNT_FILE}")
         return None
     except (json.JSONDecodeError, OSError) as e:
-        print(f"Error reading service account file: {e}")
+        print(f"Error reading service account: {e}")
         return None
 
 
@@ -45,17 +54,16 @@ def get_spreadsheet_meta(spreadsheet_id):
 
 def get_google_sheets_service():
     """
-    Authenticates with Google Sheets API using a service account JSON key.
+    Authenticates with Google Sheets API using a service account.
+
+    Credentials are loaded from SERVICE_ACCOUNT_JSON (env var with JSON string)
+    or SERVICE_ACCOUNT_FILE (path to JSON key file).
 
     Returns googleapiclient.discovery.Resource or None on error.
     """
     try:
-        if not SERVICE_ACCOUNT_FILE or not os.path.exists(SERVICE_ACCOUNT_FILE):
-            raise FileNotFoundError(f"Service account file not found: {SERVICE_ACCOUNT_FILE}")
-
-        creds = service_account.Credentials.from_service_account_file(
-            SERVICE_ACCOUNT_FILE, scopes=SCOPES
-        )
+        info = _load_service_account_info()
+        creds = service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
         service = build('sheets', 'v4', credentials=creds)
         return service
     except Exception as e:

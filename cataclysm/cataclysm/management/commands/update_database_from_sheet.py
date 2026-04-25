@@ -1,4 +1,5 @@
 
+import os
 import os.path
 from django.core.management.base import BaseCommand
 from googleapiclient.errors import HttpError
@@ -19,9 +20,10 @@ except Exception:
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
-# The ID and range of a sample spreadsheet.
-SAMPLE_SPREADSHEET_ID = "1XRyeXDIhNE6iwTXS_zDc_eHrQFU96Z2OUCIXm_t0twE"
-SAMPLE_RANGE_NAME = "Other Crew!A5:Z"
+# The ID and range of the spreadsheet.
+# Both can be overridden at runtime via environment variables.
+SAMPLE_SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "1XRyeXDIhNE6iwTXS_zDc_eHrQFU96Z2OUCIXm_t0twE")
+SAMPLE_RANGE_NAME = os.environ.get("SHEET_RANGE", "Other Crew!A5:Z")
 
 # Maps column index → Trait name (columns 4-17 in the sheet are trait flags).
 TRAIT_COLUMNS = {

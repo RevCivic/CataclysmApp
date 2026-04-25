@@ -172,8 +172,15 @@ The canonical utility is **`cataclysm/cataclysm/utils/google_sheets.py`**.
 Always import from `cataclysm.utils.google_sheets`.  The management command
 `update_database_from_sheet` uses this to import crew from a Google Sheet.
 
-Configure the service-account key file path via the environment variable
-`SERVICE_ACCOUNT_FILE` (default: `<BASE_DIR>/cataclysm/secrets/service_account.json`).
+### Environment variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `SERVICE_ACCOUNT_JSON` | one of the two | Full service-account key as a JSON string. Checked first; useful in containers where mounting a file is inconvenient. |
+| `SERVICE_ACCOUNT_FILE` | one of the two | Path to the service-account JSON key file (default: `<BASE_DIR>/cataclysm/secrets/service_account.json`). Used when `SERVICE_ACCOUNT_JSON` is not set. |
+| `SPREADSHEET_ID` | no | Google Sheets spreadsheet ID to import from (default: the hardcoded crew sheet ID). |
+| `SHEET_RANGE` | no | Cell range to read, e.g. `Other Crew!A5:Z` (default: `Other Crew!A5:Z`). |
+
 The secrets directory and JSON files are git-ignored.
 
 ---
