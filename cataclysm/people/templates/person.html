@@ -8,17 +8,17 @@
         <h2>{{ current_person.name }}</h2>
     </div>
     <div class="index_menu"><a class="lcars-btn" href="{% url 'edit_person' current_person.id%}">Edit</a></div>
-    <div style="width: 100%;">
+    <div>
         <table class="sci-fi-list">
             <tr style="vertical-align: top;">
-                <td rowspan="3" style="vertical-align: middle; width: 250px;">
-                    {%if current_person.image %}
-                        <center><img src="{{current_person.image.url}}" class="crew_image"></center>
+                <td rowspan="3" style="vertical-align: middle; width: 250px; text-align: center;">
+                    {% if current_person.image %}
+                        <img src="{{current_person.image.url}}" class="crew_image">
                     {% endif %}
                 </td>
                 <td colspan="3">
-                    <table style="vertical-align: top; width: 100%;">
-                        <th colspan="2" style="text-align: center;">Basic Info</th>
+                    <table class="sci-fi-list">
+                        <tr><th colspan="2" class="boolean">Basic Info</th></tr>
                         <tr>
                             <th>Name</th>
                             <td>{{ current_person.name }}</td>
@@ -38,8 +38,8 @@
                     </table>
                 </td>
                 <td colspan="2">
-                    <table style="vertical-align: top; width: 100%;">
-                        <th colspan="2" style="text-align: center;">Career</th>
+                    <table class="sci-fi-list">
+                        <tr><th colspan="2" class="boolean">Career</th></tr>
                         <tr>
                             <th>Faction</th>
                             <td>{{ current_person.faction }}</td>
@@ -86,11 +86,11 @@
     <div>
         <table class="sci-fi-list">
             <tr>
-                <th><a href="{% url 'add_images' current_person.id%}"> Add Images</a></th>
+                <th><a href="{% url 'add_images' current_person.id%}">Add Images</a></th>
             </tr>
             {% if current_person.additional_images.count > 0 %}
                 <tr>
-                    <th colspan="2" style="text-align: center;">Additional Images</th>
+                    <th colspan="2" class="boolean">Additional Images</th>
                 </tr>
                 <tr>
                     <td colspan="2">
@@ -106,4 +106,5 @@
             {% endif %}
         </table>
     </div>
+</div>
 {% endblock %}
