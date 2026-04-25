@@ -19,7 +19,7 @@ urlpatterns = [
     path('starships/', include(("ships.urls", "ships"), namespace='starships')),
     path('vehicles/', include("vehicles.urls")),
     path('party/', include("party.urls")),
-    path('adminflow/', include("adminflow.urls")),
+    path('adminflow/', include(("adminflow.urls", "adminflow"), namespace="adminflow")),
     path('mindmaps/', include("mindmaps.urls")),
 ]
 

@@ -1,3 +1,4 @@
+import json
 import os
 from django.conf import settings
 from google.oauth2 import service_account
@@ -11,6 +12,35 @@ SERVICE_ACCOUNT_FILE = os.environ.get(
 )
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+
+
+def get_service_account_email():
+    """Return the client_email from the service account key JSON if available."""
+    try:
+        with open(SERVICE_ACCOUNT_FILE, 'r', encoding='utf-8') as fh:
+            jd = json.load(fh)
+            return jd.get('client_email')
+    except FileNotFoundError:
+        print(f"Service account file not found: {SERVICE_ACCOUNT_FILE}")
+        return None
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"Error reading service account file: {e}")
+        return None
+
+
+def get_spreadsheet_meta(spreadsheet_id):
+    """Attempt to fetch spreadsheet metadata (title, sheets) to validate permissions.
+
+    Returns dict on success or tuple(False, error_message) on failure.
+    """
+    service = get_google_sheets_service()
+    if not service:
+        return (False, 'Could not create Google Sheets service')
+    try:
+        meta = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
+        return meta
+    except Exception as e:
+        return (False, str(e))
 
 
 def get_google_sheets_service():
