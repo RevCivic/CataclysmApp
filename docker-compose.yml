@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: cataclysmapp:latest
     ports:
       - "${PORT:-8000}:8000"
     environment:
