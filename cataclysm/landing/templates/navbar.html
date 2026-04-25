@@ -16,7 +16,8 @@
     <div class="lcars-nav-divider"></div>
 
     {% if user.is_authenticated %}
-        <a href="/admin/"         class="lcars-nav-pill lcars-nav-pill-accent">Admin</a>
+        <a href="/adminflow/"     class="lcars-nav-pill lcars-nav-pill-accent">Admin Panel</a>
+        <a href="/admin/"         class="lcars-nav-pill lcars-nav-pill-accent">Django Admin</a>
         <a href="/admin/logout/"  class="lcars-nav-pill lcars-nav-pill-accent">Log Out</a>
     {% else %}
         <a href="/admin/"         class="lcars-nav-pill lcars-nav-pill-accent">Log In</a>

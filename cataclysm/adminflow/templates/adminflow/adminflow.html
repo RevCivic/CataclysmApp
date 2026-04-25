@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel — Cataclysm{% endblock %}
+{% block content %}
+<div class="list-header index_menu">
+  <h1 class="app_name">Admin Panel</h1>
+</div>
+
+{% if sa_email %}
+  <p class="lcars-label">Service Account: <code>{{ sa_email }}</code></p>
+{% else %}
+  <p class="lcars-label text-warning">⚠ No service account key found. Set <code>SERVICE_ACCOUNT_FILE</code> or place the key at <code>cataclysm/secrets/service_account.json</code>.</p>
+{% endif %}
+
+{# ── Result messages ── #}
+{% if run_error %}
+  <div class="alert alert-danger mt-2">{{ run_error }}</div>
+{% endif %}
+{% if run_messages %}
+  <div class="alert alert-info mt-2">
+    <ul class="mb-0">
+      {% for msg in run_messages %}<li>{{ msg }}</li>{% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+{# ── Sheet preview table ── #}
+{% if sheet_rows is not None %}
+  {% if sheet_rows %}
+    <h3 class="mt-3">Sheet Data Preview</h3>
+    <div style="overflow-x:auto;">
+      <table class="sci-fi-list" style="width:100%; margin-top:8px;">
+        <tbody>
+          {% for row in sheet_rows %}
+          <tr>
+            {% for cell in row %}<td>{{ cell }}</td>{% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="mt-2">Sheet returned no rows for the given range.</p>
+  {% endif %}
+{% endif %}
+
+<hr class="lcars-divider mt-4">
+
+{# ── Read Sheet section ── #}
+<h2 class="mt-3">Read Sheet Data</h2>
+<p>Preview raw rows from a Google Sheet range without importing anything.</p>
+<form method="post" action="{% url 'adminflow:read_sheet' %}">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="rs-sheet-id">Spreadsheet ID</label>
+    <input id="rs-sheet-id" class="form-control sci-fi-input" type="text" name="spreadsheet_id"
+           value="{{ default_spreadsheet_id }}" required>
+  </div>
+  <div class="form-group">
+    <label for="rs-range">Range (e.g. Sheet1!A1:Z)</label>
+    <input id="rs-range" class="form-control sci-fi-input" type="text" name="range_name"
+           value="{{ default_range_name }}" required>
+  </div>
+  <button type="submit" class="btn btn-secondary lcars-btn">Preview Sheet</button>
+</form>
+
+<hr class="lcars-divider mt-4">
+
+{# ── Import section ── #}
+<h2 class="mt-3">Import People from Sheet</h2>
+<p>Run the <code>update_database_from_sheet</code> management command to import / update Person records from the configured Google Sheet.</p>
+<form method="post" action="{% url 'adminflow:run_import' %}">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="imp-sheet-id">Spreadsheet ID</label>
+    <input id="imp-sheet-id" class="form-control sci-fi-input" type="text" name="spreadsheet_id"
+           value="{{ default_spreadsheet_id }}" required>
+  </div>
+  <div class="form-group">
+    <label for="imp-range">Range (e.g. Other Crew!A5:Z)</label>
+    <input id="imp-range" class="form-control sci-fi-input" type="text" name="range_name"
+           value="{{ default_range_name }}" required>
+  </div>
+  <button type="submit" class="btn btn-primary lcars-btn"
+          onclick="return confirm('This will create/update Person records. Continue?')">
+    Run Import
+  </button>
+</form>
+{% endblock %}
