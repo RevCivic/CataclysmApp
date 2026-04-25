@@ -42,38 +42,37 @@ TRAIT_COLUMNS = {
 }
 
 
-def main():
-    """Read the sheet and create Person objects for each row.
+def import_people_from_sheet(spreadsheet_id, range_name):
+    """Import Person records from a Google Sheet range.
 
-    This function uses the service-account helper found in
-    `cataclysm.utils.google_sheets`. The service-account JSON path can be
-    configured via the SERVICE_ACCOUNT_FILE environment variable or placed at
-    <BASE_DIR>/cataclysm/secrets/service_account.json.
+    Returns a list of message strings describing what happened.
+    Raises on unexpected errors so callers can handle them.
     """
+    messages = []
     try:
-        values = read_sheet_data(SAMPLE_SPREADSHEET_ID, SAMPLE_RANGE_NAME)
+        values = read_sheet_data(spreadsheet_id, range_name)
         if values is None:
-            print("Failed to read sheet data. Checking service account and sheet access...")
+            messages.append("Failed to read sheet data. Checking service account and sheet access...")
             sa_email = get_service_account_email()
             if sa_email:
-                print(f"Service account client_email: {sa_email}")
-                print("Make sure you shared the Google Sheet with that email address.")
+                messages.append(f"Service account client_email: {sa_email}")
+                messages.append("Make sure you shared the Google Sheet with that email address.")
             else:
-                print("Could not read service account email from key file. Verify SERVICE_ACCOUNT_FILE path.")
+                messages.append("Could not read service account email from key file. Verify SERVICE_ACCOUNT_FILE path.")
 
             # Try to fetch spreadsheet metadata to produce a clearer error
-            meta = get_spreadsheet_meta(SAMPLE_SPREADSHEET_ID)
+            meta = get_spreadsheet_meta(spreadsheet_id)
             if isinstance(meta, tuple) and meta[0] is False:
-                print(f"Spreadsheet metadata error: {meta[1]}")
+                messages.append(f"Spreadsheet metadata error: {meta[1]}")
             else:
-                print("Spreadsheet metadata fetched (unexpected) — check returned metadata and permissions.")
-            return
+                messages.append("Spreadsheet metadata fetched (unexpected) — check returned metadata and permissions.")
+            return messages
 
         if not values:
-            print("No data found in the sheet range.")
-            return
+            messages.append("No data found in the sheet range.")
+            return messages
 
-        print("Processing rows from Google Sheet...")
+        messages.append("Processing rows from Google Sheet...")
         for row in values:
             # Safely index into row; provide defaults when values are missing
             name = row[0] if len(row) > 0 else None
@@ -103,11 +102,24 @@ def main():
                     trait, _ = Trait.objects.get_or_create(name=trait_name)
                     person.traits.add(trait)
 
-        print("Sheet processing complete.")
+        messages.append("Sheet processing complete.")
     except HttpError as err:
-        print(f"Google API error: {err}")
+        messages.append(f"Google API error: {err}")
     except Exception as e:
-        print(f"Unexpected error while updating from sheet: {e}")
+        messages.append(f"Unexpected error while updating from sheet: {e}")
+    return messages
+
+
+def main():
+    """Read the sheet and create Person objects for each row.
+
+    This function uses the service-account helper found in
+    `cataclysm.utils.google_sheets`. The service-account JSON path can be
+    configured via the SERVICE_ACCOUNT_FILE environment variable or placed at
+    <BASE_DIR>/cataclysm/secrets/service_account.json.
+    """
+    for msg in import_people_from_sheet(SAMPLE_SPREADSHEET_ID, SAMPLE_RANGE_NAME):
+        print(msg)
 
 class Command(BaseCommand):
     help = 'Update database from sheet'

@@ -20,7 +20,11 @@ def get_service_account_email():
         with open(SERVICE_ACCOUNT_FILE, 'r', encoding='utf-8') as fh:
             jd = json.load(fh)
             return jd.get('client_email')
-    except Exception:
+    except FileNotFoundError:
+        print(f"Service account file not found: {SERVICE_ACCOUNT_FILE}")
+        return None
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"Error reading service account file: {e}")
         return None
 
 
