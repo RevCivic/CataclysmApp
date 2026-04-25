@@ -20,7 +20,10 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 def _load_service_account_info():
     """Return the parsed service-account dict from JSON env var or file."""
     if SERVICE_ACCOUNT_JSON:
-        return json.loads(SERVICE_ACCOUNT_JSON)
+        try:
+            return json.loads(SERVICE_ACCOUNT_JSON)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"SERVICE_ACCOUNT_JSON is not valid JSON: {e}") from e
     with open(SERVICE_ACCOUNT_FILE, 'r', encoding='utf-8') as fh:
         return json.load(fh)
 
@@ -32,7 +35,7 @@ def get_service_account_email():
     except FileNotFoundError:
         print(f"Service account file not found: {SERVICE_ACCOUNT_FILE}")
         return None
-    except (json.JSONDecodeError, OSError) as e:
+    except (json.JSONDecodeError, ValueError, OSError) as e:
         print(f"Error reading service account: {e}")
         return None
 

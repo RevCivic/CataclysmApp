@@ -1,6 +1,5 @@
 
 import os
-import os.path
 from django.core.management.base import BaseCommand
 from googleapiclient.errors import HttpError
 from people.models import Person, Trait
