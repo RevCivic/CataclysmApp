@@ -4,6 +4,7 @@
 		<h1 class="app_name">Factions</h1>
 		<a class="btn btn-primary" href="{% url 'factions:add' %}">Add Faction</a>
 	</div>
+	{% include '_pagination.html' %}
 	<table class="sci-fi-list" style="margin-top:12px; width:100%;">
 		<thead>
 			<tr>
