@@ -26,17 +26,29 @@ def extract_spreadsheet_id(url_or_id: str) -> str:
 def get_spreadsheet_meta(spreadsheet_id):
     """Verify that the spreadsheet is publicly accessible via the export URL.
 
-    Returns a minimal dict on success or tuple(False, error_message) on failure.
+    Makes a small GET request to the CSV export endpoint to confirm the sheet
+    returns data (not a redirect to an auth/login page).  Returns a minimal
+    dict on success or tuple(False, error_message) on failure.
     """
     spreadsheet_id = extract_spreadsheet_id(spreadsheet_id)
     url = _EXPORT_BASE.format(spreadsheet_id=spreadsheet_id)
     try:
-        response = requests.head(url, params={"format": "csv"}, timeout=15, allow_redirects=True)
+        response = requests.get(
+            url,
+            params={"format": "csv"},
+            timeout=15,
+            stream=True,
+        )
         if response.status_code == 200:
             return {"spreadsheetId": spreadsheet_id}
         return (False, f"HTTP {response.status_code}: sheet may not be publicly shared")
     except requests.RequestException as e:
         return (False, str(e))
+    finally:
+        try:
+            response.close()
+        except Exception:
+            pass
 
 
 def read_sheet_data(spreadsheet_id, range_name):
@@ -48,6 +60,11 @@ def read_sheet_data(spreadsheet_id, range_name):
 
     The spreadsheet must be shared with "Anyone with the link (Viewer)" in the
     Google Sheets sharing settings.
+
+    *range_name* accepts the same A1 notation used by the Sheets API, including
+    an optional sheet name prefix (e.g. ``"Other Crew!A5:Z"`` or ``"Sheet1"``).
+    Google's CSV export endpoint passes this value as the ``range`` query
+    parameter and honours the full A1 notation format.
     """
     spreadsheet_id = extract_spreadsheet_id(spreadsheet_id)
     url = _EXPORT_BASE.format(spreadsheet_id=spreadsheet_id)
