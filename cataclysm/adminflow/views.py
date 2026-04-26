@@ -7,14 +7,12 @@ from cataclysm.management.commands.update_database_from_sheet import (
     SAMPLE_SPREADSHEET_ID,
     SAMPLE_RANGE_NAME,
 )
-from cataclysm.utils.google_sheets import get_service_account_email, read_sheet_data
+from cataclysm.utils.google_sheets import read_sheet_data, extract_spreadsheet_id
 
 
 @login_required
 def index(request):
-    sa_email = get_service_account_email()
     context = {
-        'sa_email': sa_email,
         'default_spreadsheet_id': SAMPLE_SPREADSHEET_ID,
         'default_range_name': SAMPLE_RANGE_NAME,
     }
@@ -24,13 +22,12 @@ def index(request):
 @login_required
 @require_POST
 def run_import(request):
-    spreadsheet_id = request.POST.get('spreadsheet_id', SAMPLE_SPREADSHEET_ID).strip()
+    spreadsheet_id = extract_spreadsheet_id(request.POST.get('spreadsheet_id', SAMPLE_SPREADSHEET_ID))
     range_name = request.POST.get('range_name', SAMPLE_RANGE_NAME).strip()
 
     messages = import_people_from_sheet(spreadsheet_id, range_name)
 
     context = {
-        'sa_email': get_service_account_email(),
         'default_spreadsheet_id': spreadsheet_id,
         'default_range_name': range_name,
         'run_messages': messages,
@@ -41,17 +38,16 @@ def run_import(request):
 @login_required
 @require_POST
 def read_sheet(request):
-    spreadsheet_id = request.POST.get('spreadsheet_id', SAMPLE_SPREADSHEET_ID).strip()
+    spreadsheet_id = extract_spreadsheet_id(request.POST.get('spreadsheet_id', SAMPLE_SPREADSHEET_ID))
     range_name = request.POST.get('range_name', SAMPLE_RANGE_NAME).strip()
 
     rows = read_sheet_data(spreadsheet_id, range_name)
     error = None
     if rows is None:
-        error = "Failed to read sheet data. Check the service account configuration and sheet permissions."
+        error = "Failed to read sheet data. Make sure the Google Sheet is shared with 'Anyone with the link'."
         rows = []
 
     context = {
-        'sa_email': get_service_account_email(),
         'default_spreadsheet_id': spreadsheet_id,
         'default_range_name': range_name,
         'sheet_rows': rows,

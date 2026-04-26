@@ -1,23 +1,20 @@
 
 import os
 from django.core.management.base import BaseCommand
-from googleapiclient.errors import HttpError
+
 from people.models import Person, Trait
 
 # local helper: try importing from the inner package first (works when using either manage.py)
 try:
-    from cataclysm.utils.google_sheets import read_sheet_data, get_google_sheets_service, get_service_account_email, get_spreadsheet_meta
+    from cataclysm.utils.google_sheets import read_sheet_data, get_spreadsheet_meta, extract_spreadsheet_id
 except Exception:
     # fallback to outer package layout if available
     try:
-        from ..utils.google_sheets import read_sheet_data, get_google_sheets_service, get_service_account_email, get_spreadsheet_meta  # type: ignore
+        from ..utils.google_sheets import read_sheet_data, get_spreadsheet_meta, extract_spreadsheet_id  # type: ignore
     except Exception:
         # re-raise a clear import error for troubleshooting
         raise
 
-
-# If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 # The ID and range of the spreadsheet.
 # Both can be overridden at runtime via environment variables.
@@ -50,23 +47,16 @@ def import_people_from_sheet(spreadsheet_id, range_name):
     Raises on unexpected errors so callers can handle them.
     """
     messages = []
+    spreadsheet_id = extract_spreadsheet_id(spreadsheet_id)
     try:
         values = read_sheet_data(spreadsheet_id, range_name)
         if values is None:
-            messages.append("Failed to read sheet data. Checking service account and sheet access...")
-            sa_email = get_service_account_email()
-            if sa_email:
-                messages.append(f"Service account client_email: {sa_email}")
-                messages.append("Make sure you shared the Google Sheet with that email address.")
-            else:
-                messages.append("Could not read service account email from key file. Verify SERVICE_ACCOUNT_FILE path.")
+            messages.append("Failed to read sheet data. Make sure the Google Sheet is shared with 'Anyone with the link'.")
 
             # Try to fetch spreadsheet metadata to produce a clearer error
             meta = get_spreadsheet_meta(spreadsheet_id)
             if isinstance(meta, tuple) and meta[0] is False:
-                messages.append(f"Spreadsheet metadata error: {meta[1]}")
-            else:
-                messages.append("Spreadsheet metadata fetched (unexpected) — check returned metadata and permissions.")
+                messages.append(f"Spreadsheet access error: {meta[1]}")
             return messages
 
         if not values:
@@ -104,21 +94,13 @@ def import_people_from_sheet(spreadsheet_id, range_name):
                     person.traits.add(trait)
 
         messages.append("Sheet processing complete.")
-    except HttpError as err:
-        messages.append(f"Google API error: {err}")
     except Exception as e:
         messages.append(f"Unexpected error while updating from sheet: {e}")
     return messages
 
 
 def main():
-    """Read the sheet and create Person objects for each row.
-
-    This function uses the service-account helper found in
-    `cataclysm.utils.google_sheets`. The service-account JSON path can be
-    configured via the SERVICE_ACCOUNT_FILE environment variable or placed at
-    <BASE_DIR>/cataclysm/secrets/service_account.json.
-    """
+    """Read the sheet and create Person objects for each row."""
     for msg in import_people_from_sheet(SAMPLE_SPREADSHEET_ID, SAMPLE_RANGE_NAME):
         print(msg)
 
