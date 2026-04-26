@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Deletion Complete — Cataclysm{% endblock %}
+{% block content %}
+<div class="list-header index_menu">
+  <h1 class="app_name">Deletion Complete</h1>
+</div>
+
+{% if errors %}
+  <div class="alert alert-danger mt-3">
+    <strong>Some items could not be deleted:</strong>
+    <ul class="mb-0">
+      {% for err in errors %}<li>{{ err }}</li>{% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+{% if deleted %}
+  <div class="alert alert-success mt-3">
+    Successfully deleted <strong>{{ deleted|length }}</strong>
+    record{{ deleted|length|pluralize }}.
+  </div>
+  <div style="overflow-x:auto; margin-top:1rem;">
+    <table class="sci-fi-list" style="width:100%;">
+      <thead>
+        <tr>
+          <th>List</th>
+          <th>ID</th>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in deleted %}
+        <tr>
+          <td>{{ item.model_label }}</td>
+          <td>{{ item.pk }}</td>
+          <td>{{ item.name }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="lcars-label mt-3">No records were deleted.</p>
+{% endif %}
+
+<div class="mt-4">
+  <a href="{% url 'adminflow:duplicates' %}" class="btn btn-secondary lcars-btn">Scan Again</a>
+  <a href="{% url 'adminflow:index' %}" class="btn btn-secondary lcars-btn ml-2">← Admin Panel</a>
+</div>
+{% endblock %}
