@@ -136,6 +136,46 @@ body h1, body h2, body h3, body h4 { color: var(--lcars-text); }
   opacity: 0.85;
 }
 
+/* Hamburger menu button — hidden on desktop/tablet, visible on mobile */
+.lcars-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  margin-right: 0.25rem;
+  border-radius: 0.35rem;
+  flex-shrink: 0;
+}
+
+.lcars-hamburger:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.lcars-hamburger-icon,
+.lcars-hamburger-icon::before,
+.lcars-hamburger-icon::after {
+  display: block;
+  width: 20px;
+  height: 3px;
+  background: #0a0a10;
+  border-radius: 2px;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.lcars-hamburger-icon::before,
+.lcars-hamburger-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+
+.lcars-hamburger-icon::before { top: -7px; }
+.lcars-hamburger-icon::after  { top: 7px; }
+
 /* Bottom-left: sidebar — top-right & bottom-right curves give LCARS look */
 .lcars-sidebar {
   background: var(--lcars-panel-dark);
@@ -448,7 +488,7 @@ h1.app_name {
 
 /* Landing page hero title */
 h1.app_name.hero-title {
-  font-size: 3.8rem;
+  font-size: clamp(1.8rem, 5vw, 3.8rem);
   text-align: center;
   display: block;
   width: 100%;
@@ -470,7 +510,7 @@ h2.welcome {
   background: rgba(10, 10, 30, 0.82);
   border: 2px solid var(--lcars-panel);
   border-radius: 1rem;
-  padding: 1.5rem 2rem;
+  padding: clamp(0.8rem, 3vw, 1.5rem) clamp(1rem, 4vw, 2rem);
   color: var(--lcars-text);
   font-family: 'GoodOT', sans-serif;
   font-size: 1rem;
@@ -616,6 +656,72 @@ h2.welcome {
 .crew_list_additional_images:hover { transform: scale(1.15); }
 
 /* ====================================================================
+   SIDEBAR OVERLAY  (mobile hamburger backdrop)
+   ==================================================================== */
+
+.lcars-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 199;
+}
+
+.lcars-sidebar-overlay.open {
+  display: block;
+}
+
+/* ====================================================================
+   TABLE WRAP  — enables horizontal scroll on narrow viewports
+   ==================================================================== */
+
+.lcars-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ====================================================================
+   DETAIL ROW  — image + data tables side by side, stacks on mobile
+   ==================================================================== */
+
+.lcars-detail-row {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.lcars-detail-img {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.lcars-detail-tables {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.lcars-detail-tables table {
+  flex: 1;
+  min-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .lcars-detail-row {
+    flex-direction: column;
+  }
+
+  .lcars-detail-img {
+    width: 100%;
+  }
+}
+
+/* ====================================================================
    BOOLEAN / TRAIT CELLS
    ==================================================================== */
 
@@ -706,31 +812,75 @@ h2.welcome {
 .shooting-star:nth-child(10) { top: 0;     right: 450px;  animation-delay: 2.75s; animation-duration: 2.75s; }
 
 /* ====================================================================
-   RESPONSIVE  — collapse sidebar to icon width on small screens
+   RESPONSIVE
    ==================================================================== */
 
-@media (max-width: 768px) {
+/* Tablet (601 to 1024 px) — narrower sidebar, tighter text */
+@media (min-width: 601px) and (max-width: 1024px) {
   :root {
-    --lcars-sidebar-width: 52px;
-    --lcars-topbar-height: 48px;
+    --lcars-sidebar-width: 110px;
+    --lcars-topbar-height: 52px;
   }
 
   .lcars-nav-pill {
-    font-size: 0;
-    padding: 0.4rem;
-    border-radius: 50%;
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+    font-size: 0.68rem;
+    padding: 0.38rem 0.6rem;
   }
 
-  .lcars-nav-divider { margin: 0.3rem 0; }
-  .lcars-topbar-title { font-size: 1rem; }
+  .lcars-topbar-title { font-size: 1.2rem; }
+  .lcars-main { padding: 1rem 1.2rem; }
+}
+
+/* Mobile (≤ 600 px) — hamburger overlay sidebar */
+@media (max-width: 600px) {
+  :root {
+    --lcars-topbar-height: 48px;
+  }
+
+  .lcars-chrome {
+    grid-template-columns: 0 1fr;
+  }
+
+  .lcars-tl {
+    display: none;
+  }
+
+  .lcars-sidebar {
+    position: fixed;
+    left: -200px;
+    top: 0;
+    height: 100%;
+    width: 190px;
+    z-index: 200;
+    transition: left 0.25s ease;
+    border-radius: 0 1.8rem 1.8rem 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .lcars-sidebar.open {
+    left: 0;
+  }
+
+  .lcars-hamburger {
+    display: flex;
+  }
+
   .lcars-topbar-stardate { display: none; }
-  .lcars-main { padding: 0.8rem; }
+  .lcars-topbar-title    { font-size: 1rem; }
+  .lcars-main            { padding: 0.8rem; }
+
+  .species_image,
+  .crew_image {
+    max-width: 100%;
+    width: auto;
+  }
+
+  .crew_list_image:hover {
+    transform: none;
+    position: static;
+    z-index: auto;
+  }
 }
 
 /* ====================================================================

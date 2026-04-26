@@ -4,6 +4,7 @@
         <h1 class="app_name">Vehicles</h1>
         <a class="btn btn-primary" href="{% url 'vehicles:add' %}">Add Vehicle</a>
     </div>
+  <div class="lcars-table-wrap">
   <table class="sci-fi-list" style="margin-top:12px; width:100%;">
     <thead>
       <tr>
@@ -28,4 +29,5 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
 {% endblock %}

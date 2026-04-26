@@ -8,6 +8,7 @@
         <a class="btn btn-primary" href="{% url 'add' %}">Add Species</a>
     </div>
     {% include '_pagination.html' %}
+    <div class="lcars-table-wrap">
     <table class="sci-fi-list">
         <thead>
             <tr>
@@ -59,4 +60,5 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 {% endblock %}

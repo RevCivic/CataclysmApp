@@ -10,7 +10,8 @@
 
     {% include '_pagination.html' %}
 
-    <div class="column-buttons ">
+    <div class="column-buttons">
+        <div class="lcars-table-wrap">
         <table class="toggle-table">
             <tr>
                 <th colspan="{{ traits|length }}" class="table-label">Active Fields</th>
@@ -32,6 +33,7 @@
                 <td colspan="{{ traits|length }}"><button class="all-column-button toggle-button" data-column="all"></button></td>
             </tr>
         </table>
+        </div>
     </div>
 
     <script>
@@ -70,6 +72,7 @@
 
 
 
+    <div class="lcars-table-wrap">
     <table class="sci-fi-list">
         <thead>
             <tr>
@@ -125,4 +128,5 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 {% endblock %}

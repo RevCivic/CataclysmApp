@@ -1,6 +1,6 @@
 /* Sci-Fi Form Styles - reusable for all forms */
 .sci-fi-form-container {
-    max-width: 80%;
+    max-width: min(80%, 900px);
     width: 80%;
     margin: 2vw auto;
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
@@ -66,4 +66,22 @@
     background: linear-gradient(90deg, #0077aa 0%, var(--lcars-accent-2, #99CCFF) 100%);
     color: #fff;
     box-shadow: 0 0 14px rgba(153,204,255,0.18);
+}
+
+@media (max-width: 768px) {
+    .sci-fi-form-container {
+        max-width: 98%;
+        width: 98%;
+        padding: 1.2em 1em;
+    }
+
+    .sci-fi-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .sci-fi-form-grid {
+        grid-template-columns: 1fr;
+    }
 }

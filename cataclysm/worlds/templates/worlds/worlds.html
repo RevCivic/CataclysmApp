@@ -5,6 +5,7 @@
 	<a href="{% url 'worlds:add' %}" class="btn btn-primary">Add World</a>
 </div>
 {% include '_pagination.html' %}
+<div class="lcars-table-wrap">
 <table class="table table-hover sci-fi-table">
 	<thead>
 		<tr>
@@ -37,4 +38,5 @@
 	{% endfor %}
 	</tbody>
 </table>
+</div>
 {% endblock %}
