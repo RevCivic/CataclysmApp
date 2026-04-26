@@ -6,6 +6,7 @@
 	<a href="{% url 'weapons:add' %}" class="btn btn-primary">Add Weapon</a>
 </div>
 {% include '_pagination.html' %}
+<div class="lcars-table-wrap">
 <table class="table table-striped sci-fi-table">
 	<thead>
 		<tr>
@@ -38,4 +39,5 @@
 	{% endfor %}
 	</tbody>
 </table>
+</div>
 {% endblock %}
