@@ -1,12 +1,13 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin
+from cataclysm.view_helpers import PerPageMixin, SearchMixin
 
 from .models import Armor
 
 
-class ArmorListView(PerPageMixin, ListView):
+class ArmorListView(SearchMixin, PerPageMixin, ListView):
+    search_fields = ['name', 'armor_type']
     model = Armor
     template_name = 'armor/armor.html'
     context_object_name = 'object_list'

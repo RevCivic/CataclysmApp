@@ -1,12 +1,13 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin
+from cataclysm.view_helpers import PerPageMixin, SearchMixin
 
 from .models import Faction
 
 
-class FactionListView(PerPageMixin, ListView):
+class FactionListView(SearchMixin, PerPageMixin, ListView):
+    search_fields = ['name', 'description']
     model = Faction
     template_name = 'factions/factions.html'
     context_object_name = 'object_list'

@@ -1,5 +1,13 @@
 {% load custom_filters %}
 <div class="pagination-controls">
+    <form class="search-bar" method="get" action="">
+        <input type="hidden" name="per_page" value="{{ current_per_page }}">
+        <input type="search" name="q" class="search-input" placeholder="Search…" value="{{ search_query|default:'' }}" aria-label="Search">
+        <button type="submit" class="btn btn-secondary search-btn">Search</button>
+        {% if search_query %}
+        <a href="?{% url_replace q='' page=1 %}" class="btn btn-secondary search-clear" aria-label="Clear search">&#x2715;</a>
+        {% endif %}
+    </form>
     <div class="per-page-controls">
         <span class="per-page-label">Show:</span>
         <a href="?{% url_replace per_page=50 page=1 %}" class="btn {% if current_per_page == '50' %}btn-primary{% else %}btn-secondary{% endif %}">50</a>

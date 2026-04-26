@@ -14,6 +14,10 @@ def index(request):
     if order_by:
         qs = qs.order_by(order_by)
 
+    q = request.GET.get('q', '').strip()
+    if q:
+        qs = qs.filter(name__icontains=q)
+
     per_page = request.GET.get('per_page', '50')
     if per_page not in _VALID_PER_PAGE:
         per_page = '50'
@@ -27,6 +31,7 @@ def index(request):
             'is_paginated': False,
             'traits': traits,
             'current_per_page': per_page,
+            'search_query': q,
         })
 
     paginator = Paginator(qs, int(per_page))
@@ -37,6 +42,7 @@ def index(request):
         'is_paginated': page_obj.has_other_pages(),
         'traits': traits,
         'current_per_page': per_page,
+        'search_query': q,
     })
 
 

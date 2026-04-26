@@ -41,6 +41,10 @@ def index(request):
 
     qs = Species.objects.all().order_by(order_by)
 
+    q = request.GET.get('q', '').strip()
+    if q:
+        qs = qs.filter(name__icontains=q)
+
     per_page = request.GET.get('per_page', '50')
     if per_page not in _VALID_PER_PAGE:
         per_page = '50'
@@ -53,6 +57,7 @@ def index(request):
             'current_sort_field': current_sort_field,
             'current_sort_dir': current_sort_dir,
             'current_per_page': per_page,
+            'search_query': q,
         }
     else:
         paginator = Paginator(qs, int(per_page))
@@ -64,6 +69,7 @@ def index(request):
             'current_sort_field': current_sort_field,
             'current_sort_dir': current_sort_dir,
             'current_per_page': per_page,
+            'search_query': q,
         }
 
     return render(request, 'species_index.html', context)
