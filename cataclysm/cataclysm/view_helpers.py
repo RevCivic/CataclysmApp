@@ -25,17 +25,17 @@ class SearchMixin:
 
     def get_queryset(self):
         qs = super().get_queryset()
-        q = self.request.GET.get('q', '').strip()
-        if q:
+        self._search_query = self.request.GET.get('q', '').strip()
+        if self._search_query:
             query = Q()
             for field in self.search_fields:
-                query |= Q(**{f'{field}__icontains': q})
+                query |= Q(**{f'{field}__icontains': self._search_query})
             qs = qs.filter(query)
         return qs
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['search_query'] = self.request.GET.get('q', '')
+        ctx['search_query'] = getattr(self, '_search_query', '')
         return ctx
 
 
