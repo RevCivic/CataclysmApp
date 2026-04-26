@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.db.models.functions import Lower
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
@@ -37,20 +38,21 @@ def find_all_duplicates():
         except LookupError:
             continue
 
-        # Find names that appear more than once (case-insensitive grouping via DB lower)
-        dup_names = (
-            Model.objects.values('name')
+        # Find names that appear more than once using case-insensitive grouping
+        dup_name_lowers = (
+            Model.objects.annotate(name_lower=Lower('name'))
+            .values('name_lower')
             .annotate(cnt=Count('id'))
             .filter(cnt__gt=1)
-            .values_list('name', flat=True)
+            .values_list('name_lower', flat=True)
         )
 
-        for name in dup_names:
-            records = list(Model.objects.filter(name=name).order_by('pk'))
+        for name_lower in dup_name_lowers:
+            records = list(Model.objects.filter(name__iexact=name_lower).order_by('pk'))
             groups.append({
                 'model_label': label,
                 'model_key': _model_key(app_label, model_name),
-                'name': name,
+                'name': records[0].name,
                 'records': records,
                 # suggest keeping the oldest (lowest pk); the rest are candidates
                 'suggested_keep_pk': records[0].pk,
