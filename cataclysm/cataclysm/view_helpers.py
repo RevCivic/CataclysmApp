@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 
+from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 
 _VALID_PER_PAGE = ('50', '100', '500', 'all')
@@ -15,6 +16,27 @@ def make_index_view(app_label: str) -> Callable[[HttpRequest], HttpResponse]:
         return HttpResponse(message)
 
     return view
+
+
+class SearchMixin:
+    """Mixin for ListView subclasses that filters by ?q= against search_fields."""
+
+    search_fields: list[str] = ['name']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            query = Q()
+            for field in self.search_fields:
+                query |= Q(**{f'{field}__icontains': q})
+            qs = qs.filter(query)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['search_query'] = self.request.GET.get('q', '')
+        return ctx
 
 
 class PerPageMixin:

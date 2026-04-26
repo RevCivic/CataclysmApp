@@ -1,12 +1,13 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin
+from cataclysm.view_helpers import PerPageMixin, SearchMixin
 
 from .models import Event
 
 
-class EventListView(PerPageMixin, ListView):
+class EventListView(SearchMixin, PerPageMixin, ListView):
+    search_fields = ['name', 'description', 'location']
     model = Event
     template_name = 'events/events.html'
     context_object_name = 'object_list'

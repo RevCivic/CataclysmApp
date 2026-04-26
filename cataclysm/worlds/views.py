@@ -1,12 +1,13 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin
+from cataclysm.view_helpers import PerPageMixin, SearchMixin
 
 from .models import World
 
 
-class WorldListView(PerPageMixin, ListView):
+class WorldListView(SearchMixin, PerPageMixin, ListView):
+    search_fields = ['name', 'system']
     model = World
     template_name = 'worlds/worlds.html'
     context_object_name = 'object_list'

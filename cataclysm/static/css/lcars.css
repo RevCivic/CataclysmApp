@@ -924,3 +924,46 @@ h2.welcome {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+/* ====================================================================
+   SEARCH BAR
+   ==================================================================== */
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.search-input {
+  background: rgba(10, 10, 10, 0.6);
+  color: var(--lcars-text);
+  border: 1.5px solid var(--lcars-accent-2);
+  border-radius: 0.35em;
+  padding: 0.3rem 0.65rem;
+  font-family: 'GoodOT', 'Segoe UI', Arial, sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  min-width: 180px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--lcars-panel);
+  box-shadow: 0 0 6px rgba(255, 140, 0, 0.25);
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.search-btn {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.search-clear {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1;
+}
