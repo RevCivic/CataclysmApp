@@ -1,14 +1,15 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
+from cataclysm.view_helpers import PerPageMixin
+
 from .models import Armor
 
 
-class ArmorListView(ListView):
+class ArmorListView(PerPageMixin, ListView):
     model = Armor
     template_name = 'armor/armor.html'
     context_object_name = 'object_list'
-    paginate_by = 50
 
     def get_queryset(self):
         return Armor.objects.all().order_by('name')

@@ -1,14 +1,15 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
+from cataclysm.view_helpers import PerPageMixin
+
 from .models import World
 
 
-class WorldListView(ListView):
+class WorldListView(PerPageMixin, ListView):
     model = World
     template_name = 'worlds/worlds.html'
     context_object_name = 'object_list'
-    paginate_by = 50
 
     def get_queryset(self):
         return World.objects.all().order_by('name')

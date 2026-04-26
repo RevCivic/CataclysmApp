@@ -1,14 +1,15 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
+from cataclysm.view_helpers import PerPageMixin
+
 from .models import Faction
 
 
-class FactionListView(ListView):
+class FactionListView(PerPageMixin, ListView):
     model = Faction
     template_name = 'factions/factions.html'
     context_object_name = 'object_list'
-    paginate_by = 50
 
     def get_queryset(self):
         # prefetch M2M relations used by the list template (.count calls)

@@ -1,0 +1,21 @@
+{% load custom_filters %}
+<div class="pagination-controls">
+    <div class="per-page-controls">
+        <span class="per-page-label">Show:</span>
+        <a href="?{% url_replace per_page=50 page=1 %}" class="btn {% if current_per_page == '50' %}btn-primary{% else %}btn-secondary{% endif %}">50</a>
+        <a href="?{% url_replace per_page=100 page=1 %}" class="btn {% if current_per_page == '100' %}btn-primary{% else %}btn-secondary{% endif %}">100</a>
+        <a href="?{% url_replace per_page=500 page=1 %}" class="btn {% if current_per_page == '500' %}btn-primary{% else %}btn-secondary{% endif %}">500</a>
+        <a href="?{% url_replace per_page='all' page=1 %}" class="btn {% if current_per_page == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+    </div>
+    {% if is_paginated %}
+    <nav class="pagination-nav">
+        {% if page_obj.has_previous %}
+            <a href="?{% url_replace page=page_obj.previous_page_number %}" class="btn btn-secondary">&laquo; Prev</a>
+        {% endif %}
+        <span class="page-indicator">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?{% url_replace page=page_obj.next_page_number %}" class="btn btn-secondary">Next &raquo;</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+</div>

@@ -1,8 +1,11 @@
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from species.forms import SpeciesForm
 from species.models import Species
+
+_VALID_PER_PAGE = ('50', '100', '500', 'all')
 
 
 def index(request):
@@ -36,12 +39,33 @@ def index(request):
             current_sort_field = field
             current_sort_dir = direction
 
-    species_list = Species.objects.all().order_by(order_by)
-    context = {
-        'species_list': species_list,
-        'current_sort_field': current_sort_field,
-        'current_sort_dir': current_sort_dir,
-    }
+    qs = Species.objects.all().order_by(order_by)
+
+    per_page = request.GET.get('per_page', '50')
+    if per_page not in _VALID_PER_PAGE:
+        per_page = '50'
+
+    if per_page == 'all':
+        context = {
+            'species_list': qs,
+            'page_obj': None,
+            'is_paginated': False,
+            'current_sort_field': current_sort_field,
+            'current_sort_dir': current_sort_dir,
+            'current_per_page': per_page,
+        }
+    else:
+        paginator = Paginator(qs, int(per_page))
+        page_obj = paginator.get_page(request.GET.get('page'))
+        context = {
+            'species_list': page_obj,
+            'page_obj': page_obj,
+            'is_paginated': page_obj.has_other_pages(),
+            'current_sort_field': current_sort_field,
+            'current_sort_dir': current_sort_dir,
+            'current_per_page': per_page,
+        }
+
     return render(request, 'species_index.html', context)
 
 

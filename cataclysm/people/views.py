@@ -5,19 +5,38 @@ from people.forms import PersonForm, PersonImageForm
 from people.models import Person, Trait
 
 
+_VALID_PER_PAGE = ('50', '100', '500', 'all')
+
+
 def index(request):
     qs = Person.objects.select_related('species', 'faction').prefetch_related('traits').order_by('name')
     order_by = request.GET.get('order_by')
     if order_by:
         qs = qs.order_by(order_by)
-    paginator = Paginator(qs, 50)
-    page_obj = paginator.get_page(request.GET.get('page'))
+
+    per_page = request.GET.get('per_page', '50')
+    if per_page not in _VALID_PER_PAGE:
+        per_page = '50'
+
     traits = Trait.objects.all()
+
+    if per_page == 'all':
+        return render(request, 'people_index.html', {
+            'people_list': qs,
+            'page_obj': None,
+            'is_paginated': False,
+            'traits': traits,
+            'current_per_page': per_page,
+        })
+
+    paginator = Paginator(qs, int(per_page))
+    page_obj = paginator.get_page(request.GET.get('page'))
     return render(request, 'people_index.html', {
         'people_list': page_obj,
         'page_obj': page_obj,
         'is_paginated': page_obj.has_other_pages(),
         'traits': traits,
+        'current_per_page': per_page,
     })
 
 
