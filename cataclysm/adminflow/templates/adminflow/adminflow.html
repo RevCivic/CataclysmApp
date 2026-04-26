@@ -5,11 +5,10 @@
   <h1 class="app_name">Admin Panel</h1>
 </div>
 
-{% if sa_email %}
-  <p class="lcars-label">Service Account: <code>{{ sa_email }}</code></p>
-{% else %}
-  <p class="lcars-label text-warning">⚠ No service account configured. Contact your administrator.</p>
-{% endif %}
+<p class="lcars-label">
+  Enter the Google Sheet ID or full shared link below.
+  The sheet must be shared with <strong>Anyone with the link (Viewer)</strong>.
+</p>
 
 {# ── Result messages ── #}
 {% if run_error %}
@@ -51,7 +50,7 @@
 <form method="post" action="{% url 'adminflow:read_sheet' %}">
   {% csrf_token %}
   <div class="form-group">
-    <label for="rs-sheet-id">Spreadsheet ID</label>
+    <label for="rs-sheet-id">Spreadsheet ID or Shared Link</label>
     <input id="rs-sheet-id" class="form-control sci-fi-input" type="text" name="spreadsheet_id"
            value="{{ default_spreadsheet_id }}" required>
   </div>
@@ -71,7 +70,7 @@
 <form method="post" action="{% url 'adminflow:run_import' %}">
   {% csrf_token %}
   <div class="form-group">
-    <label for="imp-sheet-id">Spreadsheet ID</label>
+    <label for="imp-sheet-id">Spreadsheet ID or Shared Link</label>
     <input id="imp-sheet-id" class="form-control sci-fi-input" type="text" name="spreadsheet_id"
            value="{{ default_spreadsheet_id }}" required>
   </div>

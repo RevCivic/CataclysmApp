@@ -1,97 +1,88 @@
-import json
-import os
-from django.conf import settings
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
+import csv
+import io
+import re
 
-# Credentials can be supplied in one of two ways (checked in order):
-#   1. SERVICE_ACCOUNT_JSON  — the full service-account JSON as a string
-#   2. SERVICE_ACCOUNT_FILE  — path to the service-account JSON file
-#      (defaults to <data_dir>/service_account.json, where data_dir is derived
-#       from DB_PATH so it matches the volume storage used for the database)
-SERVICE_ACCOUNT_JSON = os.environ.get("SERVICE_ACCOUNT_JSON")
-_db_path = os.environ.get('DB_PATH', os.path.join(getattr(settings, 'BASE_DIR', ''), 'db.sqlite3'))
-_data_dir = os.path.dirname(_db_path)
-SERVICE_ACCOUNT_FILE = os.environ.get(
-    "SERVICE_ACCOUNT_FILE",
-    os.path.join(_data_dir, 'service_account.json')
-)
+import requests
 
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+# Public Google Sheets CSV export base URL.  No API key or service account is
+# required — the sheet only needs to be shared with "Anyone with the link".
+_EXPORT_BASE = "https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export"
+
+# Regex to pull the spreadsheet ID out of a full Google Sheets URL.
+_SHEETS_URL_RE = re.compile(r"docs\.google\.com/spreadsheets/d/([A-Za-z0-9_-]+)")
 
 
-def _load_service_account_info():
-    """Return the parsed service-account dict from JSON env var or file."""
-    if SERVICE_ACCOUNT_JSON:
-        try:
-            return json.loads(SERVICE_ACCOUNT_JSON)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"SERVICE_ACCOUNT_JSON is not valid JSON: {e}") from e
-    with open(SERVICE_ACCOUNT_FILE, 'r', encoding='utf-8') as fh:
-        return json.load(fh)
+def extract_spreadsheet_id(url_or_id: str) -> str:
+    """Return the spreadsheet ID from a full Google Sheets URL or a bare ID.
 
-
-def get_service_account_email():
-    """Return the client_email from the service account key JSON if available."""
-    try:
-        return _load_service_account_info().get('client_email')
-    except FileNotFoundError:
-        print(f"Service account file not found: {SERVICE_ACCOUNT_FILE}")
-        return None
-    except (json.JSONDecodeError, ValueError, OSError) as e:
-        print(f"Error reading service account: {e}")
-        return None
+    If *url_or_id* contains a URL with the spreadsheet ID embedded, the ID is
+    extracted and returned.  Otherwise the value is returned as-is, trimmed of
+    leading/trailing whitespace.
+    """
+    match = _SHEETS_URL_RE.search(url_or_id)
+    return match.group(1) if match else url_or_id.strip()
 
 
 def get_spreadsheet_meta(spreadsheet_id):
-    """Attempt to fetch spreadsheet metadata (title, sheets) to validate permissions.
+    """Verify that the spreadsheet is publicly accessible via the export URL.
 
-    Returns dict on success or tuple(False, error_message) on failure.
+    Makes a small GET request to the CSV export endpoint to confirm the sheet
+    returns data (not a redirect to an auth/login page).  Returns a minimal
+    dict on success or tuple(False, error_message) on failure.
     """
-    service = get_google_sheets_service()
-    if not service:
-        return (False, 'Could not create Google Sheets service')
+    spreadsheet_id = extract_spreadsheet_id(spreadsheet_id)
+    url = _EXPORT_BASE.format(spreadsheet_id=spreadsheet_id)
     try:
-        meta = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
-        return meta
-    except Exception as e:
+        response = requests.get(
+            url,
+            params={"format": "csv"},
+            timeout=15,
+            stream=True,
+        )
+        if response.status_code == 200:
+            return {"spreadsheetId": spreadsheet_id}
+        return (False, f"HTTP {response.status_code}: sheet may not be publicly shared")
+    except requests.RequestException as e:
         return (False, str(e))
-
-
-def get_google_sheets_service():
-    """
-    Authenticates with Google Sheets API using a service account.
-
-    Credentials are loaded from SERVICE_ACCOUNT_JSON (env var with JSON string)
-    or SERVICE_ACCOUNT_FILE (path to JSON key file).
-
-    Returns googleapiclient.discovery.Resource or None on error.
-    """
-    try:
-        info = _load_service_account_info()
-        creds = service_account.Credentials.from_service_account_info(info, scopes=SCOPES)
-        service = build('sheets', 'v4', credentials=creds)
-        return service
-    except Exception as e:
-        # Keep errors simple to read in management command output
-        print(f"Error creating Google Sheets service: {e}")
-        return None
+    finally:
+        try:
+            response.close()
+        except Exception:
+            pass
 
 
 def read_sheet_data(spreadsheet_id, range_name):
-    """
-    Read values from a spreadsheet range and return a list of rows (list of lists).
-    Returns None on error.
-    """
-    service = get_google_sheets_service()
-    if not service:
-        return None
+    """Read values from a publicly shared spreadsheet range.
 
+    Downloads the sheet as CSV using Google's public export URL (no API key or
+    service account required) and returns a list of rows (each row is a list of
+    strings).  Returns None on error.
+
+    The spreadsheet must be shared with "Anyone with the link (Viewer)" in the
+    Google Sheets sharing settings.
+
+    *range_name* accepts the same A1 notation used by the Sheets API, including
+    an optional sheet name prefix (e.g. ``"Other Crew!A5:Z"`` or ``"Sheet1"``).
+    Google's CSV export endpoint passes this value as the ``range`` query
+    parameter and honours the full A1 notation format.
+    """
+    spreadsheet_id = extract_spreadsheet_id(spreadsheet_id)
+    url = _EXPORT_BASE.format(spreadsheet_id=spreadsheet_id)
     try:
-        result = service.spreadsheets().values().get(
-            spreadsheetId=spreadsheet_id, range=range_name
-        ).execute()
-        return result.get('values', [])
-    except Exception as e:
+        response = requests.get(
+            url,
+            params={"format": "csv", "range": range_name},
+            timeout=30,
+        )
+        response.raise_for_status()
+        reader = csv.reader(io.StringIO(response.text))
+        return list(reader)
+    except requests.HTTPError as e:
+        print(f"HTTP error reading sheet data: {e}")
+        return None
+    except requests.RequestException as e:
         print(f"Error reading sheet data: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error reading sheet data: {e}")
         return None
