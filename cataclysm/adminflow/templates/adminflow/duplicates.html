@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Remove Duplicates — Cataclysm{% endblock %}
+{% block content %}
+<div class="list-header index_menu">
+  <h1 class="app_name">Remove Duplicates</h1>
+</div>
+
+<p class="lcars-label">
+  The table below lists every record whose name appears more than once in a list.
+  Check the items you want to <strong>delete</strong>, then click
+  <em>Review Selection</em> to approve before anything is removed.
+</p>
+<p class="lcars-label">
+  The first entry in each duplicate group is pre-selected to <strong>keep</strong>
+  (un-checked). All remaining copies are pre-selected for deletion.
+</p>
+
+{% if selection_error %}
+  <div class="alert alert-warning mt-2">{{ selection_error }}</div>
+{% endif %}
+
+{% if not has_duplicates %}
+  <div class="alert alert-success mt-3">
+    No duplicate names found across any list. Everything looks clean!
+  </div>
+  <a href="{% url 'adminflow:index' %}" class="btn btn-secondary lcars-btn mt-2">← Back to Admin Panel</a>
+{% else %}
+  <form method="post" action="{% url 'adminflow:duplicates_confirm' %}">
+    {% csrf_token %}
+
+    {# ── Select/Deselect All ── #}
+    <div class="mb-3 mt-3">
+      <button type="button" class="btn btn-secondary lcars-btn btn-sm"
+              onclick="setAll(true)">Select All</button>
+      <button type="button" class="btn btn-secondary lcars-btn btn-sm ml-2"
+              onclick="setAll(false)">Deselect All</button>
+    </div>
+
+    {% regroup duplicate_groups by model_label as grouped_by_model %}
+    {% for model_group in grouped_by_model %}
+      <h2 class="mt-4">{{ model_group.grouper }}</h2>
+      <div style="overflow-x:auto;">
+        <table class="sci-fi-list" style="width:100%; margin-top:8px;">
+          <thead>
+            <tr>
+              <th style="width:3rem;">Delete?</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for group in model_group.list %}
+              {% for record in group.records %}
+                <tr>
+                  <td>
+                    <input
+                      type="checkbox"
+                      name="selected_items"
+                      value="{{ group.model_key }}:{{ record.pk }}"
+                      class="dup-checkbox"
+                      {% if record.pk != group.suggested_keep_pk %}checked{% endif %}
+                    >
+                  </td>
+                  <td>{{ record.pk }}</td>
+                  <td>{{ record.name }}</td>
+                  <td>
+                    {% if record.pk == group.suggested_keep_pk %}
+                      <span class="badge badge-success">Keep (oldest)</span>
+                    {% else %}
+                      <span class="badge badge-warning">Duplicate</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endfor %}
+
+    <div class="mt-4">
+      <button type="submit" class="btn btn-danger lcars-btn">Review Selection →</button>
+      <a href="{% url 'adminflow:index' %}" class="btn btn-secondary lcars-btn ml-2">Cancel</a>
+    </div>
+  </form>
+{% endif %}
+
+{% block extra_js %}
+<script>
+function setAll(checked) {
+  document.querySelectorAll('.dup-checkbox').forEach(function(cb) {
+    cb.checked = checked;
+  });
+}
+</script>
+{% endblock %}
+{% endblock %}

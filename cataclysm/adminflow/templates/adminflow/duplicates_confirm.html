@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Confirm Deletion — Cataclysm{% endblock %}
+{% block content %}
+<div class="list-header index_menu">
+  <h1 class="app_name">Confirm Deletion</h1>
+</div>
+
+<p class="lcars-label">
+  Please review the items listed below. These records will be
+  <strong>permanently deleted</strong> once you click <em>Confirm &amp; Delete</em>.
+  This action <strong>cannot be undone</strong>.
+</p>
+
+{% if resolve_errors %}
+  <div class="alert alert-danger mt-2">
+    <strong>Some items could not be resolved:</strong>
+    <ul class="mb-0">
+      {% for err in resolve_errors %}<li>{{ err }}</li>{% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+{% if items_to_delete %}
+  <div style="overflow-x:auto; margin-top:1rem;">
+    <table class="sci-fi-list" style="width:100%;">
+      <thead>
+        <tr>
+          <th>List</th>
+          <th>ID</th>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items_to_delete %}
+        <tr>
+          <td>{{ item.model_label }}</td>
+          <td>{{ item.pk }}</td>
+          <td>{{ item.name }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="mt-3 lcars-label">
+    <strong>{{ items_to_delete|length }}</strong> record{{ items_to_delete|length|pluralize }} will be deleted.
+  </p>
+
+  <form method="post" action="{% url 'adminflow:duplicates_delete' %}">
+    {% csrf_token %}
+    {% for key in selected_items %}
+      <input type="hidden" name="selected_items" value="{{ key }}">
+    {% endfor %}
+    <button type="submit" class="btn btn-danger lcars-btn"
+            onclick="return confirm('Are you sure? This will permanently delete {{ items_to_delete|length }} record{{ items_to_delete|length|pluralize }}.')">
+      Confirm &amp; Delete
+    </button>
+    <a href="{% url 'adminflow:duplicates' %}" class="btn btn-secondary lcars-btn ml-2">← Back to Selection</a>
+  </form>
+{% else %}
+  <div class="alert alert-warning mt-3">No valid items to delete.</div>
+  <a href="{% url 'adminflow:duplicates' %}" class="btn btn-secondary lcars-btn mt-2">← Back to Selection</a>
+{% endif %}
+{% endblock %}
