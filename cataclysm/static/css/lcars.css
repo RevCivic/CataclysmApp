@@ -815,7 +815,7 @@ h2.welcome {
    RESPONSIVE
    ==================================================================== */
 
-/* Tablet (601 – 1024 px) — narrower sidebar, tighter text */
+/* Tablet (601 to 1024 px) — narrower sidebar, tighter text */
 @media (min-width: 601px) and (max-width: 1024px) {
   :root {
     --lcars-sidebar-width: 110px;
