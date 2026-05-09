@@ -274,43 +274,60 @@ def people_species_upload(request):
             ),
         )
 
+    parsed_rows = []
+    requested_people = set()
+    requested_species = set()
+    for index, row in enumerate(rows, start=2):
+        row_data = _map_row_to_dict(headers, row)
+        person_name = row_data.get(name_header, '').strip()
+        species_name = row_data.get(species_header, '').strip()
+        parsed_rows.append((index, person_name, species_name))
+        if person_name:
+            requested_people.add(person_name.lower())
+        if species_name:
+            requested_species.add(species_name.lower())
+
+    person_matches = {}
+    for person in Person.objects.annotate(name_lower=Lower('name')).filter(name_lower__in=requested_people).order_by('pk'):
+        person_matches.setdefault(person.name_lower, []).append(person)
+
+    species_matches = {}
+    for species in Species.objects.annotate(name_lower=Lower('species_name')).filter(name_lower__in=requested_species).order_by('pk'):
+        species_matches.setdefault(species.name_lower, []).append(species)
+
     updated = 0
     unchanged = 0
     skipped = 0
     errors = []
 
-    for index, row in enumerate(rows, start=2):
-        row_data = _map_row_to_dict(headers, row)
-        person_name = row_data.get(name_header, '').strip()
-        species_name = row_data.get(species_header, '').strip()
-
+    for index, person_name, species_name in parsed_rows:
         if not person_name or not species_name:
             skipped += 1
             errors.append(f'Row {index}: name and species are required.')
             continue
 
-        person_matches = Person.objects.filter(name__iexact=person_name).order_by('pk')
-        if not person_matches.exists():
+        matching_people = person_matches.get(person_name.lower(), [])
+        if not matching_people:
             skipped += 1
             errors.append(f'Row {index}: person "{person_name}" was not found.')
             continue
-        if person_matches.count() > 1:
+        if len(matching_people) > 1:
             skipped += 1
             errors.append(f'Row {index}: multiple people matched "{person_name}".')
             continue
 
-        species_matches = Species.objects.filter(species_name__iexact=species_name).order_by('pk')
-        if not species_matches.exists():
+        matching_species = species_matches.get(species_name.lower(), [])
+        if not matching_species:
             skipped += 1
             errors.append(f'Row {index}: species "{species_name}" was not found.')
             continue
-        if species_matches.count() > 1:
+        if len(matching_species) > 1:
             skipped += 1
             errors.append(f'Row {index}: multiple species matched "{species_name}".')
             continue
 
-        person = person_matches.first()
-        species = species_matches.first()
+        person = matching_people[0]
+        species = matching_species[0]
         if person.species_id == species.id:
             unchanged += 1
             continue
