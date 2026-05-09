@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel — Cataclysm{% endblock %}
+{% block content %}
+<div class="list-header index_menu">
+  <h1 class="app_name">Admin Panel</h1>
+</div>
+
+{% include "adminflow/_subnav.html" %}
+
+<div class="lcars-panel">
+  <h2>People</h2>
+  <p>Preview and import the existing Google Sheet data for people records.</p>
+  <a href="{% url 'adminflow:people_tools' %}" class="btn btn-primary lcars-btn">Open People Tools</a>
+</div>
+
+<div class="lcars-panel" style="margin-top: 1.5rem;">
+  <h2>Species</h2>
+  <p>Upload a species CSV, review field matching, and import the rows into the database.</p>
+  <a href="{% url 'adminflow:species_tools' %}" class="btn btn-primary lcars-btn">Open Species Tools</a>
+</div>
+
+<div class="lcars-panel" style="margin-top: 1.5rem;">
+  <h2>Utilities</h2>
+  <p>Scan the catalog for duplicate records before cleaning them up.</p>
+  <a href="{% url 'adminflow:duplicates' %}" class="btn btn-warning lcars-btn">Scan for Duplicates</a>
+</div>
+{% endblock %}

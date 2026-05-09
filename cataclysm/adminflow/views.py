@@ -1,27 +1,36 @@
+import csv
+import io
+
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import Lower
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
+from adminflow.forms import SpeciesUploadForm
 from cataclysm.management.commands.update_database_from_sheet import (
-    import_people_from_sheet,
-    SAMPLE_SPREADSHEET_ID,
     SAMPLE_RANGE_NAME,
+    SAMPLE_SPREADSHEET_ID,
+    import_people_from_sheet,
 )
-from cataclysm.utils.google_sheets import read_sheet_data, extract_spreadsheet_id
+from cataclysm.utils.google_sheets import extract_spreadsheet_id, read_sheet_data
+from species.importing import SPECIES_IMPORT_FIELDS, build_species_payload, guess_field_mapping
+from species.models import Species
+
+_SPECIES_UPLOAD_HEADERS_KEY = 'adminflow_species_upload_headers'
+_SPECIES_UPLOAD_ROWS_KEY = 'adminflow_species_upload_rows'
 
 # ── Duplicate-detection registry ────────────────────────────────────────────
-# Each entry: (app_label, model_name, human-readable label)
+# Each entry: (app_label, model_name, human-readable label, name_field)
 _DUPLICATE_MODELS = [
-    ('people',   'Person',  'People'),
-    ('weapons',  'Weapon',  'Weapons'),
-    ('armor',    'Armor',   'Armor'),
-    ('factions', 'Faction', 'Factions'),
-    ('species',  'Species', 'Species'),
-    ('worlds',   'World',   'Worlds'),
-    ('events',   'Event',   'Events'),
+    ('people', 'Person', 'People', 'name'),
+    ('weapons', 'Weapon', 'Weapons', 'name'),
+    ('armor', 'Armor', 'Armor', 'name'),
+    ('factions', 'Faction', 'Factions', 'name'),
+    ('species', 'Species', 'Species', 'species_name'),
+    ('worlds', 'World', 'Worlds', 'name'),
+    ('events', 'Event', 'Events', 'name'),
 ]
 
 
@@ -29,18 +38,63 @@ def _model_key(app_label, model_name):
     return f'{app_label}.{model_name}'
 
 
+def _decode_csv_file(uploaded_file):
+    """Return decoded CSV text from an uploaded file using supported encodings."""
+    raw = uploaded_file.read()
+    for encoding in ('utf-8-sig', 'utf-8', 'latin-1'):
+        try:
+            return raw.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+    raise ValueError('Unable to decode the uploaded CSV. Please save it as UTF-8 (with or without BOM) or Latin-1 and try again.')
+
+
+def _normalize_uploaded_rows(text):
+    """Parse CSV text, trim cells, drop empty rows, and split headers from data."""
+    reader = csv.reader(io.StringIO(text))
+    parsed_rows = []
+    for row in reader:
+        cleaned_row = [cell.strip() for cell in row]
+        if any(cleaned_row):
+            parsed_rows.append(cleaned_row)
+    if not parsed_rows:
+        return [], []
+    headers = parsed_rows[0]
+    data_rows = parsed_rows[1:]
+    return headers, data_rows
+
+
+def _map_row_to_dict(headers, row):
+    """Map a row list to a header-keyed dict, padding missing cells with blanks."""
+    return {header: row[position] if position < len(row) else '' for position, header in enumerate(headers)}
+
+
+def _species_tools_context(**overrides):
+    """Build template context for the species admin tools and mapping UI."""
+    context = {
+        'species_upload_form': SpeciesUploadForm(),
+        'species_import_fields': SPECIES_IMPORT_FIELDS,
+    }
+    context.update(overrides)
+    field_mapping = context.get('field_mapping', {})
+    context['species_import_fields'] = [
+        {**field, 'selected_header': field_mapping.get(field['name'], '')}
+        for field in SPECIES_IMPORT_FIELDS
+    ]
+    return context
+
+
 def find_all_duplicates():
     """Return a list of groups; each group is a dict describing duplicate records."""
     groups = []
-    for app_label, model_name, label in _DUPLICATE_MODELS:
+    for app_label, model_name, label, name_field in _DUPLICATE_MODELS:
         try:
-            Model = apps.get_model(app_label, model_name)
+            model = apps.get_model(app_label, model_name)
         except LookupError:
             continue
 
-        # Find names that appear more than once using case-insensitive grouping
         dup_name_lowers = (
-            Model.objects.annotate(name_lower=Lower('name'))
+            model.objects.annotate(name_lower=Lower(name_field))
             .values('name_lower')
             .annotate(cnt=Count('id'))
             .filter(cnt__gt=1)
@@ -48,13 +102,12 @@ def find_all_duplicates():
         )
 
         for name_lower in dup_name_lowers:
-            records = list(Model.objects.filter(name__iexact=name_lower).order_by('pk'))
+            records = list(model.objects.filter(**{f'{name_field}__iexact': name_lower}).order_by('pk'))
             groups.append({
                 'model_label': label,
                 'model_key': _model_key(app_label, model_name),
-                'name': records[0].name,
+                'name': getattr(records[0], name_field),
                 'records': records,
-                # suggest keeping the oldest (lowest pk); the rest are candidates
                 'suggested_keep_pk': records[0].pk,
             })
 
@@ -62,10 +115,6 @@ def find_all_duplicates():
 
 
 def _resolve_items_to_delete(item_keys):
-    """
-    Given a list of strings like 'people.Person:5', return resolved dicts.
-    Returns (items_list, errors_list).
-    """
     items = []
     errors = []
     for key in item_keys:
@@ -73,11 +122,10 @@ def _resolve_items_to_delete(item_keys):
             model_key, pk_str = key.rsplit(':', 1)
             pk = int(pk_str)
             app_label, model_name = model_key.split('.')
-            Model = apps.get_model(app_label, model_name)
-            obj = Model.objects.get(pk=pk)
-            # Look up human label
+            model = apps.get_model(app_label, model_name)
+            obj = model.objects.get(pk=pk)
             label = next(
-                (lbl for al, mn, lbl in _DUPLICATE_MODELS if al == app_label and mn == model_name),
+                (lbl for al, mn, lbl, _field in _DUPLICATE_MODELS if al == app_label and mn == model_name),
                 model_key,
             )
             items.append({
@@ -85,7 +133,7 @@ def _resolve_items_to_delete(item_keys):
                 'model_label': label,
                 'model_key': model_key,
                 'pk': pk,
-                'name': obj.name,
+                'name': str(obj),
             })
         except Exception as exc:
             errors.append(f'Could not resolve {key!r}: {exc}')
@@ -93,7 +141,6 @@ def _resolve_items_to_delete(item_keys):
 
 
 def _delete_items(item_keys):
-    """Delete items identified by 'app.Model:pk' strings. Returns (deleted, errors)."""
     deleted = []
     errors = []
     for key in item_keys:
@@ -101,13 +148,13 @@ def _delete_items(item_keys):
             model_key, pk_str = key.rsplit(':', 1)
             pk = int(pk_str)
             app_label, model_name = model_key.split('.')
-            Model = apps.get_model(app_label, model_name)
-            obj = Model.objects.get(pk=pk)
+            model = apps.get_model(app_label, model_name)
+            obj = model.objects.get(pk=pk)
             label = next(
-                (lbl for al, mn, lbl in _DUPLICATE_MODELS if al == app_label and mn == model_name),
+                (lbl for al, mn, lbl, _field in _DUPLICATE_MODELS if al == app_label and mn == model_name),
                 model_key,
             )
-            name = obj.name
+            name = str(obj)
             obj.delete()
             deleted.append({'model_label': label, 'pk': pk, 'name': name})
         except Exception as exc:
@@ -117,6 +164,11 @@ def _delete_items(item_keys):
 
 @login_required
 def index(request):
+    return render(request, 'adminflow/index.html')
+
+
+@login_required
+def people_tools(request):
     context = {
         'default_spreadsheet_id': SAMPLE_SPREADSHEET_ID,
         'default_range_name': SAMPLE_RANGE_NAME,
@@ -161,11 +213,132 @@ def read_sheet(request):
     return render(request, 'adminflow/adminflow.html', context)
 
 
-# ── Duplicate removal tool ───────────────────────────────────────────────────
+@login_required
+def species_tools(request):
+    headers = request.session.get(_SPECIES_UPLOAD_HEADERS_KEY)
+    rows = request.session.get(_SPECIES_UPLOAD_ROWS_KEY)
+    context = _species_tools_context()
+    if headers and rows is not None:
+        context.update({
+            'uploaded_headers': headers,
+            'preview_rows': rows[:5],
+            'field_mapping': guess_field_mapping(headers),
+        })
+    return render(request, 'adminflow/species_tools.html', context)
+
+
+@login_required
+@require_POST
+def species_upload(request):
+    form = SpeciesUploadForm(request.POST, request.FILES)
+    if not form.is_valid():
+        return render(request, 'adminflow/species_tools.html', _species_tools_context(species_upload_form=form))
+
+    try:
+        headers, rows = _normalize_uploaded_rows(_decode_csv_file(form.cleaned_data['csv_file']))
+    except ValueError as exc:
+        return render(
+            request,
+            'adminflow/species_tools.html',
+            _species_tools_context(
+                species_upload_form=form,
+                upload_error=str(exc),
+            ),
+        )
+
+    if not headers:
+        return render(
+            request,
+            'adminflow/species_tools.html',
+            _species_tools_context(
+                species_upload_form=form,
+                upload_error='The uploaded CSV is empty or missing a header row.',
+            ),
+        )
+
+    request.session[_SPECIES_UPLOAD_HEADERS_KEY] = headers
+    request.session[_SPECIES_UPLOAD_ROWS_KEY] = rows
+
+    return render(
+        request,
+        'adminflow/species_tools.html',
+        _species_tools_context(
+            uploaded_headers=headers,
+            preview_rows=rows[:5],
+            field_mapping=guess_field_mapping(headers),
+            upload_success=f'Loaded {len(rows)} species rows from the CSV. Review the field mapping before importing.',
+        ),
+    )
+
+
+@login_required
+@require_POST
+def species_import(request):
+    headers = request.session.get(_SPECIES_UPLOAD_HEADERS_KEY)
+    rows = request.session.get(_SPECIES_UPLOAD_ROWS_KEY)
+    if not headers or rows is None:
+        return redirect('adminflow:species_tools')
+
+    field_mapping = {
+        field['name']: request.POST.get(field['name'], '').strip()
+        for field in SPECIES_IMPORT_FIELDS
+    }
+    if not field_mapping.get('species_name'):
+        return render(
+            request,
+            'adminflow/species_tools.html',
+            _species_tools_context(
+                uploaded_headers=headers,
+                preview_rows=rows[:5],
+                field_mapping=field_mapping,
+                upload_error='Map a CSV column to Species Name before importing.',
+            ),
+        )
+
+    created = 0
+    updated = 0
+    skipped = 0
+    errors = []
+
+    for index, row in enumerate(rows, start=2):
+        row_data = _map_row_to_dict(headers, row)
+        payload = build_species_payload(row_data, field_mapping)
+        species_name = payload.get('species_name', '').strip()
+        if not species_name:
+            skipped += 1
+            continue
+
+        try:
+            species, was_created = Species.objects.get_or_create(species_name=species_name)
+            for field_name, value in payload.items():
+                if field_name == 'species_name':
+                    continue
+                setattr(species, field_name, value)
+            species.full_clean()
+            species.save()
+            if was_created:
+                created += 1
+            else:
+                updated += 1
+        except Exception as exc:
+            skipped += 1
+            errors.append(f'Row {index} ({species_name}): {exc}')
+
+    request.session.pop(_SPECIES_UPLOAD_HEADERS_KEY, None)
+    request.session.pop(_SPECIES_UPLOAD_ROWS_KEY, None)
+
+    return render(
+        request,
+        'adminflow/species_tools.html',
+        _species_tools_context(
+            run_messages=[f'Imported species CSV: created {created}, updated {updated}, skipped {skipped}.'],
+            import_errors=errors,
+        ),
+    )
+
 
 @login_required
 def duplicates(request):
-    """Scan all lists for duplicate names and display them for selection."""
     groups = find_all_duplicates()
     context = {
         'duplicate_groups': groups,
@@ -177,7 +350,6 @@ def duplicates(request):
 @login_required
 @require_POST
 def duplicates_confirm(request):
-    """Receive selected item keys and show a confirmation / approval page."""
     selected = request.POST.getlist('selected_items')
     if not selected:
         groups = find_all_duplicates()
@@ -200,7 +372,6 @@ def duplicates_confirm(request):
 @login_required
 @require_POST
 def duplicates_delete(request):
-    """Delete the confirmed items and report the outcome."""
     selected = request.POST.getlist('selected_items')
     deleted, errors = _delete_items(selected)
     context = {
@@ -208,4 +379,3 @@ def duplicates_delete(request):
         'errors': errors,
     }
     return render(request, 'adminflow/duplicates_done.html', context)
-

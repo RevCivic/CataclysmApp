@@ -8,42 +8,45 @@
         {% csrf_token %}
         <div class="sci-fi-form-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5em 3em; align-items: start;">
             <div class="sci-fi-form-section" style="grid-column: 1;">
-                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">General</h4>
-                {{ form.name|as_crispy_field }}
+                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Overview</h4>
+                {{ form.species_name|as_crispy_field }}
                 {{ form.home_world|as_crispy_field }}
-                {{ form.society|as_crispy_field }}
-                {{ form.accord_status|as_crispy_field }}
                 {{ form.size|as_crispy_field }}
                 {{ form.type|as_crispy_field }}
                 {{ form.air|as_crispy_field }}
-                {{ form.gravity|as_crispy_field }}
+                {{ form.sex|as_crispy_field }}
+                {{ form.status|as_crispy_field }}
+                {{ form.locomotion|as_crispy_field }}
+                {{ form.society|as_crispy_field }}
+                {{ form.tech_level|as_crispy_field }}
+                {{ form.match_status|as_crispy_field }}
             </div>
             <div class="sci-fi-form-section" style="grid-column: 2;">
-                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Biology & Society</h4>
-                {{ form.background|as_crispy_field }}
-                {{ form.sociology|as_crispy_field }}
-                {{ form.physiology|as_crispy_field }}
-                {{ form.racial_traits|as_crispy_field }}
-                {{ form.reproduction_method|as_crispy_field }}
+                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Ratings & Survival</h4>
+                {{ form.strength|as_crispy_field }}
+                {{ form.toughness|as_crispy_field }}
+                {{ form.speed|as_crispy_field }}
+                {{ form.intelligence|as_crispy_field }}
                 {{ form.hours_of_sleep|as_crispy_field }}
                 {{ form.days_without_food|as_crispy_field }}
                 {{ form.days_without_water|as_crispy_field }}
-                {{ form.locomotion_method|as_crispy_field }}
+                {{ form.attributes|as_crispy_field }}
+                {{ form.special_abilities|as_crispy_field }}
             </div>
             <div class="sci-fi-form-section" style="grid-column: 3;">
-                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Abilities & Traits</h4>
-                {{ form.strength_rating|as_crispy_field }}
-                {{ form.toughness_rating|as_crispy_field }}
-                {{ form.speed_rating|as_crispy_field }}
-                {{ form.intelligence_rating|as_crispy_field }}
-                {{ form.natural_weapons|as_crispy_field }}
+                <h4 style="color:#00f0ff; font-family:'Orbitron',sans-serif; font-size:1.1rem; margin-bottom:10px;">Traits & Lore</h4>
+                {{ form.natural_weapon|as_crispy_field }}
                 {{ form.natural_armor|as_crispy_field }}
-                {{ form.can_fly|as_crispy_field }}
+                {{ form.flier|as_crispy_field }}
                 {{ form.aquatic|as_crispy_field }}
                 {{ form.amphibious|as_crispy_field }}
                 {{ form.telepathic|as_crispy_field }}
                 {{ form.psionic|as_crispy_field }}
-                {{ form.special_abilities|as_crispy_field }}
+                {{ form.light_grav|as_crispy_field }}
+                {{ form.heavy_grav|as_crispy_field }}
+                {{ form.background|as_crispy_field }}
+                {{ form.sociology|as_crispy_field }}
+                {{ form.physiology|as_crispy_field }}
                 {{ form.image|as_crispy_field }}
                 {{ form.hidden|as_crispy_field }}
             </div>
@@ -55,5 +58,4 @@
     <p style="text-align:center; margin-top:2em; color:#0ff; font-size:1.1em; letter-spacing:0.05em;">"To boldly go where no species has gone before..."</p>
     </div>
 </div>
-<!-- CSS moved to sci-fi-form.css -->
 {% endblock %}

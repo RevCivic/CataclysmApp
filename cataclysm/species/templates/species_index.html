@@ -12,11 +12,11 @@
     <table class="sci-fi-list">
         <thead>
             <tr>
-                <th><a href="?sort={% if current_sort_field == 'name' and current_sort_dir == 'asc' %}-name{% else %}name{% endif %}">Name {% if current_sort_field == 'name' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'species_name' and current_sort_dir == 'asc' %}-species_name{% else %}species_name{% endif %}">Species Name {% if current_sort_field == 'species_name' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
                 <th><a href="?sort={% if current_sort_field == 'size' and current_sort_dir == 'asc' %}-size{% else %}size{% endif %}">Size {% if current_sort_field == 'size' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
                 <th><a href="?sort={% if current_sort_field == 'home_world' and current_sort_dir == 'asc' %}-home_world{% else %}home_world{% endif %}">Home World {% if current_sort_field == 'home_world' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
                 <th><a href="?sort={% if current_sort_field == 'type' and current_sort_dir == 'asc' %}-type{% else %}type{% endif %}">Type {% if current_sort_field == 'type' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                <th><a href="?sort={% if current_sort_field == 'accord_status' and current_sort_dir == 'asc' %}-accord_status{% else %}accord_status{% endif %}">Accord Standing {% if current_sort_field == 'accord_status' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?sort={% if current_sort_field == 'status' and current_sort_dir == 'asc' %}-status{% else %}status{% endif %}">Status {% if current_sort_field == 'status' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
                 <th><a href="?sort={% if current_sort_field == 'strength' and current_sort_dir == 'asc' %}-strength{% else %}strength{% endif %}">Strength {% if current_sort_field == 'strength' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
                 <th><a href="?sort={% if current_sort_field == 'toughness' and current_sort_dir == 'asc' %}-toughness{% else %}toughness{% endif %}">Toughness {% if current_sort_field == 'toughness' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
                 <th><a href="?sort={% if current_sort_field == 'speed' and current_sort_dir == 'asc' %}-speed{% else %}speed{% endif %}">Speed {% if current_sort_field == 'speed' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
@@ -24,29 +24,28 @@
                 {% if request.user|has_group:'admins' %}
                     <th>Hidden</th>
                 {% endif %}
-                
             </tr>
         </thead>
         <tbody>
             {% for species in species_list %}
                 {% if not species.hidden %}
                     <tr>
-                        <td><a href="{% url 'species_page' species.id %}">{{ species.name }}</a></td>
-                        <td>{{ species.get_size_display }}</td>
-                        <td>{{ species.home_world }}</td>
-                        <td>{{ species.get_type_display }}</td>
-                        <td>{{ species.get_accord_status_display }}</td>
+                        <td><a href="{% url 'species_page' species.id %}">{{ species.species_name }}</a></td>
+                        <td>{{ species.size|default:'—' }}</td>
+                        <td>{{ species.home_world|default:'—' }}</td>
+                        <td>{{ species.type|default:'—' }}</td>
+                        <td>{{ species.status|default:'—' }}</td>
                         <td>
-                            <div class="rating-bar" style="width: {{species.strength_rating|mul:10}}%">&nbsp;{{ species.strength_rating }}</div>
+                            <div class="rating-bar" style="width: {{ species.strength|default:0|mul:10 }}%">&nbsp;{{ species.strength|default:'—' }}</div>
                         </td>
                         <td>
-                            <div class="rating-bar" style="width: {{species.toughness_rating|mul:10}}%">&nbsp;{{ species.toughness_rating }}</div>
+                            <div class="rating-bar" style="width: {{ species.toughness|default:0|mul:10 }}%">&nbsp;{{ species.toughness|default:'—' }}</div>
                         </td>
                         <td>
-                            <div class="rating-bar" style="width: {{species.speed_rating|mul:10}}%">&nbsp;{{ species.speed_rating }}</div>
+                            <div class="rating-bar" style="width: {{ species.speed|default:0|mul:10 }}%">&nbsp;{{ species.speed|default:'—' }}</div>
                         </td>
                         <td>
-                            <div class="rating-bar" style="width: {{species.intelligence_rating|mul:10}}%">&nbsp;{{ species.intelligence_rating }}</div>
+                            <div class="rating-bar" style="width: {{ species.intelligence|default:0|mul:10 }}%">&nbsp;{{ species.intelligence|default:'—' }}</div>
                         </td>
                         {% if request.user|has_group:'admins' %}
                             <td>{{ species.hidden }}</td>
@@ -55,7 +54,7 @@
                 {% endif %}
             {% empty %}
                 <tr>
-                    <td colspan="3">No species found.</td>
+                    <td colspan="9">No species found.</td>
                 </tr>
             {% endfor %}
         </tbody>

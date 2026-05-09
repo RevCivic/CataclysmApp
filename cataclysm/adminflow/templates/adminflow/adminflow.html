@@ -1,16 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Admin Panel — Cataclysm{% endblock %}
+{% block title %}People Tools — Admin Panel{% endblock %}
 {% block content %}
 <div class="list-header index_menu">
-  <h1 class="app_name">Admin Panel</h1>
+  <h1 class="app_name">Admin Panel · People</h1>
 </div>
+
+{% include "adminflow/_subnav.html" %}
 
 <p class="lcars-label">
   Enter the Google Sheet ID or full shared link below.
   The sheet must be shared with <strong>Anyone with the link (Viewer)</strong>.
 </p>
 
-{# ── Result messages ── #}
 {% if run_error %}
   <div class="alert alert-danger mt-2">{{ run_error }}</div>
 {% endif %}
@@ -22,7 +23,6 @@
   </div>
 {% endif %}
 
-{# ── Sheet preview table ── #}
 {% if sheet_rows is not None %}
   {% if sheet_rows %}
     <h3 class="mt-3">Sheet Data Preview</h3>
@@ -44,14 +44,6 @@
 
 <hr class="lcars-divider mt-4">
 
-{# ── Duplicate Removal section ── #}
-<h2 class="mt-3">Remove Duplicates</h2>
-<p>Scan all lists (People, Weapons, Armor, Factions, Species, Worlds, Events) for records with duplicate names and remove the extras.</p>
-<a href="{% url 'adminflow:duplicates' %}" class="btn btn-warning lcars-btn">Scan for Duplicates</a>
-
-<hr class="lcars-divider mt-4">
-
-{# ── Read Sheet section ── #}
 <h2 class="mt-3">Read Sheet Data</h2>
 <p>Preview raw rows from a Google Sheet range without importing anything.</p>
 <form method="post" action="{% url 'adminflow:read_sheet' %}">
@@ -71,9 +63,8 @@
 
 <hr class="lcars-divider mt-4">
 
-{# ── Import section ── #}
 <h2 class="mt-3">Import People from Sheet</h2>
-<p>Run the <code>update_database_from_sheet</code> management command to import / update Person records from the configured Google Sheet.</p>
+<p>Run the <code>update_database_from_sheet</code> management command to import or update Person records from the configured Google Sheet.</p>
 <form method="post" action="{% url 'adminflow:run_import' %}">
   {% csrf_token %}
   <div class="form-group">
