@@ -284,8 +284,8 @@ def people_species_upload(request):
     parsed_rows = []
     requested_people = set()
     requested_species = set()
-    data_row_start = 2
-    for index, row in enumerate(rows, start=data_row_start):
+    csv_row_number_start = 2
+    for index, row in enumerate(rows, start=csv_row_number_start):
         row_data = _map_row_to_dict(headers, row)
         person_name = row_data.get(name_header, '').strip()
         species_name = row_data.get(species_header, '').strip()
