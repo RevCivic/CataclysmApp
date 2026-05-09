@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from adminflow.views import _decode_csv_file
+from people.models import Person
 from species.models import Species
 
 
@@ -70,3 +71,32 @@ class AdminflowViewsTestCase(TestCase):
 
         self.assertIn('Avians', _decode_csv_file(utf8_bom_upload))
         self.assertIn('Caf\xe9', _decode_csv_file(latin1_upload))
+
+    def test_people_species_upload_updates_person_species_by_name(self):
+        old_species = Species.objects.create(species_name='Human')
+        new_species = Species.objects.create(species_name='Ketraken')
+        person = Person.objects.create(name='Talabevel Banrahal', age=30, species=old_species)
+
+        upload = SimpleUploadedFile(
+            'people_species.csv',
+            b'name,species\nTalabevel Banrahal,Ketraken\n',
+            content_type='text/csv',
+        )
+
+        response = self.client.post(reverse('adminflow:people_species_upload'), {'csv_file': upload})
+        self.assertEqual(response.status_code, 200)
+
+        person.refresh_from_db()
+        self.assertEqual(person.species, new_species)
+        self.assertContains(response, 'updated 1, unchanged 0, skipped 0')
+
+    def test_people_species_upload_requires_name_and_species_columns(self):
+        upload = SimpleUploadedFile(
+            'people_species.csv',
+            b'person_name,species_name\nTalabevel Banrahal,Ketraken\n',
+            content_type='text/csv',
+        )
+
+        response = self.client.post(reverse('adminflow:people_species_upload'), {'csv_file': upload})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'CSV must include both &quot;name&quot; and &quot;species&quot; columns.')

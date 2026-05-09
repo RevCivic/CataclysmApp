@@ -22,6 +22,23 @@
     </ul>
   </div>
 {% endif %}
+{% if people_species_update_error %}
+  <div class="alert alert-danger mt-2">{{ people_species_update_error }}</div>
+{% endif %}
+{% if people_species_update_messages %}
+  <div class="alert alert-info mt-2">
+    <ul class="mb-0">
+      {% for msg in people_species_update_messages %}<li>{{ msg }}</li>{% endfor %}
+    </ul>
+  </div>
+{% endif %}
+{% if people_species_update_errors %}
+  <div class="alert alert-warning mt-2">
+    <ul class="mb-0">
+      {% for msg in people_species_update_errors %}<li>{{ msg }}</li>{% endfor %}
+    </ul>
+  </div>
+{% endif %}
 
 {% if sheet_rows is not None %}
   {% if sheet_rows %}
@@ -80,6 +97,28 @@
   <button type="submit" class="btn btn-primary lcars-btn"
           onclick="return confirm('This will create/update Person records. Continue?')">
     Run Import
+  </button>
+</form>
+
+<hr class="lcars-divider mt-4">
+
+<h2 class="mt-3">Update Person Species from CSV</h2>
+<p>Upload a CSV with <code>name</code> and <code>species</code> columns to update existing people by name.</p>
+<form method="post" action="{% url 'adminflow:people_species_upload' %}" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="form-group">
+    {{ people_species_upload_form.csv_file.label_tag }}
+    {{ people_species_upload_form.csv_file }}
+    {% if people_species_upload_form.csv_file.help_text %}
+      <small class="form-text text-muted">{{ people_species_upload_form.csv_file.help_text }}</small>
+    {% endif %}
+    {% for error in people_species_upload_form.csv_file.errors %}
+      <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+  </div>
+  <button type="submit" class="btn btn-primary lcars-btn"
+          onclick="return confirm('This will update species on matching Person records. Continue?')">
+    Update Species from CSV
   </button>
 </form>
 {% endblock %}
