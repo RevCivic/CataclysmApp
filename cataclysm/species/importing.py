@@ -114,8 +114,8 @@ def parse_list(value: Any) -> list[str]:
         if separator in text:
             parts = [part.strip() for part in text.split(separator)]
             return [part for part in parts if part]
-    if "," in text and ", " in text:
-        parts = [part.strip() for part in text.split(",")]
+    if ',' in text:
+        parts = [part.strip() for part in text.split(',')]
         return [part for part in parts if part]
     return [text.strip()] if text.strip() else []
 

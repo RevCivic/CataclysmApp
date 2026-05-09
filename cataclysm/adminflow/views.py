@@ -45,7 +45,7 @@ def _decode_csv_file(uploaded_file):
             return raw.decode(encoding)
         except UnicodeDecodeError:
             continue
-    raise ValueError('Unable to decode the uploaded CSV. Please save it as UTF-8 or Latin-1 and try again.')
+    raise ValueError('Unable to decode the uploaded CSV. Please save it as UTF-8 (with or without BOM) or Latin-1 and try again.')
 
 
 def _normalize_uploaded_rows(text):
@@ -307,6 +307,8 @@ def species_import(request):
         try:
             species, was_created = Species.objects.get_or_create(species_name=species_name)
             for field_name, value in payload.items():
+                if field_name == 'species_name':
+                    continue
                 setattr(species, field_name, value)
             species.full_clean()
             species.save()

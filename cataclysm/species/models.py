@@ -40,9 +40,6 @@ class Species(models.Model):
     image = models.ImageField(upload_to='species/images/', null=True, blank=True)
     hidden = models.BooleanField(default=False)
 
-    @property
-    def name(self):
-        return self.species_name
 
 
     def __str__(self):
