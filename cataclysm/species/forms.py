@@ -1,48 +1,62 @@
 from django import forms
+
+from .importing import parse_list, serialize_list
 from .models import Species
 
+
 class SpeciesForm(forms.ModelForm):
+    attributes = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 4}))
+    special_abilities = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 4}))
+
     class Meta:
         model = Species
         fields = [
-            'name',
+            'species_name',
             'home_world',
-            'society',
-            'accord_status',
-            'background',
-            'sociology',
-            'physiology',
-            'racial_traits',
             'size',
             'type',
             'air',
-            'reproduction_method',
+            'sex',
+            'strength',
+            'natural_weapon',
+            'toughness',
+            'natural_armor',
+            'speed',
+            'intelligence',
+            'flier',
+            'aquatic',
+            'amphibious',
+            'tech_level',
+            'telepathic',
+            'psionic',
+            'light_grav',
+            'heavy_grav',
+            'status',
+            'locomotion',
+            'society',
+            'attributes',
             'hours_of_sleep',
             'days_without_food',
             'days_without_water',
-            'strength_rating',
-            'toughness_rating',
-            'speed_rating',
-            'intelligence_rating',
-            'natural_weapons',
-            'natural_armor',
-            'can_fly',
-            'aquatic',
-            'amphibious',
-            'telepathic',
-            'psionic',
-            'gravity',
+            'background',
+            'sociology',
+            'physiology',
             'special_abilities',
-            'locomotion_method',
+            'match_status',
             'image',
             'hidden',
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Make most fields optional on the form level; keep `name` required
-        for fname, field in self.fields.items():
-            if fname == 'name':
-                field.required = True
-            else:
-                field.required = False
+        for field_name, field in self.fields.items():
+            field.required = field_name == 'species_name'
+        if self.instance.pk:
+            self.fields['attributes'].initial = serialize_list(self.instance.attributes)
+            self.fields['special_abilities'].initial = serialize_list(self.instance.special_abilities)
+
+    def clean_attributes(self):
+        return parse_list(self.cleaned_data.get('attributes'))
+
+    def clean_special_abilities(self):
+        return parse_list(self.cleaned_data.get('special_abilities'))

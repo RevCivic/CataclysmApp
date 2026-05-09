@@ -1,5 +1,4 @@
 from django.core.paginator import Paginator
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from species.forms import SpeciesForm
@@ -9,21 +8,20 @@ _VALID_PER_PAGE = ('50', '100', '500', 'all')
 
 
 def index(request):
-    # Sorting support via ?sort=field or ?sort=-field (prefix '-' for descending)
     sort_param = request.GET.get('sort', '').strip()
     allowed = {
-        'name': 'name',
+        'species_name': 'species_name',
         'size': 'size',
         'home_world': 'home_world',
         'type': 'type',
-        'accord_status': 'accord_status',
-        'strength': 'strength_rating',
-        'toughness': 'toughness_rating',
-        'speed': 'speed_rating',
-        'intelligence': 'intelligence_rating',
+        'status': 'status',
+        'strength': 'strength',
+        'toughness': 'toughness',
+        'speed': 'speed',
+        'intelligence': 'intelligence',
     }
 
-    order_by = 'name'
+    order_by = 'species_name'
     current_sort_field = ''
     current_sort_dir = 'asc'
     if sort_param:
@@ -43,7 +41,7 @@ def index(request):
 
     q = request.GET.get('q', '').strip()
     if q:
-        qs = qs.filter(name__icontains=q)
+        qs = qs.filter(species_name__icontains=q)
 
     per_page = request.GET.get('per_page', '50')
     if per_page not in _VALID_PER_PAGE:
@@ -101,4 +99,3 @@ def edit_species(request, id):
     else:
         form = SpeciesForm(instance=species)
     return render(request, 'species/add_object.html', {'form': form})
-

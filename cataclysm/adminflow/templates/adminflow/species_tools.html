@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Species Tools — Admin Panel{% endblock %}
+{% block content %}
+<div class="list-header index_menu">
+  <h1 class="app_name">Admin Panel · Species</h1>
+</div>
+
+{% include "adminflow/_subnav.html" %}
+
+{% if upload_error %}
+  <div class="alert alert-danger mt-2">{{ upload_error }}</div>
+{% endif %}
+{% if upload_success %}
+  <div class="alert alert-info mt-2">{{ upload_success }}</div>
+{% endif %}
+{% if run_messages %}
+  <div class="alert alert-info mt-2">
+    <ul class="mb-0">
+      {% for msg in run_messages %}<li>{{ msg }}</li>{% endfor %}
+    </ul>
+  </div>
+{% endif %}
+{% if import_errors %}
+  <div class="alert alert-warning mt-2">
+    <ul class="mb-0">
+      {% for msg in import_errors %}<li>{{ msg }}</li>{% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+<h2 class="mt-3">Upload Species CSV</h2>
+<p>Upload a CSV with a header row, then match each Cataclysm species field before importing.</p>
+<form method="post" action="{% url 'adminflow:species_upload' %}" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div class="form-group">
+    {{ species_upload_form.csv_file.label_tag }}
+    {{ species_upload_form.csv_file }}
+    {% if species_upload_form.csv_file.help_text %}
+      <small class="form-text text-muted">{{ species_upload_form.csv_file.help_text }}</small>
+    {% endif %}
+    {% for error in species_upload_form.csv_file.errors %}
+      <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+  </div>
+  <button type="submit" class="btn btn-primary lcars-btn">Upload CSV</button>
+</form>
+
+{% if uploaded_headers %}
+  <hr class="lcars-divider mt-4">
+
+  <h2 class="mt-3">Match Fields</h2>
+  <p>Review the detected columns and adjust any mismatches before importing.</p>
+  <form method="post" action="{% url 'adminflow:species_import' %}">
+    {% csrf_token %}
+    <div class="lcars-table-wrap">
+      <table class="sci-fi-list" style="width:100%;">
+        <thead>
+          <tr>
+            <th>Species Field</th>
+            <th>CSV Column</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for field in species_import_fields %}
+            <tr>
+              <td>{{ field.label }}{% if field.required %} *{% endif %}</td>
+              <td>
+                <select name="{{ field.name }}" class="form-control sci-fi-input">
+                  <option value="">Do not import</option>
+                  {% for header in uploaded_headers %}
+                    <option value="{{ header }}" {% if field.selected_header == header %}selected{% endif %}>{{ header }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <button type="submit" class="btn btn-primary lcars-btn mt-3" onclick="return confirm('Import the mapped species rows now?')">Import Species CSV</button>
+  </form>
+
+  <h3 class="mt-4">Preview</h3>
+  <div style="overflow-x:auto;">
+    <table class="sci-fi-list" style="width:100%;">
+      <tbody>
+        <tr>
+          {% for header in uploaded_headers %}<th>{{ header }}</th>{% endfor %}
+        </tr>
+        {% for row in preview_rows %}
+          <tr>
+            {% for cell in row %}<td>{{ cell }}</td>{% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+{% endblock %}
