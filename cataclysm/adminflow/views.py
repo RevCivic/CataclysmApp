@@ -39,6 +39,7 @@ def _model_key(app_label, model_name):
 
 
 def _decode_csv_file(uploaded_file):
+    """Return decoded CSV text from an uploaded file using supported encodings."""
     raw = uploaded_file.read()
     for encoding in ('utf-8-sig', 'utf-8', 'latin-1'):
         try:
@@ -49,6 +50,7 @@ def _decode_csv_file(uploaded_file):
 
 
 def _normalize_uploaded_rows(text):
+    """Parse CSV text, trim cells, drop empty rows, and split headers from data."""
     reader = csv.reader(io.StringIO(text))
     parsed_rows = []
     for row in reader:
@@ -63,10 +65,12 @@ def _normalize_uploaded_rows(text):
 
 
 def _map_row_to_dict(headers, row):
+    """Map a row list to a header-keyed dict, padding missing cells with blanks."""
     return {header: row[position] if position < len(row) else '' for position, header in enumerate(headers)}
 
 
 def _species_tools_context(**overrides):
+    """Build template context for the species admin tools and mapping UI."""
     context = {
         'species_upload_form': SpeciesUploadForm(),
         'species_import_fields': SPECIES_IMPORT_FIELDS,
