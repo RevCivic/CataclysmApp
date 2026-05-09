@@ -100,3 +100,21 @@ class AdminflowViewsTestCase(TestCase):
         response = self.client.post(reverse('adminflow:people_species_upload'), {'csv_file': upload})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'CSV must include both &quot;name&quot; and &quot;species&quot; columns.')
+
+    def test_people_species_upload_matches_case_insensitively(self):
+        old_species = Species.objects.create(species_name='Human')
+        new_species = Species.objects.create(species_name='Ketraken')
+        person = Person.objects.create(name='Talabevel Banrahal', age=30, species=old_species)
+
+        upload = SimpleUploadedFile(
+            'people_species.csv',
+            b'name,species\nTALABEVEL BANRAHAL,ketraken\n',
+            content_type='text/csv',
+        )
+
+        response = self.client.post(reverse('adminflow:people_species_upload'), {'csv_file': upload})
+        self.assertEqual(response.status_code, 200)
+
+        person.refresh_from_db()
+        self.assertEqual(person.species, new_species)
+        self.assertContains(response, 'updated 1, unchanged 0, skipped 0')

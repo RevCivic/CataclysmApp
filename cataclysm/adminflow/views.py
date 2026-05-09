@@ -3,7 +3,7 @@ import io
 
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
@@ -101,6 +101,13 @@ def _people_tools_context(**overrides):
     }
     context.update(overrides)
     return context
+
+
+def _build_iexact_filter(field_name, values):
+    query = Q()
+    for value in values:
+        query |= Q(**{f'{field_name}__iexact': value})
+    return query
 
 
 def find_all_duplicates():
@@ -277,7 +284,8 @@ def people_species_upload(request):
     parsed_rows = []
     requested_people = set()
     requested_species = set()
-    for index, row in enumerate(rows, start=2):
+    data_row_start = 2
+    for index, row in enumerate(rows, start=data_row_start):
         row_data = _map_row_to_dict(headers, row)
         person_name = row_data.get(name_header, '').strip()
         species_name = row_data.get(species_header, '').strip()
@@ -288,11 +296,17 @@ def people_species_upload(request):
             requested_species.add(species_name.lower())
 
     person_matches = {}
-    for person in Person.objects.annotate(name_lower=Lower('name')).filter(name_lower__in=requested_people):
+    people_qs = Person.objects.none()
+    if requested_people:
+        people_qs = Person.objects.filter(_build_iexact_filter('name', requested_people))
+    for person in people_qs:
         person_matches.setdefault(person.name.lower(), []).append(person)
 
     species_matches = {}
-    for species in Species.objects.annotate(name_lower=Lower('species_name')).filter(name_lower__in=requested_species):
+    species_qs = Species.objects.none()
+    if requested_species:
+        species_qs = Species.objects.filter(_build_iexact_filter('species_name', requested_species))
+    for species in species_qs:
         species_matches.setdefault(species.species_name.lower(), []).append(species)
 
     updated = 0
