@@ -284,8 +284,8 @@ def people_species_upload(request):
     parsed_rows = []
     requested_people = set()
     requested_species = set()
-    csv_row_number_start = 2
-    for index, row in enumerate(rows, start=csv_row_number_start):
+    first_data_row = 2
+    for index, row in enumerate(rows, start=first_data_row):
         row_data = _map_row_to_dict(headers, row)
         person_name = row_data.get(name_header, '').strip()
         species_name = row_data.get(species_header, '').strip()
@@ -296,16 +296,18 @@ def people_species_upload(request):
             requested_species.add(species_name.lower())
 
     person_matches = {}
-    people_qs = Person.objects.none()
-    if requested_people:
-        people_qs = Person.objects.filter(_build_iexact_filter('name', requested_people))
+    people_qs = (
+        Person.objects.filter(_build_iexact_filter('name', requested_people))
+        if requested_people else Person.objects.none()
+    )
     for person in people_qs:
         person_matches.setdefault(person.name.lower(), []).append(person)
 
     species_matches = {}
-    species_qs = Species.objects.none()
-    if requested_species:
-        species_qs = Species.objects.filter(_build_iexact_filter('species_name', requested_species))
+    species_qs = (
+        Species.objects.filter(_build_iexact_filter('species_name', requested_species))
+        if requested_species else Species.objects.none()
+    )
     for species in species_qs:
         species_matches.setdefault(species.species_name.lower(), []).append(species)
 
