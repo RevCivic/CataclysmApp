@@ -288,12 +288,12 @@ def people_species_upload(request):
             requested_species.add(species_name.lower())
 
     person_matches = {}
-    for person in Person.objects.annotate(name_lower=Lower('name')).filter(name_lower__in=requested_people).order_by('pk'):
-        person_matches.setdefault(person.name_lower, []).append(person)
+    for person in Person.objects.annotate(name_lower=Lower('name')).filter(name_lower__in=requested_people):
+        person_matches.setdefault(person.name.lower(), []).append(person)
 
     species_matches = {}
-    for species in Species.objects.annotate(name_lower=Lower('species_name')).filter(name_lower__in=requested_species).order_by('pk'):
-        species_matches.setdefault(species.name_lower, []).append(species)
+    for species in Species.objects.annotate(name_lower=Lower('species_name')).filter(name_lower__in=requested_species):
+        species_matches.setdefault(species.species_name.lower(), []).append(species)
 
     updated = 0
     unchanged = 0
