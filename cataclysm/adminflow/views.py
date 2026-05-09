@@ -3,12 +3,14 @@ import io
 
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
-from adminflow.forms import PeopleSpeciesUploadForm, SpeciesUploadForm
+from adminflow.forms import DownloadImagesForm, PeopleSpeciesUploadForm, SpeciesUploadForm
 from cataclysm.management.commands.update_database_from_sheet import (
     SAMPLE_RANGE_NAME,
     SAMPLE_SPREADSHEET_ID,
@@ -103,11 +105,29 @@ def _people_tools_context(**overrides):
     return context
 
 
+def _index_context(**overrides):
+    context = {
+        'download_images_form': DownloadImagesForm(
+            initial={
+                'spreadsheet_id': SAMPLE_SPREADSHEET_ID,
+                'dry_run': True,
+                'overwrite': False,
+            }
+        ),
+    }
+    context.update(overrides)
+    return context
+
+
 def _build_iexact_filter(field_name, values):
     query = Q()
     for value in values:
         query |= Q(**{f'{field_name}__iexact': value})
     return query
+
+
+def _non_empty_lines(value):
+    return [line for line in value.splitlines() if line.strip()]
 
 
 def find_all_duplicates():
@@ -190,7 +210,53 @@ def _delete_items(item_keys):
 
 @login_required
 def index(request):
-    return render(request, 'adminflow/index.html')
+    return render(request, 'adminflow/index.html', _index_context())
+
+
+@login_required
+@require_POST
+def run_download_images(request):
+    form = DownloadImagesForm(request.POST)
+    if not form.is_valid():
+        return render(request, 'adminflow/index.html', _index_context(download_images_form=form))
+
+    spreadsheet_id = extract_spreadsheet_id(form.cleaned_data['spreadsheet_id'])
+    if not spreadsheet_id:
+        form.add_error('spreadsheet_id', 'Enter a valid Google Sheets ID or URL.')
+        return render(request, 'adminflow/index.html', _index_context(download_images_form=form))
+
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+    try:
+        call_command(
+            'download_sheet_images',
+            spreadsheet_id=spreadsheet_id,
+            dry_run=form.cleaned_data['dry_run'],
+            overwrite=form.cleaned_data['overwrite'],
+            stdout=stdout,
+            stderr=stderr,
+        )
+    except CommandError as exc:
+        return render(
+            request,
+            'adminflow/index.html',
+            _index_context(
+                download_images_form=form,
+                download_images_error=str(exc),
+                download_images_messages=_non_empty_lines(stdout.getvalue()),
+                download_images_warnings=_non_empty_lines(stderr.getvalue()),
+            ),
+        )
+
+    return render(
+        request,
+        'adminflow/index.html',
+        _index_context(
+            download_images_form=form,
+            download_images_messages=_non_empty_lines(stdout.getvalue()),
+            download_images_warnings=_non_empty_lines(stderr.getvalue()),
+        ),
+    )
 
 
 @login_required
