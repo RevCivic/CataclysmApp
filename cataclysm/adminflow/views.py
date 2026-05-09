@@ -50,12 +50,20 @@ def _decode_csv_file(uploaded_file):
 
 def _normalize_uploaded_rows(text):
     reader = csv.reader(io.StringIO(text))
-    rows = [[cell.strip() for cell in row] for row in reader if any(cell.strip() for cell in row)]
-    if not rows:
+    parsed_rows = []
+    for row in reader:
+        cleaned_row = [cell.strip() for cell in row]
+        if any(cleaned_row):
+            parsed_rows.append(cleaned_row)
+    if not parsed_rows:
         return [], []
-    headers = rows[0]
-    data_rows = rows[1:]
+    headers = parsed_rows[0]
+    data_rows = parsed_rows[1:]
     return headers, data_rows
+
+
+def _map_row_to_dict(headers, row):
+    return {header: row[position] if position < len(row) else '' for position, header in enumerate(headers)}
 
 
 def _species_tools_context(**overrides):
@@ -289,7 +297,7 @@ def species_import(request):
     errors = []
 
     for index, row in enumerate(rows, start=2):
-        row_data = {header: row[position] if position < len(row) else '' for position, header in enumerate(headers)}
+        row_data = _map_row_to_dict(headers, row)
         payload = build_species_payload(row_data, field_mapping)
         species_name = payload.get('species_name', '').strip()
         if not species_name:
