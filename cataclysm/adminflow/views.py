@@ -126,6 +126,10 @@ def _build_iexact_filter(field_name, values):
     return query
 
 
+def _non_empty_lines(value):
+    return [line for line in value.splitlines() if line.strip()]
+
+
 def find_all_duplicates():
     """Return a list of groups; each group is a dict describing duplicate records."""
     groups = []
@@ -239,8 +243,8 @@ def run_download_images(request):
             _index_context(
                 download_images_form=form,
                 download_images_error=str(exc),
-                download_images_messages=[line for line in stdout.getvalue().splitlines() if line.strip()],
-                download_images_warnings=[line for line in stderr.getvalue().splitlines() if line.strip()],
+                download_images_messages=_non_empty_lines(stdout.getvalue()),
+                download_images_warnings=_non_empty_lines(stderr.getvalue()),
             ),
         )
 
@@ -249,8 +253,8 @@ def run_download_images(request):
         'adminflow/index.html',
         _index_context(
             download_images_form=form,
-            download_images_messages=[line for line in stdout.getvalue().splitlines() if line.strip()],
-            download_images_warnings=[line for line in stderr.getvalue().splitlines() if line.strip()],
+            download_images_messages=_non_empty_lines(stdout.getvalue()),
+            download_images_warnings=_non_empty_lines(stderr.getvalue()),
         ),
     )
 
