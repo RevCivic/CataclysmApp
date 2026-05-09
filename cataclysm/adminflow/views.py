@@ -3,18 +3,19 @@ import io
 
 from django.apps import apps
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
-from adminflow.forms import SpeciesUploadForm
+from adminflow.forms import PeopleSpeciesUploadForm, SpeciesUploadForm
 from cataclysm.management.commands.update_database_from_sheet import (
     SAMPLE_RANGE_NAME,
     SAMPLE_SPREADSHEET_ID,
     import_people_from_sheet,
 )
 from cataclysm.utils.google_sheets import extract_spreadsheet_id, read_sheet_data
+from people.models import Person
 from species.importing import SPECIES_IMPORT_FIELDS, build_species_payload, guess_field_mapping
 from species.models import Species
 
@@ -82,6 +83,31 @@ def _species_tools_context(**overrides):
         for field in SPECIES_IMPORT_FIELDS
     ]
     return context
+
+
+def _find_header_match(headers, expected_name):
+    expected = expected_name.strip().lower()
+    for header in headers:
+        if header.strip().lower() == expected:
+            return header
+    return None
+
+
+def _people_tools_context(**overrides):
+    context = {
+        'default_spreadsheet_id': SAMPLE_SPREADSHEET_ID,
+        'default_range_name': SAMPLE_RANGE_NAME,
+        'people_species_upload_form': PeopleSpeciesUploadForm(),
+    }
+    context.update(overrides)
+    return context
+
+
+def _build_iexact_filter(field_name, values):
+    query = Q()
+    for value in values:
+        query |= Q(**{f'{field_name}__iexact': value})
+    return query
 
 
 def find_all_duplicates():
@@ -169,10 +195,7 @@ def index(request):
 
 @login_required
 def people_tools(request):
-    context = {
-        'default_spreadsheet_id': SAMPLE_SPREADSHEET_ID,
-        'default_range_name': SAMPLE_RANGE_NAME,
-    }
+    context = _people_tools_context()
     return render(request, 'adminflow/adminflow.html', context)
 
 
@@ -184,11 +207,11 @@ def run_import(request):
 
     messages = import_people_from_sheet(spreadsheet_id, range_name)
 
-    context = {
-        'default_spreadsheet_id': spreadsheet_id,
-        'default_range_name': range_name,
-        'run_messages': messages,
-    }
+    context = _people_tools_context(
+        default_spreadsheet_id=spreadsheet_id,
+        default_range_name=range_name,
+        run_messages=messages,
+    )
     return render(request, 'adminflow/adminflow.html', context)
 
 
@@ -204,13 +227,141 @@ def read_sheet(request):
         error = "Failed to read sheet data. Make sure the Google Sheet is shared with 'Anyone with the link'."
         rows = []
 
-    context = {
-        'default_spreadsheet_id': spreadsheet_id,
-        'default_range_name': range_name,
-        'sheet_rows': rows,
-        'run_error': error,
-    }
+    context = _people_tools_context(
+        default_spreadsheet_id=spreadsheet_id,
+        default_range_name=range_name,
+        sheet_rows=rows,
+        run_error=error,
+    )
     return render(request, 'adminflow/adminflow.html', context)
+
+
+@login_required
+@require_POST
+def people_species_upload(request):
+    form = PeopleSpeciesUploadForm(request.POST, request.FILES)
+    if not form.is_valid():
+        return render(
+            request,
+            'adminflow/adminflow.html',
+            _people_tools_context(people_species_upload_form=form),
+        )
+
+    try:
+        headers, rows = _normalize_uploaded_rows(_decode_csv_file(form.cleaned_data['csv_file']))
+    except ValueError as exc:
+        return render(
+            request,
+            'adminflow/adminflow.html',
+            _people_tools_context(
+                people_species_upload_form=form,
+                people_species_update_error=str(exc),
+            ),
+        )
+
+    if not headers:
+        return render(
+            request,
+            'adminflow/adminflow.html',
+            _people_tools_context(
+                people_species_upload_form=form,
+                people_species_update_error='The uploaded CSV is empty or missing a header row.',
+            ),
+        )
+
+    name_header = _find_header_match(headers, 'name')
+    species_header = _find_header_match(headers, 'species')
+    if not name_header or not species_header:
+        return render(
+            request,
+            'adminflow/adminflow.html',
+            _people_tools_context(
+                people_species_upload_form=form,
+                people_species_update_error='CSV must include both "name" and "species" columns.',
+            ),
+        )
+
+    parsed_rows = []
+    requested_people = set()
+    requested_species = set()
+    first_data_row = 2
+    for index, row in enumerate(rows, start=first_data_row):
+        row_data = _map_row_to_dict(headers, row)
+        person_name = row_data.get(name_header, '').strip()
+        species_name = row_data.get(species_header, '').strip()
+        parsed_rows.append((index, person_name, species_name))
+        if person_name:
+            requested_people.add(person_name.lower())
+        if species_name:
+            requested_species.add(species_name.lower())
+
+    person_matches = {}
+    people_qs = (
+        Person.objects.filter(_build_iexact_filter('name', requested_people))
+        if requested_people else Person.objects.none()
+    )
+    for person in people_qs:
+        person_matches.setdefault(person.name.lower(), []).append(person)
+
+    species_matches = {}
+    species_qs = (
+        Species.objects.filter(_build_iexact_filter('species_name', requested_species))
+        if requested_species else Species.objects.none()
+    )
+    for species in species_qs:
+        species_matches.setdefault(species.species_name.lower(), []).append(species)
+
+    updated = 0
+    unchanged = 0
+    skipped = 0
+    errors = []
+
+    for index, person_name, species_name in parsed_rows:
+        if not person_name or not species_name:
+            skipped += 1
+            errors.append(f'Row {index}: name and species are required.')
+            continue
+
+        matching_people = person_matches.get(person_name.lower(), [])
+        if not matching_people:
+            skipped += 1
+            errors.append(f'Row {index}: person "{person_name}" was not found.')
+            continue
+        if len(matching_people) > 1:
+            skipped += 1
+            errors.append(f'Row {index}: multiple people matched "{person_name}".')
+            continue
+
+        matching_species = species_matches.get(species_name.lower(), [])
+        if not matching_species:
+            skipped += 1
+            errors.append(f'Row {index}: species "{species_name}" was not found.')
+            continue
+        if len(matching_species) > 1:
+            skipped += 1
+            errors.append(f'Row {index}: multiple species matched "{species_name}".')
+            continue
+
+        person = matching_people[0]
+        species = matching_species[0]
+        if person.species_id == species.id:
+            unchanged += 1
+            continue
+
+        person.species = species
+        person.save(update_fields=['species'])
+        updated += 1
+
+    return render(
+        request,
+        'adminflow/adminflow.html',
+        _people_tools_context(
+            people_species_update_messages=[
+                f'Processed people species CSV: updated {updated}, unchanged {unchanged}, skipped {skipped}.'
+            ],
+            people_species_update_errors=errors,
+        ),
+    )
 
 
 @login_required
