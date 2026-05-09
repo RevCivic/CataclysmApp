@@ -3,6 +3,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
+from adminflow.views import _decode_csv_file
 from species.models import Species
 
 
@@ -62,3 +63,10 @@ class AdminflowViewsTestCase(TestCase):
         self.assertEqual(species.attributes, ['Swift', 'Graceful'])
         self.assertEqual(species.special_abilities, ['Glide', 'Sonic Cry'])
         self.assertContains(response, 'created 1')
+
+    def test_decode_csv_file_supports_utf8_bom_and_latin1(self):
+        utf8_bom_upload = SimpleUploadedFile('species.csv', 'Species_Name\nAvians\n'.encode('utf-8-sig'))
+        latin1_upload = SimpleUploadedFile('species.csv', 'Species_Name\nCaf\xe9\n'.encode('latin-1'))
+
+        self.assertIn('Avians', _decode_csv_file(utf8_bom_upload))
+        self.assertIn('Caf\xe9', _decode_csv_file(latin1_upload))
