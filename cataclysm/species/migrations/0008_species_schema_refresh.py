@@ -3,11 +3,14 @@ from django.db import migrations, models
 
 def migrate_gravity_flags(apps, schema_editor):
     Species = apps.get_model('species', 'Species')
+    species_to_update = []
     for species in Species.objects.all():
         gravity = getattr(species, 'gravity', None)
         species.light_grav = gravity == 'light'
         species.heavy_grav = gravity == 'heavy'
-        species.save(update_fields=['light_grav', 'heavy_grav'])
+        species_to_update.append(species)
+    if species_to_update:
+        Species.objects.bulk_update(species_to_update, ['light_grav', 'heavy_grav'])
 
 
 class Migration(migrations.Migration):

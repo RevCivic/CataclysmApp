@@ -44,9 +44,6 @@ class Species(models.Model):
     def name(self):
         return self.species_name
 
-    @name.setter
-    def name(self, value):
-        self.species_name = value
 
     def __str__(self):
         return self.species_name

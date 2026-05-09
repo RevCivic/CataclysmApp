@@ -45,7 +45,7 @@ def _decode_csv_file(uploaded_file):
             return raw.decode(encoding)
         except UnicodeDecodeError:
             continue
-    return raw.decode('utf-8', errors='ignore')
+    raise ValueError('Unable to decode the uploaded CSV. Please save it as UTF-8 or Latin-1 and try again.')
 
 
 def _normalize_uploaded_rows(text):
@@ -222,7 +222,18 @@ def species_upload(request):
     if not form.is_valid():
         return render(request, 'adminflow/species_tools.html', _species_tools_context(species_upload_form=form))
 
-    headers, rows = _normalize_uploaded_rows(_decode_csv_file(form.cleaned_data['csv_file']))
+    try:
+        headers, rows = _normalize_uploaded_rows(_decode_csv_file(form.cleaned_data['csv_file']))
+    except ValueError as exc:
+        return render(
+            request,
+            'adminflow/species_tools.html',
+            _species_tools_context(
+                species_upload_form=form,
+                upload_error=str(exc),
+            ),
+        )
+
     if not headers:
         return render(
             request,
