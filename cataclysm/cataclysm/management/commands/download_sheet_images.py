@@ -1,11 +1,13 @@
+import ipaddress
 import mimetypes
 import os
 import re
+import socket
 from urllib.parse import urlparse
 
 import requests
 from django.core.files.base import ContentFile
-from django.core.management.base import BaseCommand, CommandParser
+from django.core.management.base import BaseCommand, CommandError, CommandParser
 from django.utils.text import slugify
 
 from people.models import Person
@@ -14,16 +16,23 @@ from species.models import Species
 from cataclysm.utils.google_sheets import extract_spreadsheet_id, read_sheet_data
 
 
-DEFAULT_SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "1XRyeXDIhNE6iwTXS_zDc_eHrQFU96Z2OUCIXm_t0twE")
+DEFAULT_SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "").strip()
 DEFAULT_TABS = ("Main Crew", "Other Crew")
 URL_RE = re.compile(r"https?://[^\s\"'<>]+", re.IGNORECASE)
+SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg"}
+DEFAULT_USER_AGENT = "CataclysmAppImageSync/1.0"
 
 
 def _url_from_cell(value: str) -> str | None:
     if not value:
         return None
     match = URL_RE.search(value.strip())
-    return match.group(0).rstrip("),.;]") if match else None
+    if not match:
+        return None
+    url = match.group(0)
+    if url and url[-1] in {")", "]", ",", ";"}:
+        return url[:-1]
+    return url
 
 
 def _url_from_column(row: list[str], index: int | None) -> str | None:
@@ -57,23 +66,89 @@ def _row_url_pair(row: list[str], person_url_col: int | None, species_url_col: i
     return person_url, species_url
 
 
-def _guess_extension(url: str, content_type: str | None) -> str:
+def _is_private_or_local_host(hostname: str) -> bool:
+    if hostname.lower() == "localhost":
+        return True
+
+    try:
+        addresses = {ipaddress.ip_address(hostname)}
+    except ValueError:
+        try:
+            resolved = socket.getaddrinfo(hostname, None)
+        except socket.gaierror as exc:
+            raise ValueError(f"Could not resolve download host: {hostname}") from exc
+        addresses = {ipaddress.ip_address(entry[4][0]) for entry in resolved}
+
+    return any(
+        address.is_loopback
+        or address.is_private
+        or address.is_link_local
+        or address.is_reserved
+        or address.is_multicast
+        or address.is_unspecified
+        for address in addresses
+    )
+
+
+def _validate_download_url(url: str) -> None:
+    parsed = urlparse(url)
+    if parsed.scheme.lower() not in {"http", "https"}:
+        raise ValueError(f"Unsupported URL scheme for download: {parsed.scheme!r}")
+    if not parsed.hostname:
+        raise ValueError("Download URL is missing a hostname.")
+    if _is_private_or_local_host(parsed.hostname):
+        raise ValueError(f"Refusing to download from private/local host: {parsed.hostname}")
+
+
+def _guess_extension(url: str, content_type: str | None) -> str | None:
     parsed_path = urlparse(url).path
     ext = os.path.splitext(parsed_path)[1].lower()
-    if ext in {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg"}:
+    if ext in SUPPORTED_IMAGE_EXTENSIONS:
         return ext
     if content_type:
         guessed = mimetypes.guess_extension(content_type.split(";")[0].strip())
         if guessed:
-            return ".jpg" if guessed == ".jpe" else guessed
-    return ".jpg"
+            # Python can return ".jpe" for JPEG content types; normalize to ".jpg".
+            normalized = ".jpg" if guessed == ".jpe" else guessed
+            if normalized in SUPPORTED_IMAGE_EXTENSIONS:
+                return normalized
+    return None
 
 
-def _download_image(url: str, timeout: int = 30) -> tuple[bytes, str]:
-    response = requests.get(url, timeout=timeout)
-    response.raise_for_status()
-    extension = _guess_extension(url, response.headers.get("Content-Type"))
-    return response.content, extension
+def _download_image(url: str, timeout: int = 10, max_bytes: int = 10 * 1024 * 1024) -> tuple[bytes, str]:
+    _validate_download_url(url)
+    response = requests.get(
+        url,
+        timeout=timeout,
+        allow_redirects=False,
+        stream=True,
+        headers={"User-Agent": DEFAULT_USER_AGENT},
+    )
+    try:
+        response.raise_for_status()
+        content_type = response.headers.get("Content-Type")
+        if content_type and not content_type.split(";")[0].strip().lower().startswith("image/"):
+            raise ValueError(f"Refusing non-image content type for {url}: {content_type}")
+
+        content_length = response.headers.get("Content-Length")
+        if content_length and content_length.isdigit() and int(content_length) > max_bytes:
+            raise ValueError(f"Refusing download larger than {max_bytes} bytes for URL: {url}")
+
+        extension = _guess_extension(url, content_type)
+        if not extension:
+            raise ValueError(f"Could not determine a safe image extension for URL: {url}")
+
+        data = bytearray()
+        for chunk in response.iter_content(chunk_size=8192):
+            if not chunk:
+                continue
+            data.extend(chunk)
+            if len(data) > max_bytes:
+                raise ValueError(f"Refusing download larger than {max_bytes} bytes for URL: {url}")
+
+        return bytes(data), extension
+    finally:
+        response.close()
 
 
 class Command(BaseCommand):
@@ -83,7 +158,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--spreadsheet-id",
             default=DEFAULT_SPREADSHEET_ID,
-            help="Google spreadsheet URL or ID (defaults to SPREADSHEET_ID env var or project sheet).",
+            help="Google spreadsheet URL or ID (defaults to SPREADSHEET_ID env var).",
         )
         parser.add_argument(
             "--tabs",
@@ -109,8 +184,25 @@ class Command(BaseCommand):
         )
         parser.add_argument("--overwrite", action="store_true", help="Overwrite existing image fields.")
         parser.add_argument("--dry-run", action="store_true", help="Report what would be downloaded without writing files.")
+        parser.add_argument("--timeout", type=int, default=10, help="Download timeout in seconds (default: 10).")
+        parser.add_argument(
+            "--max-bytes",
+            type=int,
+            default=10 * 1024 * 1024,
+            help="Maximum bytes allowed per image download (default: 10485760).",
+        )
 
-    def _save_image(self, obj, url: str, base_name: str, dry_run: bool, overwrite: bool, download_cache: dict[str, tuple[bytes, str]]):
+    def _save_image(
+        self,
+        obj,
+        url: str,
+        base_name: str,
+        dry_run: bool,
+        overwrite: bool,
+        download_cache: dict[str, tuple[bytes, str]],
+        timeout: int,
+        max_bytes: int,
+    ) -> str:
         image_field = obj.image
         if image_field and not overwrite:
             return "skipped_existing"
@@ -120,7 +212,7 @@ class Command(BaseCommand):
         if url in download_cache:
             data, ext = download_cache[url]
         else:
-            data, ext = _download_image(url)
+            data, ext = _download_image(url, timeout=timeout, max_bytes=max_bytes)
             download_cache[url] = (data, ext)
 
         filename = f"{slugify(base_name) or 'image'}{ext}"
@@ -139,6 +231,15 @@ class Command(BaseCommand):
         species_url_col = options["species_url_col"]
         overwrite = options["overwrite"]
         dry_run = options["dry_run"]
+        timeout = options["timeout"]
+        max_bytes = options["max_bytes"]
+
+        if not spreadsheet_id:
+            raise CommandError("Provide --spreadsheet-id or set the SPREADSHEET_ID environment variable.")
+        if timeout <= 0:
+            raise CommandError("--timeout must be a positive integer.")
+        if max_bytes <= 0:
+            raise CommandError("--max-bytes must be a positive integer.")
 
         stats = {
             "rows": 0,
@@ -177,11 +278,22 @@ class Command(BaseCommand):
                         stats["people_missing"] += 1
                     else:
                         try:
-                            result = self._save_image(person, person_url, person.name, dry_run, overwrite, download_cache)
+                            result = self._save_image(
+                                person,
+                                person_url,
+                                person.name,
+                                dry_run,
+                                overwrite,
+                                download_cache,
+                                timeout=timeout,
+                                max_bytes=max_bytes,
+                            )
                             stats[f"people_{result}"] += 1
-                        except Exception as exc:
+                        except (requests.RequestException, OSError, ValueError) as exc:
                             stats["people_errors"] += 1
-                            self.stderr.write(f"[{tab_name} row {row_index}] Person '{person_name}' failed: {exc}")
+                            self.stderr.write(
+                                self.style.ERROR(f"[{tab_name} row {row_index}] Person '{person_name}' failed: {exc}")
+                            )
 
                 if species_name and species_url:
                     species = Species.objects.filter(species_name__iexact=species_name).first()
@@ -189,11 +301,22 @@ class Command(BaseCommand):
                         stats["species_missing"] += 1
                     else:
                         try:
-                            result = self._save_image(species, species_url, species.species_name, dry_run, overwrite, download_cache)
+                            result = self._save_image(
+                                species,
+                                species_url,
+                                species.species_name,
+                                dry_run,
+                                overwrite,
+                                download_cache,
+                                timeout=timeout,
+                                max_bytes=max_bytes,
+                            )
                             stats[f"species_{result}"] += 1
-                        except Exception as exc:
+                        except (requests.RequestException, OSError, ValueError) as exc:
                             stats["species_errors"] += 1
-                            self.stderr.write(f"[{tab_name} row {row_index}] Species '{species_name}' failed: {exc}")
+                            self.stderr.write(
+                                self.style.ERROR(f"[{tab_name} row {row_index}] Species '{species_name}' failed: {exc}")
+                            )
 
         prefix = "[DRY-RUN] " if dry_run else ""
         self.stdout.write(

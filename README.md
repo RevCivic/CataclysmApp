@@ -67,7 +67,7 @@ Use the management command below to pull image URLs from the public crew spreads
 
 ```bash
 cd cataclysm
-python manage.py download_sheet_images --spreadsheet-id "https://docs.google.com/spreadsheets/d/1XRyeXDIhNE6iwTXS_zDc_eHrQFU96Z2OUCIXm_t0twE/edit?usp=sharing"
+python manage.py download_sheet_images --spreadsheet-id "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit?usp=sharing"
 ```
 
 Useful options:
@@ -76,3 +76,7 @@ Useful options:
 - `--person-url-col <index>` and `--species-url-col <index>` (use explicit URL columns)
 - `--dry-run` (report without writing files)
 - `--overwrite` (replace existing images)
+- `--timeout <seconds>` (HTTP timeout per image download, default `10`)
+- `--max-bytes <bytes>` (max bytes per image download, default `10485760`)
+
+For security, downloads only support direct `http/https` image URLs and intentionally do **not** follow HTTP redirects to reduce SSRF-style redirect abuse.
