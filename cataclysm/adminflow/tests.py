@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -19,6 +21,28 @@ class AdminflowViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Open People Tools')
         self.assertContains(response, 'Open Species Tools')
+        self.assertContains(response, 'Download Images from Sheet')
+
+    def test_run_download_images_from_general_admin_tasks(self):
+        def fake_call_command(*args, **kwargs):
+            kwargs['stdout'].write('Processed rows=1')
+
+        with patch('adminflow.views.call_command', side_effect=fake_call_command) as mock_call:
+            response = self.client.post(
+                reverse('adminflow:run_download_images'),
+                {
+                    'spreadsheet_id': 'dummy-sheet-id',
+                    'dry_run': 'on',
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Processed rows=1')
+        args, kwargs = mock_call.call_args
+        self.assertEqual(args[0], 'download_sheet_images')
+        self.assertEqual(kwargs['spreadsheet_id'], 'dummy-sheet-id')
+        self.assertTrue(kwargs['dry_run'])
+        self.assertFalse(kwargs['overwrite'])
 
     def test_species_upload_preview_shows_mapping_step(self):
         upload = SimpleUploadedFile(

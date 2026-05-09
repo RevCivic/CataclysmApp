@@ -20,8 +20,52 @@
 </div>
 
 <div class="lcars-panel" style="margin-top: 1.5rem;">
-  <h2>Utilities</h2>
-  <p>Scan the catalog for duplicate records before cleaning them up.</p>
+  <h2>General Admin Tasks</h2>
+  <p>Run maintenance utilities for the full catalog.</p>
   <a href="{% url 'adminflow:duplicates' %}" class="btn btn-warning lcars-btn">Scan for Duplicates</a>
+
+  <hr class="lcars-divider mt-4">
+
+  <h3 class="mt-3">Download Images from Sheet</h3>
+  <p>Run <code>download_sheet_images</code> to sync person/species image URLs from the crew Google Sheet.</p>
+  {% if download_images_error %}
+    <div class="alert alert-danger mt-2">{{ download_images_error }}</div>
+  {% endif %}
+  {% if download_images_messages %}
+    <div class="alert alert-info mt-2">
+      <ul class="mb-0">
+        {% for msg in download_images_messages %}<li>{{ msg }}</li>{% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  {% if download_images_warnings %}
+    <div class="alert alert-warning mt-2">
+      <ul class="mb-0">
+        {% for msg in download_images_warnings %}<li>{{ msg }}</li>{% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  <form method="post" action="{% url 'adminflow:run_download_images' %}">
+    {% csrf_token %}
+    <div class="form-group">
+      {{ download_images_form.spreadsheet_id.label_tag }}
+      {{ download_images_form.spreadsheet_id }}
+      {% if download_images_form.spreadsheet_id.help_text %}
+        <small class="form-text text-muted">{{ download_images_form.spreadsheet_id.help_text }}</small>
+      {% endif %}
+      {% for error in download_images_form.spreadsheet_id.errors %}
+        <div class="text-danger">{{ error }}</div>
+      {% endfor %}
+    </div>
+    <div class="form-check">
+      {{ download_images_form.dry_run }}
+      {{ download_images_form.dry_run.label_tag }}
+    </div>
+    <div class="form-check mb-3">
+      {{ download_images_form.overwrite }}
+      {{ download_images_form.overwrite.label_tag }}
+    </div>
+    <button type="submit" class="btn btn-primary lcars-btn">Run Download Images</button>
+  </form>
 </div>
 {% endblock %}
