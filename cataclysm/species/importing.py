@@ -35,7 +35,6 @@ SPECIES_IMPORT_FIELDS = [
     {"name": "sociology", "label": "Sociology", "kind": "text"},
     {"name": "physiology", "label": "Physiology", "kind": "text"},
     {"name": "special_abilities", "label": "Special Abilities", "kind": "list"},
-    {"name": "match_status", "label": "Match Status", "kind": "text"},
 ]
 
 SPECIES_FIELD_NAMES = [field["name"] for field in SPECIES_IMPORT_FIELDS]
