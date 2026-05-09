@@ -60,3 +60,23 @@ If you add more published ports later, use separate purpose-based variables (for
 Use Docker/Portainer secrets or a secure environment-variable source for credentials in production.
 The container intentionally binds Gunicorn to `0.0.0.0:8000`; place it behind a reverse proxy/TLS termination in production.
 Treat `DEFAULT_PASSWORD_UPDATE=true` as a privileged operation and restrict who can modify runtime environment variables.
+
+## Download crew/species images from Google Sheets
+
+Use the management command below to pull image URLs from the public crew spreadsheet tabs (`Main Crew` and `Other Crew`) and save them to matching `Person.image` and `Species.image` records:
+
+```bash
+cd cataclysm
+python manage.py download_sheet_images --spreadsheet-id "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit?usp=sharing"
+```
+
+Useful options:
+
+- `--tabs "Main Crew" "Other Crew"` (override tabs)
+- `--person-url-col <index>` and `--species-url-col <index>` (use explicit URL columns)
+- `--dry-run` (report without writing files)
+- `--overwrite` (replace existing images)
+- `--timeout <seconds>` (HTTP timeout per image download, default `10`)
+- `--max-bytes <bytes>` (max bytes per image download, default `10485760`)
+
+For security, downloads only support direct `http/https` image URLs and intentionally do **not** follow HTTP redirects to reduce SSRF-style redirect abuse.
