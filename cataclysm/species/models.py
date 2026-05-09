@@ -36,7 +36,6 @@ class Species(models.Model):
     sociology = models.TextField(blank=True, null=True)
     physiology = models.TextField(blank=True, null=True)
     special_abilities = models.JSONField(blank=True, null=True)
-    match_status = models.CharField(max_length=50, blank=True, null=True)
     image = models.ImageField(upload_to='species/images/', null=True, blank=True)
     hidden = models.BooleanField(default=False)
 

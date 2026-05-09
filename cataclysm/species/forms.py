@@ -42,7 +42,6 @@ class SpeciesForm(forms.ModelForm):
             'sociology',
             'physiology',
             'special_abilities',
-            'match_status',
             'image',
             'hidden',
         ]
