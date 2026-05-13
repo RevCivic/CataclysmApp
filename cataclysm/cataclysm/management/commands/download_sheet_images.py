@@ -27,17 +27,20 @@ def _sheet_range(tab_name: str, start_row: int, end_column: str) -> str:
     normalized_tab = tab_name.strip()
     if normalized_tab.startswith("'") and normalized_tab.endswith("'"):
         normalized_tab = normalized_tab[1:-1]
+    # Sheets API A1 notation escapes single quotes inside sheet names by doubling them.
     escaped_tab = normalized_tab.replace("'", "''")
     return f"'{escaped_tab}'!A{start_row}:{end_column}"
 
 
-def _cell_text(cell: str | dict[str, str | None]) -> str:
+def _cell_text(cell: str | dict[str, str | None] | None) -> str:
+    if cell is None:
+        return ""
     if isinstance(cell, dict):
         return (cell.get("formatted_value") or "").strip()
     return cell.strip()
 
 
-def _cell_hyperlink(cell: str | dict[str, str | None]) -> str | None:
+def _cell_hyperlink(cell: str | dict[str, str | None] | None) -> str | None:
     if not isinstance(cell, dict):
         return None
     hyperlink = cell.get("hyperlink")
@@ -94,6 +97,10 @@ def _row_url_pair(
     person_url = urls[0]
     species_url = urls[1] if len(urls) > 1 else None
     return person_url, species_url
+
+
+def _safe_cell_text(row: list[str | dict[str, str | None]], index: int) -> str:
+    return _cell_text(row[index]) if 0 <= index < len(row) else ""
 
 
 def _extract_google_drive_file_id(url: str) -> str | None:
@@ -325,8 +332,8 @@ class Command(BaseCommand):
                 continue
 
             for row_index, row in enumerate(rows, start=start_row):
-                person_name = _cell_text(row[person_name_col]) if len(row) > person_name_col else ""
-                species_name = _cell_text(row[species_name_col]) if len(row) > species_name_col else ""
+                person_name = _safe_cell_text(row, person_name_col)
+                species_name = _safe_cell_text(row, species_name_col)
                 person_url, species_url = _row_url_pair(row, person_url_col, species_url_col)
 
                 if not person_name and not species_name:

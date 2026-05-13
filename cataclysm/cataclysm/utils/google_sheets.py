@@ -17,7 +17,6 @@ _GRID_DATA_FIELDS = (
     "userEnteredFormat/textFormat/link"
     "))))"
 )
-_GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "").strip()
 
 # Regex to pull the spreadsheet ID out of a full Google Sheets URL.
 _SHEETS_URL_RE = re.compile(r"docs\.google\.com/spreadsheets/d/([A-Za-z0-9_-]+)")
@@ -107,6 +106,15 @@ def _extract_link_uri(link):
     return None
 
 
+def _get_nested_link(payload, *keys):
+    current = payload
+    for key in keys:
+        if not isinstance(current, dict):
+            return None
+        current = current.get(key)
+    return _extract_link_uri(current)
+
+
 def _extract_cell_hyperlink(cell):
     if not isinstance(cell, dict):
         return None
@@ -115,15 +123,15 @@ def _extract_cell_hyperlink(cell):
     if isinstance(direct_hyperlink, str) and direct_hyperlink:
         return direct_hyperlink
 
-    user_entered_link = _extract_link_uri(((cell.get("userEnteredFormat") or {}).get("textFormat") or {}).get("link"))
+    user_entered_link = _get_nested_link(cell, "userEnteredFormat", "textFormat", "link")
     if user_entered_link:
         return user_entered_link
 
     for run in cell.get("textFormatRuns") or []:
-        run_link = _extract_link_uri(((run.get("format") or {}).get("link")))
+        run_link = _get_nested_link(run, "format", "link")
         if run_link:
             return run_link
-        run_text_link = _extract_link_uri(((run.get("textFormat") or {}).get("link")))
+        run_text_link = _get_nested_link(run, "textFormat", "link")
         if run_text_link:
             return run_text_link
 
@@ -135,6 +143,9 @@ def read_sheet_rich_data(spreadsheet_id, range_name):
 
     Returns a list of rows where each cell is represented as:
     {"formatted_value": str, "hyperlink": Optional[str]}
+
+    If GOOGLE_API_KEY is unset, this works only for spreadsheets/ranges that are
+    publicly accessible to unauthenticated callers.
     """
     spreadsheet_id = extract_spreadsheet_id(spreadsheet_id)
     url = _SPREADSHEETS_API_BASE.format(spreadsheet_id=spreadsheet_id)
@@ -143,8 +154,9 @@ def read_sheet_rich_data(spreadsheet_id, range_name):
         "includeGridData": "true",
         "fields": _GRID_DATA_FIELDS,
     }
-    if _GOOGLE_API_KEY:
-        params["key"] = _GOOGLE_API_KEY
+    api_key = os.environ.get("GOOGLE_API_KEY", "").strip()
+    if api_key:
+        params["key"] = api_key
 
     try:
         response = requests.get(url, params=params, timeout=30)
