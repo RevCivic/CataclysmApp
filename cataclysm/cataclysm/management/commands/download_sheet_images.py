@@ -13,7 +13,7 @@ from django.utils.text import slugify
 from people.models import Person
 from species.models import Species
 
-from cataclysm.utils.google_sheets import extract_spreadsheet_id, read_sheet_data
+from cataclysm.utils.google_sheets import extract_spreadsheet_id, read_sheet_rich_data
 
 
 DEFAULT_SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "").strip()
@@ -25,17 +25,36 @@ DEFAULT_USER_AGENT = "CataclysmAppImageSync/1.0"
 
 def _sheet_range(tab_name: str, start_row: int, end_column: str) -> str:
     normalized_tab = tab_name.strip()
-    # Strip any surrounding single quotes — they're only valid in the Sheets
-    # REST API, not in Google's CSV export URL where this range is used.
     if normalized_tab.startswith("'") and normalized_tab.endswith("'"):
         normalized_tab = normalized_tab[1:-1]
-    return f"{normalized_tab}!A{start_row}:{end_column}"
+    escaped_tab = normalized_tab.replace("'", "''")
+    return f"'{escaped_tab}'!A{start_row}:{end_column}"
 
 
-def _url_from_cell(value: str) -> str | None:
+def _cell_text(cell: str | dict[str, str | None]) -> str:
+    if isinstance(cell, dict):
+        return (cell.get("formatted_value") or "").strip()
+    return cell.strip()
+
+
+def _cell_hyperlink(cell: str | dict[str, str | None]) -> str | None:
+    if not isinstance(cell, dict):
+        return None
+    hyperlink = cell.get("hyperlink")
+    if isinstance(hyperlink, str) and hyperlink:
+        return hyperlink.strip()
+    return None
+
+
+def _url_from_cell(cell: str | dict[str, str | None]) -> str | None:
+    hyperlink = _cell_hyperlink(cell)
+    if hyperlink:
+        return hyperlink
+
+    value = _cell_text(cell)
     if not value:
         return None
-    match = URL_RE.search(value.strip())
+    match = URL_RE.search(value)
     if not match:
         return None
     url = match.group(0)
@@ -44,13 +63,13 @@ def _url_from_cell(value: str) -> str | None:
     return url
 
 
-def _url_from_column(row: list[str], index: int | None) -> str | None:
+def _url_from_column(row: list[str | dict[str, str | None]], index: int | None) -> str | None:
     if index is None or index < 0 or index >= len(row):
         return None
     return _url_from_cell(row[index])
 
 
-def _extract_row_urls(row: list[str]) -> list[str]:
+def _extract_row_urls(row: list[str | dict[str, str | None]]) -> list[str]:
     urls: list[str] = []
     seen = set()
     for cell in row:
@@ -61,7 +80,9 @@ def _extract_row_urls(row: list[str]) -> list[str]:
     return urls
 
 
-def _row_url_pair(row: list[str], person_url_col: int | None, species_url_col: int | None) -> tuple[str | None, str | None]:
+def _row_url_pair(
+    row: list[str | dict[str, str | None]], person_url_col: int | None, species_url_col: int | None
+) -> tuple[str | None, str | None]:
     person_url = _url_from_column(row, person_url_col)
     species_url = _url_from_column(row, species_url_col)
     if person_url_col is not None or species_url_col is not None:
@@ -298,14 +319,14 @@ class Command(BaseCommand):
 
         for tab_name in tabs:
             range_name = _sheet_range(tab_name, start_row, end_column)
-            rows = read_sheet_data(spreadsheet_id, range_name)
+            rows = read_sheet_rich_data(spreadsheet_id, range_name)
             if rows is None:
                 self.stderr.write(self.style.WARNING(f"Failed to read tab '{tab_name}' ({range_name})."))
                 continue
 
             for row_index, row in enumerate(rows, start=start_row):
-                person_name = (row[person_name_col] if len(row) > person_name_col else "").strip()
-                species_name = (row[species_name_col] if len(row) > species_name_col else "").strip()
+                person_name = _cell_text(row[person_name_col]) if len(row) > person_name_col else ""
+                species_name = _cell_text(row[species_name_col]) if len(row) > species_name_col else ""
                 person_url, species_url = _row_url_pair(row, person_url_col, species_url_col)
 
                 if not person_name and not species_name:
