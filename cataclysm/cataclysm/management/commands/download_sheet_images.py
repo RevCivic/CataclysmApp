@@ -3,7 +3,7 @@ import mimetypes
 import os
 import re
 import socket
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 import requests
 from django.core.files.base import ContentFile
@@ -64,6 +64,30 @@ def _row_url_pair(row: list[str], person_url_col: int | None, species_url_col: i
     person_url = urls[0]
     species_url = urls[1] if len(urls) > 1 else None
     return person_url, species_url
+
+
+def _extract_google_drive_file_id(url: str) -> str | None:
+    parsed = urlparse(url)
+    hostname = (parsed.hostname or "").lower()
+    if hostname not in {"drive.google.com", "docs.google.com"}:
+        return None
+
+    query = parse_qs(parsed.query)
+    query_id = query.get("id", [None])[0]
+    if query_id:
+        return query_id
+
+    path_parts = [part for part in parsed.path.split("/") if part]
+    if len(path_parts) >= 3 and path_parts[0] == "file" and path_parts[1] == "d":
+        return path_parts[2]
+    return None
+
+
+def _normalize_image_url(url: str) -> str:
+    file_id = _extract_google_drive_file_id(url)
+    if file_id:
+        return f"https://drive.google.com/uc?export=view&id={file_id}"
+    return url
 
 
 def _is_private_or_local_host(hostname: str) -> bool:
@@ -204,20 +228,27 @@ class Command(BaseCommand):
         max_bytes: int,
     ) -> str:
         image_field = obj.image
-        if image_field and not overwrite:
+        normalized_url = _normalize_image_url(url)
+        current_source_url = getattr(obj, "image_source_url", "")
+
+        if image_field and not overwrite and current_source_url == normalized_url:
             return "skipped_existing"
         if dry_run:
             return "would_update"
 
-        if url in download_cache:
-            data, ext = download_cache[url]
+        if normalized_url in download_cache:
+            data, ext = download_cache[normalized_url]
         else:
-            data, ext = _download_image(url, timeout=timeout, max_bytes=max_bytes)
-            download_cache[url] = (data, ext)
+            data, ext = _download_image(normalized_url, timeout=timeout, max_bytes=max_bytes)
+            download_cache[normalized_url] = (data, ext)
 
         filename = f"{slugify(base_name) or 'image'}{ext}"
         image_field.save(filename, ContentFile(data), save=False)
-        obj.save(update_fields=["image"])
+        if hasattr(obj, "image_source_url"):
+            obj.image_source_url = normalized_url
+            obj.save(update_fields=["image", "image_source_url"])
+        else:
+            obj.save(update_fields=["image"])
         return "updated"
 
     def handle(self, *args, **options):

@@ -21,6 +21,7 @@ class Person(models.Model):
     armors = models.ManyToManyField('armor.Armor', blank=True)
     bio = models.TextField(blank=True)
     image = models.ImageField(upload_to='people/images/', blank=True)
+    image_source_url = models.URLField(blank=True, default='')
     stats = models.ForeignKey('Statset', on_delete=models.SET_NULL, blank=True, null=True)
     skills = models.ForeignKey('Skillset', on_delete=models.SET_NULL, blank=True, null=True)
     traits = models.ManyToManyField('Trait', blank=True)

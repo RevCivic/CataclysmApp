@@ -4,13 +4,19 @@ import tempfile
 from io import StringIO
 from unittest.mock import Mock, patch
 
+from django.core.files.base import ContentFile
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 
 from people.models import Person
 from species.models import Species
 
-from .management.commands.download_sheet_images import _row_url_pair, _url_from_cell, _validate_download_url
+from .management.commands.download_sheet_images import (
+    _normalize_image_url,
+    _row_url_pair,
+    _url_from_cell,
+    _validate_download_url,
+)
 
 
 class DownloadSheetImagesHelpersTestCase(TestCase):
@@ -37,6 +43,16 @@ class DownloadSheetImagesHelpersTestCase(TestCase):
             _validate_download_url("http://localhost:8000/a.png")
         with self.assertRaises(ValueError):
             _validate_download_url("file:///tmp/a.png")
+
+    def test_normalize_image_url_converts_google_drive_links(self):
+        self.assertEqual(
+            _normalize_image_url("https://drive.google.com/file/d/abc123/view?usp=drive_link"),
+            "https://drive.google.com/uc?export=view&id=abc123",
+        )
+        self.assertEqual(
+            _normalize_image_url("https://docs.google.com/uc?id=xyz987&export=download"),
+            "https://drive.google.com/uc?export=view&id=xyz987",
+        )
 
 
 class DownloadSheetImagesCommandTestCase(TestCase):
@@ -85,6 +101,8 @@ class DownloadSheetImagesCommandTestCase(TestCase):
         self.assertEqual(mock_get.call_count, 2)
         self.assertEqual(person.image.read(), b"image-bytes")
         self.assertEqual(species.image.read(), b"image-bytes")
+        self.assertEqual(person.image_source_url, "https://example.com/person.png")
+        self.assertEqual(species.image_source_url, "https://example.com/species.jpg")
 
     def test_dry_run_does_not_download_or_save(self):
         person = Person.objects.create(name="Alice", age=30, sex="F")
@@ -134,3 +152,61 @@ class DownloadSheetImagesCommandTestCase(TestCase):
         written = command_output.getvalue()
         self.assertIn("people(updated=0, would_update=0, skipped_existing=0, missing=1, errors=0)", written)
         self.assertIn("species(updated=0, would_update=0, skipped_existing=0, missing=1, errors=0)", written)
+
+    def test_existing_image_with_same_source_url_skips_download(self):
+        person = Person.objects.create(
+            name="Alice",
+            age=30,
+            sex="F",
+            image_source_url="https://drive.google.com/uc?export=view&id=abc123",
+        )
+        person.image.save("alice.png", ContentFile(b"old-bytes"), save=True)
+        rows = [["Alice", "Human", "", "", "", "https://drive.google.com/file/d/abc123/view?usp=sharing"]]
+
+        with (
+            patch("cataclysm.management.commands.download_sheet_images.read_sheet_data", side_effect=[rows, []]),
+            patch("cataclysm.management.commands.download_sheet_images.requests.get") as mock_get,
+        ):
+            call_command(
+                "download_sheet_images",
+                spreadsheet_id="dummy-sheet",
+                tabs=["Main Crew", "Other Crew"],
+                person_url_col=5,
+            )
+
+        person.refresh_from_db()
+        self.assertEqual(person.image.read(), b"old-bytes")
+        mock_get.assert_not_called()
+
+    def test_existing_image_with_changed_source_url_updates_without_overwrite(self):
+        person = Person.objects.create(
+            name="Alice",
+            age=30,
+            sex="F",
+            image_source_url="https://drive.google.com/uc?export=view&id=old123",
+        )
+        person.image.save("alice.png", ContentFile(b"old-bytes"), save=True)
+        rows = [["Alice", "Human", "", "", "", "https://drive.google.com/file/d/new456/view?usp=sharing"]]
+
+        mock_response = Mock()
+        mock_response.headers = {"Content-Type": "image/png", "Content-Length": "11"}
+        mock_response.raise_for_status = Mock()
+        mock_response.iter_content = Mock(return_value=[b"new-bytes"])
+        mock_response.close = Mock()
+
+        with (
+            patch("cataclysm.management.commands.download_sheet_images.read_sheet_data", side_effect=[rows, []]),
+            patch("cataclysm.management.commands.download_sheet_images._validate_download_url"),
+            patch("cataclysm.management.commands.download_sheet_images.requests.get", return_value=mock_response) as mock_get,
+        ):
+            call_command(
+                "download_sheet_images",
+                spreadsheet_id="dummy-sheet",
+                tabs=["Main Crew", "Other Crew"],
+                person_url_col=5,
+            )
+
+        person.refresh_from_db()
+        self.assertEqual(person.image.read(), b"new-bytes")
+        self.assertEqual(person.image_source_url, "https://drive.google.com/uc?export=view&id=new456")
+        self.assertEqual(mock_get.call_count, 1)

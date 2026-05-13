@@ -63,7 +63,7 @@ Treat `DEFAULT_PASSWORD_UPDATE=true` as a privileged operation and restrict who 
 
 ## Download crew/species images from Google Sheets
 
-Use the management command below to pull image URLs from the public crew spreadsheet tabs (`Main Crew` and `Other Crew`) and save them to matching `Person.image` and `Species.image` records:
+Use the management command below to pull image URLs from the public crew spreadsheet tabs (`Main Crew` and `Other Crew`) and save them to matching `Person.image` and `Species.image` records. The command also stores the source URL in `Person.image_source_url` / `Species.image_source_url` and supports common Google Drive share-link formats:
 
 ```bash
 cd cataclysm
@@ -78,5 +78,7 @@ Useful options:
 - `--overwrite` (replace existing images)
 - `--timeout <seconds>` (HTTP timeout per image download, default `10`)
 - `--max-bytes <bytes>` (max bytes per image download, default `10485760`)
+
+Without `--overwrite`, images are skipped only when the stored `image_source_url` already matches the current sheet URL; if the sheet URL changed, the image is refreshed.
 
 For security, downloads only support direct `http/https` image URLs and intentionally do **not** follow HTTP redirects to reduce SSRF-style redirect abuse.
