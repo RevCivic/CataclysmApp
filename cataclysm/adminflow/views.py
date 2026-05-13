@@ -24,7 +24,8 @@ from species.models import Species
 _SPECIES_UPLOAD_HEADERS_KEY = 'adminflow_species_upload_headers'
 _SPECIES_UPLOAD_ROWS_KEY = 'adminflow_species_upload_rows'
 _PEOPLE_SPECIES_REVIEW_ROWS_KEY = 'adminflow_people_species_review_rows'
-_PLACEHOLDER_PERSON_AGE = 0
+# Placeholder people created from CSV review use age 0 until an editor fills in the record.
+_DEFAULT_PERSON_AGE = 0
 
 # ── Duplicate-detection registry ────────────────────────────────────────────
 # Each entry: (app_label, model_name, human-readable label, name_field)
@@ -101,7 +102,7 @@ def _people_tools_context(**overrides):
     context = {
         'default_spreadsheet_id': SAMPLE_SPREADSHEET_ID,
         'default_range_name': SAMPLE_RANGE_NAME,
-        'placeholder_person_age': _PLACEHOLDER_PERSON_AGE,
+        'placeholder_person_age': _DEFAULT_PERSON_AGE,
         'people_species_upload_form': PeopleSpeciesUploadForm(),
     }
     context.update(overrides)
@@ -563,50 +564,43 @@ def people_species_apply(request):
         return redirect('adminflow:people_tools')
 
     analysis = _analyze_people_species_rows(parsed_rows)
-    missing_people = {name.lower(): name for name in analysis['missing_people']}
-    missing_species = {name.lower(): name for name in analysis['missing_species']}
-    selected_people = {
-        value.strip().lower()
-        for value in request.POST.getlist('create_people')
-        if value.strip()
-    }
-    selected_species = {
-        value.strip().lower()
-        for value in request.POST.getlist('create_species')
-        if value.strip()
-    }
+    missing_people = {name.lower() for name in analysis['missing_people']}
+    missing_species = {name.lower() for name in analysis['missing_species']}
+    selected_people = [value.strip() for value in request.POST.getlist('create_people') if value.strip()]
+    selected_species = [value.strip() for value in request.POST.getlist('create_species') if value.strip()]
 
     created_people = 0
     created_species = 0
 
-    for species_key in sorted(selected_species):
-        species_name = missing_species.get(species_key)
-        if not species_name:
+    for species_name in selected_species:
+        if species_name.lower() not in missing_species:
             continue
         _species, was_created = Species.objects.get_or_create(species_name=species_name)
         if was_created:
             created_species += 1
 
-    for person_key in sorted(selected_people):
-        person_name = missing_people.get(person_key)
-        if not person_name:
+    person_species_lookup = {}
+    for row in parsed_rows:
+        person_name = row['person_name']
+        species_name = row['species_name']
+        if person_name and species_name:
+            person_species_lookup.setdefault(person_name.lower(), species_name)
+
+    for person_name in selected_people:
+        person_key = person_name.lower()
+        if person_key not in missing_people:
             continue
 
         linked_species = None
-        species_candidates = [
-            row['species_name']
-            for row in parsed_rows
-            if row['person_name'].lower() == person_key and row['species_name']
-        ]
-        if species_candidates:
-            species_name = species_candidates[0]
+        species_name = person_species_lookup.get(person_key)
+        if species_name:
             species_matches = Species.objects.filter(species_name__iexact=species_name)
             if species_matches.count() == 1:
                 linked_species = species_matches.first()
 
         _person, was_created = Person.objects.get_or_create(
             name=person_name,
-            defaults={'age': _PLACEHOLDER_PERSON_AGE, 'species': linked_species},
+            defaults={'age': _DEFAULT_PERSON_AGE, 'species': linked_species},
         )
         if was_created:
             created_people += 1
