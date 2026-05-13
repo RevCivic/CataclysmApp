@@ -14,6 +14,7 @@ from species.models import Species
 from .management.commands.download_sheet_images import (
     _normalize_image_url,
     _row_url_pair,
+    _sheet_range,
     _url_from_cell,
     _validate_download_url,
 )
@@ -53,6 +54,12 @@ class DownloadSheetImagesHelpersTestCase(TestCase):
             _normalize_image_url("https://docs.google.com/uc?id=xyz987&export=download"),
             "https://drive.google.com/uc?export=view&id=xyz987",
         )
+
+    def test_sheet_range_quotes_sheet_names_with_spaces(self):
+        self.assertEqual(_sheet_range("Other Crew", 5, "ZZ"), "'Other Crew'!A5:ZZ")
+
+    def test_sheet_range_preserves_existing_quotes(self):
+        self.assertEqual(_sheet_range("'Other Crew'", 5, "ZZ"), "'Other Crew'!A5:ZZ")
 
 
 class DownloadSheetImagesCommandTestCase(TestCase):
