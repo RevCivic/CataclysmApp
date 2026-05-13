@@ -103,7 +103,7 @@
 <hr class="lcars-divider mt-4">
 
 <h2 class="mt-3">Update Person Species from CSV</h2>
-<p>Upload a CSV with <code>name</code> and <code>species</code> columns to update existing people by name.</p>
+<p>Upload a CSV with <code>name</code> and <code>species</code> columns to review person/species matches before applying updates or creating missing records.</p>
 <form method="post" action="{% url 'adminflow:people_species_upload' %}" enctype="multipart/form-data">
   {% csrf_token %}
   <div class="form-group">
@@ -116,9 +116,79 @@
       <div class="text-danger">{{ error }}</div>
     {% endfor %}
   </div>
-  <button type="submit" class="btn btn-primary lcars-btn"
-          onclick="return confirm('This will update species on matching Person records. Continue?')">
-    Update Species from CSV
+  <button type="submit" class="btn btn-primary lcars-btn">
+    Analyze CSV
   </button>
 </form>
+
+{% if review_rows %}
+  <hr class="lcars-divider mt-4">
+
+  <h3 class="mt-3">CSV Review</h3>
+  <p>Review each row below, then choose any missing species or people that should be created before the update runs.</p>
+
+  <div style="overflow-x:auto;">
+    <table class="sci-fi-list" style="width:100%;">
+      <thead>
+        <tr>
+          <th>Row</th>
+          <th>Name</th>
+          <th>Species</th>
+          <th>Status</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in review_rows %}
+          <tr>
+            <td>{{ row.row_number }}</td>
+            <td>{{ row.person_name|default:"—" }}</td>
+            <td>{{ row.species_name|default:"—" }}</td>
+            <td>{{ row.status }}</td>
+            <td>{{ row.note }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="mt-3">
+    Ready: <strong>{{ summary.ready }}</strong> ·
+    Unchanged: <strong>{{ summary.unchanged }}</strong> ·
+    Missing People: <strong>{{ summary.missing_people }}</strong> ·
+    Missing Species: <strong>{{ summary.missing_species }}</strong> ·
+    Blocked/Invalid: <strong>{{ summary.ambiguous|add:summary.invalid }}</strong>
+  </p>
+
+  <form method="post" action="{% url 'adminflow:people_species_apply' %}">
+    {% csrf_token %}
+
+    {% if missing_species %}
+      <h4 class="mt-3">Missing Species</h4>
+      <p>Select any species that should be created now.</p>
+      {% for species_name in missing_species %}
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="create_species" value="{{ species_name }}" id="create-species-{{ forloop.counter }}" checked>
+          <label class="form-check-label" for="create-species-{{ forloop.counter }}">{{ species_name }}</label>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% if missing_people %}
+      <h4 class="mt-4">Missing People</h4>
+      <p>Select any people that should be created now. New placeholder people are created with age <code>0</code> so they can be reviewed and completed later.</p>
+      {% for person_name in missing_people %}
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="create_people" value="{{ person_name }}" id="create-person-{{ forloop.counter }}" checked>
+          <label class="form-check-label" for="create-person-{{ forloop.counter }}">{{ person_name }}</label>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <button type="submit" class="btn btn-primary lcars-btn mt-3"
+            onclick="return confirm('Apply the reviewed updates and any selected creations?')">
+      Apply Reviewed Changes
+    </button>
+  </form>
+{% endif %}
 {% endblock %}

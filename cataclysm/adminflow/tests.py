@@ -107,7 +107,11 @@ class AdminflowViewsTestCase(TestCase):
             content_type='text/csv',
         )
 
-        response = self.client.post(reverse('adminflow:people_species_upload'), {'csv_file': upload})
+        review_response = self.client.post(reverse('adminflow:people_species_upload'), {'csv_file': upload})
+        self.assertEqual(review_response.status_code, 200)
+        self.assertContains(review_response, 'Ready to update')
+
+        response = self.client.post(reverse('adminflow:people_species_apply'))
         self.assertEqual(response.status_code, 200)
 
         person.refresh_from_db()
@@ -136,9 +140,40 @@ class AdminflowViewsTestCase(TestCase):
             content_type='text/csv',
         )
 
-        response = self.client.post(reverse('adminflow:people_species_upload'), {'csv_file': upload})
+        review_response = self.client.post(reverse('adminflow:people_species_upload'), {'csv_file': upload})
+        self.assertEqual(review_response.status_code, 200)
+
+        response = self.client.post(reverse('adminflow:people_species_apply'))
         self.assertEqual(response.status_code, 200)
 
         person.refresh_from_db()
         self.assertEqual(person.species, new_species)
         self.assertContains(response, 'updated 1, unchanged 0, skipped 0')
+
+    def test_people_species_review_can_create_missing_species_and_person(self):
+        upload = SimpleUploadedFile(
+            'people_species.csv',
+            b'name,species\nNew Recruit,New Species\n',
+            content_type='text/csv',
+        )
+
+        review_response = self.client.post(reverse('adminflow:people_species_upload'), {'csv_file': upload})
+        self.assertEqual(review_response.status_code, 200)
+        self.assertContains(review_response, 'Missing person &amp; species')
+        self.assertContains(review_response, 'New Recruit')
+        self.assertContains(review_response, 'New Species')
+
+        response = self.client.post(
+            reverse('adminflow:people_species_apply'),
+            {
+                'create_people': ['New Recruit'],
+                'create_species': ['New Species'],
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+
+        species = Species.objects.get(species_name='New Species')
+        person = Person.objects.get(name='New Recruit')
+        self.assertEqual(person.age, 0)
+        self.assertEqual(person.species, species)
+        self.assertContains(response, 'created species 1, created people 1, updated 0, unchanged 1, skipped 0')

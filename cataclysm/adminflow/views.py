@@ -23,6 +23,7 @@ from species.models import Species
 
 _SPECIES_UPLOAD_HEADERS_KEY = 'adminflow_species_upload_headers'
 _SPECIES_UPLOAD_ROWS_KEY = 'adminflow_species_upload_rows'
+_PEOPLE_SPECIES_REVIEW_ROWS_KEY = 'adminflow_people_species_review_rows'
 
 # ── Duplicate-detection registry ────────────────────────────────────────────
 # Each entry: (app_label, model_name, human-readable label, name_field)
@@ -128,6 +129,174 @@ def _build_iexact_filter(field_name, values):
 
 def _non_empty_lines(value):
     return [line for line in value.splitlines() if line.strip()]
+
+
+def _clear_people_species_review(request):
+    request.session.pop(_PEOPLE_SPECIES_REVIEW_ROWS_KEY, None)
+
+
+def _people_species_matches(parsed_rows):
+    requested_people = {row['person_name'].lower() for row in parsed_rows if row['person_name']}
+    requested_species = {row['species_name'].lower() for row in parsed_rows if row['species_name']}
+
+    person_matches = {}
+    people_qs = (
+        Person.objects.filter(_build_iexact_filter('name', requested_people))
+        if requested_people else Person.objects.none()
+    )
+    for person in people_qs:
+        person_matches.setdefault(person.name.lower(), []).append(person)
+
+    species_matches = {}
+    species_qs = (
+        Species.objects.filter(_build_iexact_filter('species_name', requested_species))
+        if requested_species else Species.objects.none()
+    )
+    for species in species_qs:
+        species_matches.setdefault(species.species_name.lower(), []).append(species)
+
+    return person_matches, species_matches
+
+
+def _analyze_people_species_rows(parsed_rows):
+    person_matches, species_matches = _people_species_matches(parsed_rows)
+    review_rows = []
+    missing_people = {}
+    missing_species = {}
+    summary = {
+        'ready': 0,
+        'unchanged': 0,
+        'missing_people': 0,
+        'missing_species': 0,
+        'ambiguous': 0,
+        'invalid': 0,
+    }
+
+    for row in parsed_rows:
+        person_name = row['person_name']
+        species_name = row['species_name']
+        review_row = {
+            **row,
+            'status': '',
+            'note': '',
+            'can_create_person': False,
+            'can_create_species': False,
+        }
+
+        if not person_name or not species_name:
+            summary['invalid'] += 1
+            review_row['status'] = 'Needs data'
+            review_row['note'] = 'Name and species are required.'
+            review_rows.append(review_row)
+            continue
+
+        matching_people = person_matches.get(person_name.lower(), [])
+        matching_species = species_matches.get(species_name.lower(), [])
+
+        if len(matching_people) > 1:
+            summary['ambiguous'] += 1
+            review_row['status'] = 'Blocked'
+            review_row['note'] = f'Multiple people matched "{person_name}".'
+            review_rows.append(review_row)
+            continue
+
+        if len(matching_species) > 1:
+            summary['ambiguous'] += 1
+            review_row['status'] = 'Blocked'
+            review_row['note'] = f'Multiple species matched "{species_name}".'
+            review_rows.append(review_row)
+            continue
+
+        if not matching_people:
+            summary['missing_people'] += 1
+            review_row['status'] = 'Missing person'
+            review_row['note'] = f'No person matched "{person_name}".'
+            review_row['can_create_person'] = True
+            missing_people.setdefault(person_name.lower(), person_name)
+
+        if not matching_species:
+            summary['missing_species'] += 1
+            review_row['status'] = 'Missing species' if matching_people else 'Missing person & species'
+            review_row['note'] = (
+                f'No species matched "{species_name}".'
+                if matching_people else
+                f'No person matched "{person_name}" and no species matched "{species_name}".'
+            )
+            review_row['can_create_species'] = True
+            missing_species.setdefault(species_name.lower(), species_name)
+
+        if review_row['status']:
+            review_rows.append(review_row)
+            continue
+
+        person = matching_people[0]
+        species = matching_species[0]
+        if person.species_id == species.id:
+            summary['unchanged'] += 1
+            review_row['status'] = 'Unchanged'
+            review_row['note'] = f'{person.name} already uses {species.species_name}.'
+        else:
+            summary['ready'] += 1
+            review_row['status'] = 'Ready to update'
+            review_row['note'] = f'Will update {person.name} to {species.species_name}.'
+        review_rows.append(review_row)
+
+    return {
+        'review_rows': review_rows,
+        'missing_people': sorted(missing_people.values(), key=str.lower),
+        'missing_species': sorted(missing_species.values(), key=str.lower),
+        'summary': summary,
+    }
+
+
+def _apply_people_species_rows(parsed_rows):
+    person_matches, species_matches = _people_species_matches(parsed_rows)
+    updated = 0
+    unchanged = 0
+    skipped = 0
+    errors = []
+
+    for row in parsed_rows:
+        index = row['row_number']
+        person_name = row['person_name']
+        species_name = row['species_name']
+
+        if not person_name or not species_name:
+            skipped += 1
+            errors.append(f'Row {index}: name and species are required.')
+            continue
+
+        matching_people = person_matches.get(person_name.lower(), [])
+        if not matching_people:
+            skipped += 1
+            errors.append(f'Row {index}: person "{person_name}" was not found.')
+            continue
+        if len(matching_people) > 1:
+            skipped += 1
+            errors.append(f'Row {index}: multiple people matched "{person_name}".')
+            continue
+
+        matching_species = species_matches.get(species_name.lower(), [])
+        if not matching_species:
+            skipped += 1
+            errors.append(f'Row {index}: species "{species_name}" was not found.')
+            continue
+        if len(matching_species) > 1:
+            skipped += 1
+            errors.append(f'Row {index}: multiple species matched "{species_name}".')
+            continue
+
+        person = matching_people[0]
+        species = matching_species[0]
+        if person.species_id == species.id:
+            unchanged += 1
+            continue
+
+        person.species = species
+        person.save(update_fields=['species'])
+        updated += 1
+
+    return updated, unchanged, skipped, errors
 
 
 def find_all_duplicates():
@@ -262,6 +431,9 @@ def run_download_images(request):
 @login_required
 def people_tools(request):
     context = _people_tools_context()
+    parsed_rows = request.session.get(_PEOPLE_SPECIES_REVIEW_ROWS_KEY)
+    if parsed_rows:
+        context.update(_analyze_people_species_rows(parsed_rows))
     return render(request, 'adminflow/adminflow.html', context)
 
 
@@ -347,83 +519,109 @@ def people_species_upload(request):
             ),
         )
 
-    parsed_rows = []
-    requested_people = set()
-    requested_species = set()
     first_data_row = 2
+    parsed_rows = []
     for index, row in enumerate(rows, start=first_data_row):
         row_data = _map_row_to_dict(headers, row)
         person_name = row_data.get(name_header, '').strip()
         species_name = row_data.get(species_header, '').strip()
-        parsed_rows.append((index, person_name, species_name))
-        if person_name:
-            requested_people.add(person_name.lower())
-        if species_name:
-            requested_species.add(species_name.lower())
+        parsed_rows.append({
+            'row_number': index,
+            'person_name': person_name,
+            'species_name': species_name,
+        })
 
-    person_matches = {}
-    people_qs = (
-        Person.objects.filter(_build_iexact_filter('name', requested_people))
-        if requested_people else Person.objects.none()
-    )
-    for person in people_qs:
-        person_matches.setdefault(person.name.lower(), []).append(person)
-
-    species_matches = {}
-    species_qs = (
-        Species.objects.filter(_build_iexact_filter('species_name', requested_species))
-        if requested_species else Species.objects.none()
-    )
-    for species in species_qs:
-        species_matches.setdefault(species.species_name.lower(), []).append(species)
-
-    updated = 0
-    unchanged = 0
-    skipped = 0
-    errors = []
-
-    for index, person_name, species_name in parsed_rows:
-        if not person_name or not species_name:
-            skipped += 1
-            errors.append(f'Row {index}: name and species are required.')
-            continue
-
-        matching_people = person_matches.get(person_name.lower(), [])
-        if not matching_people:
-            skipped += 1
-            errors.append(f'Row {index}: person "{person_name}" was not found.')
-            continue
-        if len(matching_people) > 1:
-            skipped += 1
-            errors.append(f'Row {index}: multiple people matched "{person_name}".')
-            continue
-
-        matching_species = species_matches.get(species_name.lower(), [])
-        if not matching_species:
-            skipped += 1
-            errors.append(f'Row {index}: species "{species_name}" was not found.')
-            continue
-        if len(matching_species) > 1:
-            skipped += 1
-            errors.append(f'Row {index}: multiple species matched "{species_name}".')
-            continue
-
-        person = matching_people[0]
-        species = matching_species[0]
-        if person.species_id == species.id:
-            unchanged += 1
-            continue
-
-        person.species = species
-        person.save(update_fields=['species'])
-        updated += 1
+    request.session[_PEOPLE_SPECIES_REVIEW_ROWS_KEY] = parsed_rows
+    analysis = _analyze_people_species_rows(parsed_rows)
 
     return render(
         request,
         'adminflow/adminflow.html',
         _people_tools_context(
             people_species_update_messages=[
-                f'Processed people species CSV: updated {updated}, unchanged {unchanged}, skipped {skipped}.'
+                (
+                    'Analyzed people species CSV: '
+                    f'ready {analysis["summary"]["ready"]}, '
+                    f'unchanged {analysis["summary"]["unchanged"]}, '
+                    f'missing people {analysis["summary"]["missing_people"]}, '
+                    f'missing species {analysis["summary"]["missing_species"]}, '
+                    f'blocked/invalid {analysis["summary"]["ambiguous"] + analysis["summary"]["invalid"]}.'
+                )
+            ],
+            **analysis,
+        ),
+    )
+
+
+@login_required
+@require_POST
+def people_species_apply(request):
+    parsed_rows = request.session.get(_PEOPLE_SPECIES_REVIEW_ROWS_KEY)
+    if not parsed_rows:
+        return redirect('adminflow:people_tools')
+
+    analysis = _analyze_people_species_rows(parsed_rows)
+    missing_people = {name.lower(): name for name in analysis['missing_people']}
+    missing_species = {name.lower(): name for name in analysis['missing_species']}
+    selected_people = {
+        value.strip().lower()
+        for value in request.POST.getlist('create_people')
+        if value.strip()
+    }
+    selected_species = {
+        value.strip().lower()
+        for value in request.POST.getlist('create_species')
+        if value.strip()
+    }
+
+    created_people = 0
+    created_species = 0
+
+    for species_key in sorted(selected_species):
+        species_name = missing_species.get(species_key)
+        if not species_name:
+            continue
+        _species, was_created = Species.objects.get_or_create(species_name=species_name)
+        if was_created:
+            created_species += 1
+
+    for person_key in sorted(selected_people):
+        person_name = missing_people.get(person_key)
+        if not person_name:
+            continue
+
+        linked_species = None
+        species_candidates = [
+            row['species_name']
+            for row in parsed_rows
+            if row['person_name'].lower() == person_key and row['species_name']
+        ]
+        if species_candidates:
+            species_name = species_candidates[0]
+            species_matches = Species.objects.filter(species_name__iexact=species_name)
+            if species_matches.count() == 1:
+                linked_species = species_matches.first()
+
+        _person, was_created = Person.objects.get_or_create(
+            name=person_name,
+            defaults={'age': 0, 'species': linked_species},
+        )
+        if was_created:
+            created_people += 1
+
+    updated, unchanged, skipped, errors = _apply_people_species_rows(parsed_rows)
+    _clear_people_species_review(request)
+
+    return render(
+        request,
+        'adminflow/adminflow.html',
+        _people_tools_context(
+            people_species_update_messages=[
+                (
+                    'Processed reviewed people species CSV: '
+                    f'created species {created_species}, created people {created_people}, '
+                    f'updated {updated}, unchanged {unchanged}, skipped {skipped}.'
+                )
             ],
             people_species_update_errors=errors,
         ),
