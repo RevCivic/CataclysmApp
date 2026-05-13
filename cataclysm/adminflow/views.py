@@ -586,7 +586,7 @@ def people_species_apply(request):
         person_name = row['person_name']
         species_name = row['species_name']
         if person_name and species_name:
-            person_species_lookup.setdefault(person_name.lower(), species_name)
+            person_species_lookup.setdefault(person_name.lower(), set()).add(species_name)
 
     _, species_matches = _people_species_matches(parsed_rows)
 
@@ -599,8 +599,9 @@ def people_species_apply(request):
             continue
 
         linked_species = None
-        species_name = person_species_lookup.get(person_key)
-        if species_name:
+        species_names = person_species_lookup.get(person_key, set())
+        if len(species_names) == 1:
+            species_name = next(iter(species_names))
             species_options = species_matches.get(species_name.lower(), [])
             if len(species_options) == 1:
                 linked_species = species_options[0]
