@@ -198,14 +198,14 @@ def _analyze_people_species_rows(parsed_rows):
         matching_people = person_matches.get(person_name.lower(), [])
         matching_species = species_matches.get(species_name.lower(), [])
 
-        if len(matching_people) > 1:
+        if len(matching_people) >= _AMBIGUOUS_MATCH_LIMIT:
             summary['ambiguous'] += 1
             review_row['status'] = 'Blocked'
             review_row['note'] = f'Multiple people matched "{person_name}".'
             review_rows.append(review_row)
             continue
 
-        if len(matching_species) > 1:
+        if len(matching_species) >= _AMBIGUOUS_MATCH_LIMIT:
             summary['ambiguous'] += 1
             review_row['status'] = 'Blocked'
             review_row['note'] = f'Multiple species matched "{species_name}".'
@@ -276,7 +276,7 @@ def _apply_people_species_rows(parsed_rows):
             skipped += 1
             errors.append(f'Row {index}: person "{person_name}" was not found.')
             continue
-        if len(matching_people) > 1:
+        if len(matching_people) >= _AMBIGUOUS_MATCH_LIMIT:
             skipped += 1
             errors.append(f'Row {index}: multiple people matched "{person_name}".')
             continue
@@ -286,7 +286,7 @@ def _apply_people_species_rows(parsed_rows):
             skipped += 1
             errors.append(f'Row {index}: species "{species_name}" was not found.')
             continue
-        if len(matching_species) > 1:
+        if len(matching_species) >= _AMBIGUOUS_MATCH_LIMIT:
             skipped += 1
             errors.append(f'Row {index}: multiple species matched "{species_name}".')
             continue
@@ -576,8 +576,9 @@ def people_species_apply(request):
     for species_name in selected_species:
         if species_name.lower() not in missing_species:
             continue
-        _, was_created = Species.objects.get_or_create(species_name=species_name)
-        if was_created:
+        existing_species = Species.objects.filter(species_name__iexact=species_name).first()
+        if existing_species is None:
+            Species.objects.create(species_name=species_name)
             created_species += 1
 
     person_species_lookup = {}
@@ -587,26 +588,29 @@ def people_species_apply(request):
         if person_name and species_name:
             person_species_lookup.setdefault(person_name.lower(), species_name)
 
+    _, species_matches = _people_species_matches(parsed_rows)
+
     for person_name in selected_people:
         person_key = person_name.lower()
         if person_key not in missing_people:
             continue
 
+        if Person.objects.filter(name__iexact=person_name).exists():
+            continue
+
         linked_species = None
         species_name = person_species_lookup.get(person_key)
         if species_name:
-            species_matches = list(
-                Species.objects.filter(species_name__iexact=species_name)[:_AMBIGUOUS_MATCH_LIMIT]
-            )
-            if len(species_matches) == 1:
-                linked_species = species_matches[0]
+            species_options = species_matches.get(species_name.lower(), [])
+            if len(species_options) == 1:
+                linked_species = species_options[0]
 
-        _, was_created = Person.objects.get_or_create(
+        Person.objects.create(
             name=person_name,
-            defaults={'age': _DEFAULT_PERSON_AGE, 'species': linked_species},
+            age=_DEFAULT_PERSON_AGE,
+            species=linked_species,
         )
-        if was_created:
-            created_people += 1
+        created_people += 1
 
     updated, unchanged, skipped, errors = _apply_people_species_rows(parsed_rows)
     _clear_people_species_review(request)
