@@ -26,6 +26,8 @@ _SPECIES_UPLOAD_ROWS_KEY = 'adminflow_species_upload_rows'
 _PEOPLE_SPECIES_REVIEW_ROWS_KEY = 'adminflow_people_species_review_rows'
 # Placeholder people created from CSV review use age 0 until an editor fills in the record.
 _DEFAULT_PERSON_AGE = 0
+_FIRST_CSV_DATA_ROW = 2
+_AMBIGUOUS_MATCH_LIMIT = 2
 
 # ── Duplicate-detection registry ────────────────────────────────────────────
 # Each entry: (app_label, model_name, human-readable label, name_field)
@@ -522,9 +524,8 @@ def people_species_upload(request):
             ),
         )
 
-    first_data_row = 2
     parsed_rows = []
-    for index, row in enumerate(rows, start=first_data_row):
+    for index, row in enumerate(rows, start=_FIRST_CSV_DATA_ROW):
         row_data = _map_row_to_dict(headers, row)
         person_name = row_data.get(name_header, '').strip()
         species_name = row_data.get(species_header, '').strip()
@@ -594,7 +595,9 @@ def people_species_apply(request):
         linked_species = None
         species_name = person_species_lookup.get(person_key)
         if species_name:
-            species_matches = list(Species.objects.filter(species_name__iexact=species_name)[:2])
+            species_matches = list(
+                Species.objects.filter(species_name__iexact=species_name)[:_AMBIGUOUS_MATCH_LIMIT]
+            )
             if len(species_matches) == 1:
                 linked_species = species_matches[0]
 
