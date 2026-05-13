@@ -575,7 +575,7 @@ def people_species_apply(request):
     for species_name in selected_species:
         if species_name.lower() not in missing_species:
             continue
-        _species, was_created = Species.objects.get_or_create(species_name=species_name)
+        _, was_created = Species.objects.get_or_create(species_name=species_name)
         if was_created:
             created_species += 1
 
@@ -594,11 +594,11 @@ def people_species_apply(request):
         linked_species = None
         species_name = person_species_lookup.get(person_key)
         if species_name:
-            species_matches = Species.objects.filter(species_name__iexact=species_name)
-            if species_matches.count() == 1:
-                linked_species = species_matches.first()
+            species_matches = list(Species.objects.filter(species_name__iexact=species_name)[:2])
+            if len(species_matches) == 1:
+                linked_species = species_matches[0]
 
-        _person, was_created = Person.objects.get_or_create(
+        _, was_created = Person.objects.get_or_create(
             name=person_name,
             defaults={'age': _DEFAULT_PERSON_AGE, 'species': linked_species},
         )
