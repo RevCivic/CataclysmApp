@@ -37,6 +37,7 @@ class Species(models.Model):
     physiology = models.TextField(blank=True, null=True)
     special_abilities = models.JSONField(blank=True, null=True)
     image = models.ImageField(upload_to='species/images/', null=True, blank=True)
+    image_source_url = models.URLField(blank=True, default='')
     hidden = models.BooleanField(default=False)
 
 
