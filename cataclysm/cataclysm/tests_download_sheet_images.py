@@ -55,11 +55,11 @@ class DownloadSheetImagesHelpersTestCase(TestCase):
             "https://drive.google.com/uc?export=view&id=xyz987",
         )
 
-    def test_sheet_range_quotes_sheet_names_with_spaces(self):
-        self.assertEqual(_sheet_range("Other Crew", 5, "ZZ"), "'Other Crew'!A5:ZZ")
+    def test_sheet_range_does_not_quote_sheet_names_with_spaces(self):
+        self.assertEqual(_sheet_range("Other Crew", 5, "ZZ"), "Other Crew!A5:ZZ")
 
-    def test_sheet_range_preserves_existing_quotes(self):
-        self.assertEqual(_sheet_range("'Other Crew'", 5, "ZZ"), "'Other Crew'!A5:ZZ")
+    def test_sheet_range_strips_existing_surrounding_quotes(self):
+        self.assertEqual(_sheet_range("'Other Crew'", 5, "ZZ"), "Other Crew!A5:ZZ")
 
 
 class DownloadSheetImagesCommandTestCase(TestCase):

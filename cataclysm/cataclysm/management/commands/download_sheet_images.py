@@ -25,12 +25,11 @@ DEFAULT_USER_AGENT = "CataclysmAppImageSync/1.0"
 
 def _sheet_range(tab_name: str, start_row: int, end_column: str) -> str:
     normalized_tab = tab_name.strip()
+    # Strip any surrounding single quotes — they're only valid in the Sheets
+    # REST API, not in Google's CSV export URL where this range is used.
     if normalized_tab.startswith("'") and normalized_tab.endswith("'"):
-        quoted_tab = normalized_tab
-    else:
-        escaped_tab = normalized_tab.replace("'", "''")
-        quoted_tab = f"'{escaped_tab}'"
-    return f"{quoted_tab}!A{start_row}:{end_column}"
+        normalized_tab = normalized_tab[1:-1]
+    return f"{normalized_tab}!A{start_row}:{end_column}"
 
 
 def _url_from_cell(value: str) -> str | None:
