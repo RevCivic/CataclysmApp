@@ -24,6 +24,7 @@ from species.models import Species
 _SPECIES_UPLOAD_HEADERS_KEY = 'adminflow_species_upload_headers'
 _SPECIES_UPLOAD_ROWS_KEY = 'adminflow_species_upload_rows'
 _PEOPLE_SPECIES_REVIEW_ROWS_KEY = 'adminflow_people_species_review_rows'
+_PLACEHOLDER_PERSON_AGE = 0
 
 # ── Duplicate-detection registry ────────────────────────────────────────────
 # Each entry: (app_label, model_name, human-readable label, name_field)
@@ -100,6 +101,7 @@ def _people_tools_context(**overrides):
     context = {
         'default_spreadsheet_id': SAMPLE_SPREADSHEET_ID,
         'default_range_name': SAMPLE_RANGE_NAME,
+        'placeholder_person_age': _PLACEHOLDER_PERSON_AGE,
         'people_species_upload_form': PeopleSpeciesUploadForm(),
     }
     context.update(overrides)
@@ -604,7 +606,7 @@ def people_species_apply(request):
 
         _person, was_created = Person.objects.get_or_create(
             name=person_name,
-            defaults={'age': 0, 'species': linked_species},
+            defaults={'age': _PLACEHOLDER_PERSON_AGE, 'species': linked_species},
         )
         if was_created:
             created_people += 1

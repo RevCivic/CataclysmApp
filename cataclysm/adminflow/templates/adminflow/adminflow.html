@@ -176,7 +176,7 @@
 
     {% if missing_people %}
       <h4 class="mt-4">Missing People</h4>
-      <p>Select any people that should be created now. New placeholder people are created with age <code>0</code> so they can be reviewed and completed later.</p>
+      <p>Select any people that should be created now. New placeholder people are created with age <code>{{ placeholder_person_age }}</code> so they can be reviewed and completed later.</p>
       {% for person_name in missing_people %}
         <div class="form-check">
           <input class="form-check-input" type="checkbox" name="create_people" value="{{ person_name }}" id="create-person-{{ forloop.counter }}" checked>
