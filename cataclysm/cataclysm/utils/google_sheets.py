@@ -178,11 +178,11 @@ def read_sheet_rich_data(spreadsheet_id, range_name):
                     rows.append(values)
         return rows
     except requests.HTTPError as e:
-        print(f"HTTP error reading rich sheet data: {e}")
-        return None
+        status = e.response.status_code if e.response is not None else "?"
+        try:
+            detail = (e.response.json().get("error", {}).get("message") or e.response.text[:300]).strip()
+        except Exception:
+            detail = str(e)
+        raise IOError(f"Sheets API HTTP {status} for range '{range_name}': {detail}") from e
     except requests.RequestException as e:
-        print(f"Error reading rich sheet data: {e}")
-        return None
-    except Exception as e:
-        print(f"Unexpected error reading rich sheet data: {e}")
-        return None
+        raise IOError(f"Sheets API request error for range '{range_name}': {e}") from e
