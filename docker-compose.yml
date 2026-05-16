@@ -18,6 +18,7 @@ services:
       DB_PATH: ${DB_PATH:-/app/data/db.sqlite3}
       SECRET_KEY: ${SECRET_KEY:-}
       MEDIA_ROOT: ${MEDIA_ROOT:-/app/data/media}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
 
 volumes:
   cataclysm_data:
