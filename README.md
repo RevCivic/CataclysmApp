@@ -70,6 +70,8 @@ cd cataclysm
 python manage.py download_sheet_images --spreadsheet-id "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit?usp=sharing"
 ```
 
+`download_sheet_images` reads sheet cells via the Google Sheets v4 grid-data endpoint so hyperlink URLs embedded in cells are preserved. Set `GOOGLE_API_KEY` if your environment requires an API key for `sheets.googleapis.com`.
+
 Useful options:
 
 - `--tabs "Main Crew" "Other Crew"` (override tabs)

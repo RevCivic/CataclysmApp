@@ -39,6 +39,20 @@ class DownloadSheetImagesHelpersTestCase(TestCase):
         self.assertEqual(person_url, "https://example.com/p.png")
         self.assertEqual(species_url, "https://example.com/s.png")
 
+    def test_row_url_pair_uses_hyperlinks_from_rich_cells(self):
+        person_url, species_url = _row_url_pair(
+            [
+                {"formatted_value": "Alice", "hyperlink": None},
+                {"formatted_value": "Human", "hyperlink": None},
+                {"formatted_value": "Portrait", "hyperlink": "https://example.com/p.png"},
+                {"formatted_value": "Species Card", "hyperlink": "https://example.com/s.png"},
+            ],
+            None,
+            None,
+        )
+        self.assertEqual(person_url, "https://example.com/p.png")
+        self.assertEqual(species_url, "https://example.com/s.png")
+
     def test_validate_download_url_rejects_localhost_and_non_http(self):
         with self.assertRaises(ValueError):
             _validate_download_url("http://localhost:8000/a.png")
@@ -56,10 +70,10 @@ class DownloadSheetImagesHelpersTestCase(TestCase):
         )
 
     def test_sheet_range_does_not_quote_sheet_names_with_spaces(self):
-        self.assertEqual(_sheet_range("Other Crew", 5, "ZZ"), "Other Crew!A5:ZZ")
+        self.assertEqual(_sheet_range("Other Crew", 5, "ZZ"), "'Other Crew'!A5:ZZ")
 
     def test_sheet_range_strips_existing_surrounding_quotes(self):
-        self.assertEqual(_sheet_range("'Other Crew'", 5, "ZZ"), "Other Crew!A5:ZZ")
+        self.assertEqual(_sheet_range("'Other Crew'", 5, "ZZ"), "'Other Crew'!A5:ZZ")
 
 
 class DownloadSheetImagesCommandTestCase(TestCase):
@@ -79,7 +93,15 @@ class DownloadSheetImagesCommandTestCase(TestCase):
     def test_command_downloads_and_saves_images(self):
         person = Person.objects.create(name="Alice", age=30, sex="F")
         species = Species.objects.create(species_name="Human")
-        rows = [["Alice", "Human", "", "", "", "https://example.com/person.png", "https://example.com/species.jpg"]]
+        rows = [[
+            {"formatted_value": "Alice", "hyperlink": None},
+            {"formatted_value": "Human", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "Person Portrait", "hyperlink": "https://example.com/person.png"},
+            {"formatted_value": "Species Portrait", "hyperlink": "https://example.com/species.jpg"},
+        ]]
 
         mock_response = Mock()
         mock_response.headers = {"Content-Type": "image/png", "Content-Length": "11"}
@@ -88,7 +110,7 @@ class DownloadSheetImagesCommandTestCase(TestCase):
         mock_response.close = Mock()
 
         with (
-            patch("cataclysm.management.commands.download_sheet_images.read_sheet_data", side_effect=[rows, []]),
+            patch("cataclysm.management.commands.download_sheet_images.read_sheet_rich_data", side_effect=[rows, []]),
             patch("cataclysm.management.commands.download_sheet_images._validate_download_url"),
             patch("cataclysm.management.commands.download_sheet_images.requests.get", return_value=mock_response) as mock_get,
         ):
@@ -114,10 +136,18 @@ class DownloadSheetImagesCommandTestCase(TestCase):
     def test_dry_run_does_not_download_or_save(self):
         person = Person.objects.create(name="Alice", age=30, sex="F")
         species = Species.objects.create(species_name="Human")
-        rows = [["Alice", "Human", "", "", "", "https://example.com/person.png", "https://example.com/species.jpg"]]
+        rows = [[
+            {"formatted_value": "Alice", "hyperlink": None},
+            {"formatted_value": "Human", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "Person Portrait", "hyperlink": "https://example.com/person.png"},
+            {"formatted_value": "Species Portrait", "hyperlink": "https://example.com/species.jpg"},
+        ]]
 
         with (
-            patch("cataclysm.management.commands.download_sheet_images.read_sheet_data", side_effect=[rows, []]),
+            patch("cataclysm.management.commands.download_sheet_images.read_sheet_rich_data", side_effect=[rows, []]),
             patch("cataclysm.management.commands.download_sheet_images._validate_download_url"),
             patch("cataclysm.management.commands.download_sheet_images.requests.get") as mock_get,
         ):
@@ -138,11 +168,19 @@ class DownloadSheetImagesCommandTestCase(TestCase):
         self.assertEqual(mock_get.call_count, 0)
 
     def test_command_counts_missing_people_and_species(self):
-        rows = [["Missing Person", "Missing Species", "", "", "", "https://example.com/person.png", "https://example.com/species.jpg"]]
+        rows = [[
+            {"formatted_value": "Missing Person", "hyperlink": None},
+            {"formatted_value": "Missing Species", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "Person Portrait", "hyperlink": "https://example.com/person.png"},
+            {"formatted_value": "Species Portrait", "hyperlink": "https://example.com/species.jpg"},
+        ]]
         command_output = StringIO()
 
         with (
-            patch("cataclysm.management.commands.download_sheet_images.read_sheet_data", side_effect=[rows, []]),
+            patch("cataclysm.management.commands.download_sheet_images.read_sheet_rich_data", side_effect=[rows, []]),
             patch("cataclysm.management.commands.download_sheet_images._validate_download_url"),
             patch("cataclysm.management.commands.download_sheet_images.requests.get") as mock_get,
         ):
@@ -168,10 +206,17 @@ class DownloadSheetImagesCommandTestCase(TestCase):
             image_source_url="https://drive.google.com/uc?export=view&id=abc123",
         )
         person.image.save("alice.png", ContentFile(b"old-bytes"), save=True)
-        rows = [["Alice", "Human", "", "", "", "https://drive.google.com/file/d/abc123/view?usp=sharing"]]
+        rows = [[
+            {"formatted_value": "Alice", "hyperlink": None},
+            {"formatted_value": "Human", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "Portrait", "hyperlink": "https://drive.google.com/file/d/abc123/view?usp=sharing"},
+        ]]
 
         with (
-            patch("cataclysm.management.commands.download_sheet_images.read_sheet_data", side_effect=[rows, []]),
+            patch("cataclysm.management.commands.download_sheet_images.read_sheet_rich_data", side_effect=[rows, []]),
             patch("cataclysm.management.commands.download_sheet_images.requests.get") as mock_get,
         ):
             call_command(
@@ -193,7 +238,14 @@ class DownloadSheetImagesCommandTestCase(TestCase):
             image_source_url="https://drive.google.com/uc?export=view&id=old123",
         )
         person.image.save("alice.png", ContentFile(b"old-bytes"), save=True)
-        rows = [["Alice", "Human", "", "", "", "https://drive.google.com/file/d/new456/view?usp=sharing"]]
+        rows = [[
+            {"formatted_value": "Alice", "hyperlink": None},
+            {"formatted_value": "Human", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "", "hyperlink": None},
+            {"formatted_value": "Portrait", "hyperlink": "https://drive.google.com/file/d/new456/view?usp=sharing"},
+        ]]
 
         mock_response = Mock()
         mock_response.headers = {"Content-Type": "image/png", "Content-Length": "11"}
@@ -202,7 +254,7 @@ class DownloadSheetImagesCommandTestCase(TestCase):
         mock_response.close = Mock()
 
         with (
-            patch("cataclysm.management.commands.download_sheet_images.read_sheet_data", side_effect=[rows, []]),
+            patch("cataclysm.management.commands.download_sheet_images.read_sheet_rich_data", side_effect=[rows, []]),
             patch("cataclysm.management.commands.download_sheet_images._validate_download_url"),
             patch("cataclysm.management.commands.download_sheet_images.requests.get", return_value=mock_response) as mock_get,
         ):
