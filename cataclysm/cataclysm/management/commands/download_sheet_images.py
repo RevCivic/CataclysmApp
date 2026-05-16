@@ -326,9 +326,10 @@ class Command(BaseCommand):
 
         for tab_name in tabs:
             range_name = _sheet_range(tab_name, start_row, end_column)
-            rows = read_sheet_rich_data(spreadsheet_id, range_name)
-            if rows is None:
-                self.stderr.write(self.style.WARNING(f"Failed to read tab '{tab_name}' ({range_name})."))
+            try:
+                rows = read_sheet_rich_data(spreadsheet_id, range_name)
+            except IOError as exc:
+                self.stderr.write(self.style.ERROR(f"Failed to read tab '{tab_name}' ({range_name}): {exc}"))
                 continue
 
             for row_index, row in enumerate(rows, start=start_row):
