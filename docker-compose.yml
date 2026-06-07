@@ -19,6 +19,8 @@ services:
       SECRET_KEY: ${SECRET_KEY:-}
       MEDIA_ROOT: ${MEDIA_ROOT:-/app/data/media}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      EMAIL_ADDRESS: ${EMAIL_ADDRESS:-}
+      EMAIL_APP_PASSWORD: ${EMAIL_APP_PASSWORD:-}
 
 volumes:
   cataclysm_data:

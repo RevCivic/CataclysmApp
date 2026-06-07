@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Log In — Cataclysm{% endblock %}
+{% block content %}
+<div class="sci-fi-form-container" style="max-width:420px;">
+    <h1>Log In</h1>
+
+    {% if form.errors %}
+    <div class="alert alert-danger" role="alert">
+        Invalid username or password. Please try again.
+    </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div style="text-align:center; margin-top:1.5em;">
+            <button type="submit" class="btn btn-primary">Engage</button>
+        </div>
+    </form>
+
+    <div style="text-align:center; margin-top:1.2em; font-size:0.95em;">
+        <a href="{% url 'password_reset' %}">Forgot password?</a>
+    </div>
+</div>
+{% endblock %}

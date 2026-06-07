@@ -54,12 +54,59 @@ docker run --rm -p 8080:8000 \
 - `DEFAULT_PASSWORD`: Optional default admin password used when creating the default admin (must satisfy Django password validators: minimum length, non-common, non-numeric, etc.)
 - `DEFAULT_PASSWORD_UPDATE`: Optional (`true`/`false`, default `false`); when exactly `true`, updates password for an existing `DEFAULT_USERNAME` only if that user is already staff + superuser
 - `ALLOWED_HOSTS`: Comma-separated Django allowed hosts list (default: `localhost,127.0.0.1,[::1]`; for example `localhost,127.0.0.1,app.example.com`)
+- `EMAIL_ADDRESS`: Gmail address used as the SMTP sender for password-reset emails (for example `yourname@gmail.com`)
+- `EMAIL_APP_PASSWORD`: [Gmail App Password](https://support.google.com/accounts/answer/185833) for the above address. Both `EMAIL_ADDRESS` **and** `EMAIL_APP_PASSWORD` must be set to enable live email delivery; when either is absent the console backend is used (emails are printed to stdout only).
 
 If you add more published ports later, use separate purpose-based variables (for example `APP_HTTP_PORT`, `APP_METRICS_PORT`) instead of reusing one value.
 
 Use Docker/Portainer secrets or a secure environment-variable source for credentials in production.
 The container intentionally binds Gunicorn to `0.0.0.0:8000`; place it behind a reverse proxy/TLS termination in production.
 Treat `DEFAULT_PASSWORD_UPDATE=true` as a privileged operation and restrict who can modify runtime environment variables.
+
+### Password reset
+
+Users can reset their password at `/accounts/password_reset/`. The link is also accessible from the sidebar navigation when not logged in.
+
+Reset tokens expire after **24 hours** and can only be used **once**.
+
+The response to a reset request is intentionally identical whether or not the email address belongs to an existing account, to prevent account enumeration.
+
+#### Gmail App Password setup
+
+1. Enable 2-Step Verification on the Gmail account you want to use as the sender.
+2. Go to **Google Account → Security → App passwords**, generate a new app password (select "Mail" / "Other").
+3. Set `EMAIL_ADDRESS=yourname@gmail.com` and `EMAIL_APP_PASSWORD=<generated-password>` in your environment or `.env` file.
+
+#### Admin runbook
+
+**Test email delivery** (without restarting):
+
+```bash
+cd cataclysm
+python manage.py shell -c "
+from django.core.mail import send_mail
+send_mail('Test', 'Works!', None, ['you@example.com'])
+"
+```
+
+**Recover a locked-out admin** (no email required):
+
+```bash
+cd cataclysm
+python manage.py changepassword <username>
+```
+
+**Troubleshoot email issues:**
+
+- Confirm `EMAIL_ADDRESS` and `EMAIL_APP_PASSWORD` are set in the running container environment.
+- Check that Gmail 2-Step Verification is enabled and the App Password is correct.
+- Verify `ALLOWED_HOSTS` includes the domain used in reset links so links in emails are correct.
+- For SMTP connection errors, confirm port 587 is not blocked by the host firewall or container networking.
+- If reset links arrive with `localhost` or the wrong host, place the app behind a reverse proxy that sets the `Host` header correctly, or use `CSRF_TRUSTED_ORIGINS` / `USE_X_FORWARDED_HOST` as appropriate.
+
+#### Rate limiting
+
+Django does not include built-in rate limiting for the password reset endpoint. It is strongly recommended to configure rate limiting at the reverse-proxy level (for example nginx `limit_req`) to prevent abuse.
 
 ## Download crew/species images from Google Sheets
 
