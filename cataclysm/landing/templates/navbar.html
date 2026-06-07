@@ -16,10 +16,11 @@
     <div class="lcars-nav-divider"></div>
 
     {% if user.is_authenticated %}
-        <a href="/adminflow/"     class="lcars-nav-pill lcars-nav-pill-accent">Admin Panel</a>
-        <a href="/admin/"         class="lcars-nav-pill lcars-nav-pill-accent">Django Admin</a>
-        <a href="/admin/logout/"  class="lcars-nav-pill lcars-nav-pill-accent">Log Out</a>
+        <a href="/adminflow/"          class="lcars-nav-pill lcars-nav-pill-accent">Admin Panel</a>
+        <a href="/admin/"              class="lcars-nav-pill lcars-nav-pill-accent">Django Admin</a>
+        <a href="/accounts/logout/"    class="lcars-nav-pill lcars-nav-pill-accent">Log Out</a>
     {% else %}
-        <a href="/admin/"         class="lcars-nav-pill lcars-nav-pill-accent">Log In</a>
+        <a href="/accounts/login/"     class="lcars-nav-pill lcars-nav-pill-accent">Log In</a>
+        <a href="/accounts/password_reset/" class="lcars-nav-pill lcars-nav-pill-accent">Forgot Password?</a>
     {% endif %}
 </nav>

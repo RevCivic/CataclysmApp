@@ -96,7 +96,7 @@ ROOT_URLCONF = 'cataclysm.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -180,3 +180,37 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.join(BASE_DIR, 'media'))
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# -----------------------------------------------------------------------
+# Email – Gmail SMTP via app password
+# Set EMAIL_ADDRESS and EMAIL_APP_PASSWORD in the environment to enable
+# live email delivery.  Without those variables the console backend is
+# used (emails are printed to stdout), which is safe for local dev.
+# -----------------------------------------------------------------------
+_email_address = os.environ.get('EMAIL_ADDRESS', '')
+_email_app_password = os.environ.get('EMAIL_APP_PASSWORD', '')
+
+if _email_address and _email_app_password:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = _email_address
+    EMAIL_HOST_PASSWORD = _email_app_password
+    DEFAULT_FROM_EMAIL = _email_address
+    SERVER_EMAIL = _email_address
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'noreply@example.com'
+
+
+# -----------------------------------------------------------------------
+# Authentication
+# -----------------------------------------------------------------------
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# Password-reset tokens expire after 24 hours.
+PASSWORD_RESET_TIMEOUT = 86400
