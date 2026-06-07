@@ -8,7 +8,10 @@ def url_replace(context, **kwargs):
     """Return the current query string with the given parameters replaced/added."""
     query = context['request'].GET.copy()
     for key, value in kwargs.items():
-        query[key] = value
+        if value in ('', None):
+            query.pop(key, None)
+        else:
+            query[key] = value
     return query.urlencode()
 
 @register.filter(name='isnumeric')

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load mathfilters %}
 {% load group_check %}
+{% load custom_filters %}
 
 {% block content %}
     <div class="index_menu">
@@ -9,6 +10,41 @@
     </div>
 
     {% include '_pagination.html' %}
+
+    {% if tags %}
+    <form method="get" class="pagination-controls">
+        <input type="hidden" name="per_page" value="{{ current_per_page }}">
+        {% if current_order_by %}
+        <input type="hidden" name="order_by" value="{{ current_order_by }}">
+        {% endif %}
+        {% if search_query %}
+        <input type="hidden" name="q" value="{{ search_query }}">
+        {% endif %}
+        <div class="lcars-table-wrap">
+            <table class="toggle-table">
+                <tr>
+                    <th colspan="{{ tags|length }}" class="table-label">Tag Filters</th>
+                </tr>
+                <tr>
+                    {% for tag in tags %}
+                        <th>{{ tag.name }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for tag in tags %}
+                        <td><input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %}></td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
+        <div style="margin-top: 1rem;">
+            <button type="submit" class="btn btn-secondary">Apply Tag Filters</button>
+            {% if selected_tag_ids %}
+            <a href="?{% url_replace tag='' page=1 %}" class="btn btn-secondary">Clear Tags</a>
+            {% endif %}
+        </div>
+    </form>
+    {% endif %}
 
     <div class="column-buttons">
         <div class="lcars-table-wrap">
@@ -76,20 +112,23 @@
     <table class="sci-fi-list">
         <thead>
             <tr>
-                <th class="center"><a href="?order_by=id">ID</a></th>
-                <th class="center"><a href="?order_by=name">Name</a></th>
-                <th class="center"><a href="?order_by=age">Age</a></th>
-                <th class="center"><a href="?order_by=sex">Sex</a></th>
-                <th class="center"><a href="?order_by=species">Species</a></th>
-                <th class="center"><a href="?order_by=faction">Faction</a></th>
-                <th class="center"><a href="?order_by=rank">Rank</a></th>
-                <th class="center"><a href="?order_by=position">Position</a></th>
+                <th class="center"><a href="?{% url_replace order_by='id' %}">ID</a></th>
+                <th class="center"><a href="?{% url_replace order_by='name' %}">Name</a></th>
+                <th class="center"><a href="?{% url_replace order_by='age' %}">Age</a></th>
+                <th class="center"><a href="?{% url_replace order_by='sex' %}">Sex</a></th>
+                <th class="center"><a href="?{% url_replace order_by='species' %}">Species</a></th>
+                <th class="center"><a href="?{% url_replace order_by='faction' %}">Faction</a></th>
+                <th class="center"><a href="?{% url_replace order_by='rank' %}">Rank</a></th>
+                <th class="center"><a href="?{% url_replace order_by='position' %}">Position</a></th>
                 {% for trait in traits %}
                     <th class="rotate {{ trait.name|slugify }} boolean"><div><span>{{ trait.name }}</span></div></th>
                 {% endfor %}
+                {% if tags %}
+                    <th class="center">Tags</th>
+                {% endif %}
                 <th class="crew-image">Picture</th>
                 {% if request.user|has_group:'admins' %}
-                    <th><a href="?order_by=hidden">Hidden</a></th>
+                    <th><a href="?{% url_replace order_by='hidden' %}">Hidden</a></th>
                 {% endif %}
 
             </tr>
@@ -109,6 +148,15 @@
                         {% for trait in traits %}
                             <td class="boolean {{ trait.name|slugify }}">{% if trait in person.traits.all %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
                         {% endfor %}
+                        {% if tags %}
+                            <td>
+                                {% for tag in person.tags.all %}
+                                    {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    —
+                                {% endfor %}
+                            </td>
+                        {% endif %}
                         {% if person.image %}
                             <td>
                                 <img src="{{ person.image.url }}" alt="{{ person.name }}" class="crew_list_image"></img>

@@ -43,8 +43,12 @@ class SpeciesForm(forms.ModelForm):
             'physiology',
             'special_abilities',
             'image',
+            'tags',
             'hidden',
         ]
+        widgets = {
+            'tags': forms.CheckboxSelectMultiple,
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

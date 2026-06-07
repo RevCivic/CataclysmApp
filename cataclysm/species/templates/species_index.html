@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load mathfilters %}
 {% load group_check %}
+{% load custom_filters %}
 
 {% block content %}
     <div class="list-header index_menu">
@@ -8,19 +9,56 @@
         <a class="btn btn-primary" href="{% url 'add' %}">Add Species</a>
     </div>
     {% include '_pagination.html' %}
+    {% if tags %}
+    <form method="get" class="pagination-controls">
+        <input type="hidden" name="per_page" value="{{ current_per_page }}">
+        {% if current_sort_param %}
+        <input type="hidden" name="sort" value="{{ current_sort_param }}">
+        {% endif %}
+        {% if search_query %}
+        <input type="hidden" name="q" value="{{ search_query }}">
+        {% endif %}
+        <div class="lcars-table-wrap">
+            <table class="toggle-table">
+                <tr>
+                    <th colspan="{{ tags|length }}" class="table-label">Tag Filters</th>
+                </tr>
+                <tr>
+                    {% for tag in tags %}
+                        <th>{{ tag.name }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for tag in tags %}
+                        <td><input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %}></td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
+        <div style="margin-top: 1rem;">
+            <button type="submit" class="btn btn-secondary">Apply Tag Filters</button>
+            {% if selected_tag_ids %}
+            <a href="?{% url_replace tag='' page=1 %}" class="btn btn-secondary">Clear Tags</a>
+            {% endif %}
+        </div>
+    </form>
+    {% endif %}
     <div class="lcars-table-wrap">
     <table class="sci-fi-list">
         <thead>
             <tr>
-                <th><a href="?sort={% if current_sort_field == 'species_name' and current_sort_dir == 'asc' %}-species_name{% else %}species_name{% endif %}">Species Name {% if current_sort_field == 'species_name' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                <th><a href="?sort={% if current_sort_field == 'size' and current_sort_dir == 'asc' %}-size{% else %}size{% endif %}">Size {% if current_sort_field == 'size' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                <th><a href="?sort={% if current_sort_field == 'home_world' and current_sort_dir == 'asc' %}-home_world{% else %}home_world{% endif %}">Home World {% if current_sort_field == 'home_world' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                <th><a href="?sort={% if current_sort_field == 'type' and current_sort_dir == 'asc' %}-type{% else %}type{% endif %}">Type {% if current_sort_field == 'type' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                <th><a href="?sort={% if current_sort_field == 'status' and current_sort_dir == 'asc' %}-status{% else %}status{% endif %}">Status {% if current_sort_field == 'status' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                <th><a href="?sort={% if current_sort_field == 'strength' and current_sort_dir == 'asc' %}-strength{% else %}strength{% endif %}">Strength {% if current_sort_field == 'strength' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                <th><a href="?sort={% if current_sort_field == 'toughness' and current_sort_dir == 'asc' %}-toughness{% else %}toughness{% endif %}">Toughness {% if current_sort_field == 'toughness' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                <th><a href="?sort={% if current_sort_field == 'speed' and current_sort_dir == 'asc' %}-speed{% else %}speed{% endif %}">Speed {% if current_sort_field == 'speed' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
-                <th><a href="?sort={% if current_sort_field == 'intelligence' and current_sort_dir == 'asc' %}-intelligence{% else %}intelligence{% endif %}">Intelligence {% if current_sort_field == 'intelligence' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?{% url_replace sort=sort_links.species_name %}">Species Name {% if current_sort_field == 'species_name' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?{% url_replace sort=sort_links.size %}">Size {% if current_sort_field == 'size' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?{% url_replace sort=sort_links.home_world %}">Home World {% if current_sort_field == 'home_world' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?{% url_replace sort=sort_links.type %}">Type {% if current_sort_field == 'type' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?{% url_replace sort=sort_links.status %}">Status {% if current_sort_field == 'status' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?{% url_replace sort=sort_links.strength %}">Strength {% if current_sort_field == 'strength' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?{% url_replace sort=sort_links.toughness %}">Toughness {% if current_sort_field == 'toughness' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?{% url_replace sort=sort_links.speed %}">Speed {% if current_sort_field == 'speed' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                <th><a href="?{% url_replace sort=sort_links.intelligence %}">Intelligence {% if current_sort_field == 'intelligence' %}{% if current_sort_dir == 'asc' %}▲{% else %}▼{% endif %}{% endif %}</a></th>
+                {% if tags %}
+                    <th>Tags</th>
+                {% endif %}
                 {% if request.user|has_group:'admins' %}
                     <th>Hidden</th>
                 {% endif %}
@@ -47,6 +85,15 @@
                         <td>
                             <div class="rating-bar" style="width: {{ species.intelligence|default:0|mul:10 }}%">&nbsp;{{ species.intelligence|default:'—' }}</div>
                         </td>
+                        {% if tags %}
+                            <td>
+                                {% for tag in species.tags.all %}
+                                    {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    —
+                                {% endfor %}
+                            </td>
+                        {% endif %}
                         {% if request.user|has_group:'admins' %}
                             <td>{{ species.hidden }}</td>
                         {% endif %}

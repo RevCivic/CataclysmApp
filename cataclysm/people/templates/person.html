@@ -33,6 +33,16 @@
                     <th>Species</th>
                     <td>{{ current_person.species }}</td>
                 </tr>
+                <tr>
+                    <th>Tags</th>
+                    <td>
+                        {% for tag in current_person.tags.all %}
+                            {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            —
+                        {% endfor %}
+                    </td>
+                </tr>
             </table>
             <table class="sci-fi-list">
                 <tr><th colspan="2" class="boolean">Career</th></tr>

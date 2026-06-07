@@ -2,6 +2,15 @@
 <div class="pagination-controls">
     <form class="search-bar" method="get" action="">
         <input type="hidden" name="per_page" value="{{ current_per_page }}">
+        {% if current_order_by %}
+        <input type="hidden" name="order_by" value="{{ current_order_by }}">
+        {% endif %}
+        {% if current_sort_param %}
+        <input type="hidden" name="sort" value="{{ current_sort_param }}">
+        {% endif %}
+        {% for tag_id in selected_tag_ids %}
+        <input type="hidden" name="tag" value="{{ tag_id }}">
+        {% endfor %}
         <input type="search" name="q" class="search-input" placeholder="Search…" value="{{ search_query|default:'' }}" aria-label="Search">
         <button type="submit" class="btn btn-secondary search-btn">Search</button>
         {% if search_query %}
