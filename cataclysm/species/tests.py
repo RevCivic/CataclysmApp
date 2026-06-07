@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .importing import guess_field_mapping
-from .models import Species
+from .models import Species, Tag
 
 
 class SpeciesViewsTestCase(TestCase):
@@ -29,6 +29,8 @@ class SpeciesViewsTestCase(TestCase):
             status='Unknown',
             society='Unknown',
         )
+        cls.tag = Tag.objects.create(name='Core Worlds')
+        cls.species.tags.add(cls.tag)
 
     def test_index_returns_200(self):
         resp = self.client.get('/species/')
@@ -40,6 +42,7 @@ class SpeciesViewsTestCase(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'Home World')
         self.assertContains(resp, 'Binary')
+        self.assertContains(resp, 'Core Worlds')
 
     def test_add_get_returns_200(self):
         resp = self.client.get(reverse('add'))
@@ -48,6 +51,16 @@ class SpeciesViewsTestCase(TestCase):
     def test_species_404_on_missing(self):
         resp = self.client.get(reverse('species_page', kwargs={'id': 9999}))
         self.assertEqual(resp.status_code, 404)
+
+    def test_index_filters_by_tag(self):
+        other_species = Species.objects.create(species_name='Skarn')
+        other_tag = Tag.objects.create(name='Frontier')
+        other_species.tags.add(other_tag)
+
+        resp = self.client.get('/species/', {'tag': [self.tag.id]})
+
+        self.assertContains(resp, 'Xelthari')
+        self.assertNotContains(resp, 'Skarn')
 
 
 class SpeciesImportHelpersTestCase(TestCase):

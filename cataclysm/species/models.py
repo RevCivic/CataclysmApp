@@ -1,6 +1,13 @@
 from django.db import models
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Species(models.Model):
     class Meta:
         app_label = 'species'
@@ -38,6 +45,7 @@ class Species(models.Model):
     special_abilities = models.JSONField(blank=True, null=True)
     image = models.ImageField(upload_to='species/images/', null=True, blank=True)
     image_source_url = models.URLField(blank=True, default='')
+    tags = models.ManyToManyField('Tag', blank=True)
     hidden = models.BooleanField(default=False)
 
 

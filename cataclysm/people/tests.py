@@ -2,7 +2,7 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Person, Trait
+from .models import Person, Tag, Trait
 
 
 class PeopleViewsTestCase(TestCase):
@@ -14,7 +14,9 @@ class PeopleViewsTestCase(TestCase):
             sex='Male',
         )
         cls.trait = Trait.objects.create(name='Tactician')
+        cls.tag = Tag.objects.create(name='Bridge Crew')
         cls.person.traits.add(cls.trait)
+        cls.person.tags.add(cls.tag)
 
     def test_index_returns_200(self):
         resp = self.client.get('/people/')
@@ -32,6 +34,20 @@ class PeopleViewsTestCase(TestCase):
         resp = self.client.get(reverse('person_page', kwargs={'id': self.person.pk}))
         self.assertContains(resp, 'Tactician')
 
+    def test_person_page_shows_tag(self):
+        resp = self.client.get(reverse('person_page', kwargs={'id': self.person.pk}))
+        self.assertContains(resp, 'Bridge Crew')
+
+    def test_index_filters_by_tag(self):
+        other_person = Person.objects.create(name='Unaffiliated', age=30, sex='Female')
+        other_tag = Tag.objects.create(name='Scientist')
+        other_person.tags.add(other_tag)
+
+        resp = self.client.get('/people/', {'tag': [self.tag.id]})
+
+        self.assertContains(resp, 'Hugo Walgrave')
+        self.assertNotContains(resp, 'Unaffiliated')
+
     def test_add_person_get_returns_200(self):
         resp = self.client.get(reverse('add_person'))
         self.assertEqual(resp.status_code, 200)
@@ -43,4 +59,3 @@ class PeopleViewsTestCase(TestCase):
     def test_person_404_on_missing(self):
         resp = self.client.get(reverse('person_page', kwargs={'id': 9999}))
         self.assertEqual(resp.status_code, 404)
-

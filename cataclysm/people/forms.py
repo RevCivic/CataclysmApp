@@ -8,6 +8,7 @@ class PersonForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'traits': forms.CheckboxSelectMultiple,
+            'tags': forms.CheckboxSelectMultiple,
         }
 
 class StatsetForm(forms.ModelForm):

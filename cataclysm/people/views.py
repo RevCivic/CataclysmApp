@@ -2,14 +2,14 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
 from people.forms import PersonForm, PersonImageForm
-from people.models import Person, Trait
+from people.models import Person, Tag, Trait
 
 
 _VALID_PER_PAGE = ('50', '100', '500', 'all')
 
 
 def index(request):
-    qs = Person.objects.select_related('species', 'faction').prefetch_related('traits').order_by('name')
+    qs = Person.objects.select_related('species', 'faction').prefetch_related('traits', 'tags').order_by('name')
     order_by = request.GET.get('order_by')
     if order_by:
         qs = qs.order_by(order_by)
@@ -18,11 +18,16 @@ def index(request):
     if q:
         qs = qs.filter(name__icontains=q)
 
+    selected_tag_ids = [int(tag_id) for tag_id in request.GET.getlist('tag') if tag_id.isdigit()]
+    if selected_tag_ids:
+        qs = qs.filter(tags__id__in=selected_tag_ids).distinct()
+
     per_page = request.GET.get('per_page', '50')
     if per_page not in _VALID_PER_PAGE:
         per_page = '50'
 
     traits = Trait.objects.all()
+    tags = Tag.objects.order_by('name')
 
     if per_page == 'all':
         return render(request, 'people_index.html', {
@@ -30,8 +35,11 @@ def index(request):
             'page_obj': None,
             'is_paginated': False,
             'traits': traits,
+            'tags': tags,
+            'selected_tag_ids': selected_tag_ids,
             'current_per_page': per_page,
             'search_query': q,
+            'current_order_by': order_by or '',
         })
 
     paginator = Paginator(qs, int(per_page))
@@ -41,8 +49,11 @@ def index(request):
         'page_obj': page_obj,
         'is_paginated': page_obj.has_other_pages(),
         'traits': traits,
+        'tags': tags,
+        'selected_tag_ids': selected_tag_ids,
         'current_per_page': per_page,
         'search_query': q,
+        'current_order_by': order_by or '',
     })
 
 
@@ -50,7 +61,7 @@ def person_page(request, id):
     current_person = get_object_or_404(
         Person.objects
               .select_related('species', 'faction', 'stats', 'skills')
-              .prefetch_related('traits', 'weapons', 'armors', 'additional_images'),
+              .prefetch_related('traits', 'tags', 'weapons', 'armors', 'additional_images'),
         id=id,
     )
     traits = Trait.objects.all()
@@ -96,4 +107,3 @@ def add_images(request, id):
     else:
         form = PersonImageForm(initial={'linked_person': person})
     return render(request, 'add_object.html', {'form': form})
-

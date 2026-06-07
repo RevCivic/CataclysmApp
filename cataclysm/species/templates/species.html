@@ -32,6 +32,16 @@
             <tr><th>Locomotion</th><td>{{ current_species.locomotion|default:'—' }}</td></tr>
             <tr><th>Society</th><td>{{ current_species.society|default:'—' }}</td></tr>
             <tr><th>Tech Level</th><td>{{ current_species.tech_level|default:'—' }}</td></tr>
+            <tr>
+                <th>Tags</th>
+                <td>
+                    {% for tag in current_species.tags.all %}
+                        {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        —
+                    {% endfor %}
+                </td>
+            </tr>
         </table>
     </div>
 
