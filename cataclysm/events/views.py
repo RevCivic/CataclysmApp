@@ -9,11 +9,9 @@ from .models import Event
 class EventListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     search_fields = ['name', 'description', 'location']
     model = Event
+    queryset = Event.objects.prefetch_related('tags').order_by('name')
     template_name = 'events/events.html'
     context_object_name = 'object_list'
-
-    def get_queryset(self):
-        return Event.objects.prefetch_related('tags').order_by('name')
 
 
 class EventCreateView(CreateView):

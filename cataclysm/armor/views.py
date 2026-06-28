@@ -9,11 +9,9 @@ from .models import Armor
 class ArmorListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     search_fields = ['name', 'armor_type']
     model = Armor
+    queryset = Armor.objects.prefetch_related('tags').order_by('name')
     template_name = 'armor/armor.html'
     context_object_name = 'object_list'
-
-    def get_queryset(self):
-        return Armor.objects.prefetch_related('tags').order_by('name')
 
 
 class ArmorCreateView(CreateView):

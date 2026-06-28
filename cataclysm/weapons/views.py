@@ -9,11 +9,9 @@ from .models import Weapon
 class WeaponListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     search_fields = ['name', 'weapon_type']
     model = Weapon
+    queryset = Weapon.objects.prefetch_related('tags').order_by('name')
     template_name = 'weapons/weapons.html'
     context_object_name = 'object_list'
-
-    def get_queryset(self):
-        return Weapon.objects.prefetch_related('tags').order_by('name')
 
 
 class WeaponCreateView(CreateView):

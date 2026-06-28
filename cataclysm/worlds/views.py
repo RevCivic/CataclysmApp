@@ -9,11 +9,9 @@ from .models import World
 class WorldListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     search_fields = ['name', 'system']
     model = World
+    queryset = World.objects.prefetch_related('tags').order_by('name')
     template_name = 'worlds/worlds.html'
     context_object_name = 'object_list'
-
-    def get_queryset(self):
-        return World.objects.prefetch_related('tags').order_by('name')
 
 
 class WorldCreateView(CreateView):
