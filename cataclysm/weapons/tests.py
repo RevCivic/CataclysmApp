@@ -67,7 +67,7 @@ class WeaponViewsTestCase(TestCase):
             'range_increment': 40,
             'capacity': 10,
             'usage': '1',
-            'special_properties': '',
+            'special_properties': 'none',
             'weight': '1.0',
             'description': 'Compact sidearm.',
             'new_tags': 'Sidearm, Close Quarters',
