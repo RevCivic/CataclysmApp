@@ -57,3 +57,26 @@ class WeaponViewsTestCase(TestCase):
 
         self.assertContains(resp, 'Phaser')
         self.assertNotContains(resp, 'Rifle')
+
+    def test_add_post_creates_and_assigns_new_tags(self):
+        resp = self.client.post(reverse('weapons:add'), {
+            'name': 'Pulse Pistol',
+            'weapon_type': 'Energy',
+            'damage': '1d8',
+            'critical': 'burn 1d4',
+            'range_increment': 40,
+            'capacity': 10,
+            'usage': '1',
+            'special_properties': '',
+            'weight': '1.0',
+            'description': 'Compact sidearm.',
+            'new_tags': 'Sidearm, Close Quarters',
+        })
+
+        self.assertEqual(resp.status_code, 302)
+        weapon = Weapon.objects.get(name='Pulse Pistol')
+        self.assertQuerysetEqual(
+            weapon.tags.order_by('name').values_list('name', flat=True),
+            ['Close Quarters', 'Sidearm'],
+            transform=lambda value: value,
+        )

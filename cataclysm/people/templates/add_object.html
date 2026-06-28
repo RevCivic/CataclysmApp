@@ -31,6 +31,10 @@
                 {{ form.skills|as_crispy_field }}
                 {{ form.traits|as_crispy_field }}
                 {{ form.tags|as_crispy_field }}
+                <div class="mb-3">
+                    <label for="id_new_tags" class="form-label">New tags (comma-separated)</label>
+                    <input id="id_new_tags" name="new_tags" type="text" class="form-control" placeholder="e.g. Bridge Crew, Scientist">
+                </div>
             </div>
         </div>
         <div style="text-align:center; margin-top: 2.5em;">

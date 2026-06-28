@@ -63,6 +63,20 @@ class SpeciesViewsTestCase(TestCase):
         self.assertContains(resp, 'Xelthari')
         self.assertNotContains(resp, 'Skarn')
 
+    def test_add_post_creates_and_assigns_new_tags(self):
+        resp = self.client.post(reverse('add'), {
+            'species_name': 'Nyr',
+            'new_tags': 'Core Worlds, Frontier, frontier',
+        })
+
+        self.assertEqual(resp.status_code, 302)
+        species = Species.objects.get(species_name='Nyr')
+        self.assertQuerysetEqual(
+            species.tags.order_by('name').values_list('name', flat=True),
+            ['Core Worlds', 'Frontier'],
+            transform=lambda value: value,
+        )
+
 
 class SpeciesImportHelpersTestCase(TestCase):
     def test_guess_field_mapping_matches_alias_headers(self):

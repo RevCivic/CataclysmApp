@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin, SearchMixin, TagFilterMixin
+from cataclysm.view_helpers import AddTagsFromInputMixin, PerPageMixin, SearchMixin, TagFilterMixin
 
 from .models import World
 
@@ -14,7 +14,7 @@ class WorldListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     context_object_name = 'object_list'
 
 
-class WorldCreateView(CreateView):
+class WorldCreateView(AddTagsFromInputMixin, CreateView):
     model = World
     fields = '__all__'
     template_name = 'worlds/add_object.html'

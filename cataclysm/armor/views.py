@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin, SearchMixin, TagFilterMixin
+from cataclysm.view_helpers import AddTagsFromInputMixin, PerPageMixin, SearchMixin, TagFilterMixin
 
 from .models import Armor
 
@@ -14,7 +14,7 @@ class ArmorListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     context_object_name = 'object_list'
 
 
-class ArmorCreateView(CreateView):
+class ArmorCreateView(AddTagsFromInputMixin, CreateView):
     model = Armor
     fields = '__all__'
     template_name = 'armor/add_object.html'

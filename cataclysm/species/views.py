@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
+from cataclysm.view_helpers import add_tags_from_input
 from species.forms import SpeciesForm
 from species.models import Species
 from tags.models import Tag
@@ -109,6 +110,7 @@ def add(request):
         form = SpeciesForm(request.POST, request.FILES)
         if form.is_valid():
             species = form.save()
+            add_tags_from_input(species, request.POST.get('new_tags', ''))
             return redirect('species_page', id=species.id)
     else:
         form = SpeciesForm()
@@ -120,7 +122,8 @@ def edit_species(request, id):
     if request.method == 'POST':
         form = SpeciesForm(request.POST, request.FILES, instance=species)
         if form.is_valid():
-            form.save()
+            species = form.save()
+            add_tags_from_input(species, request.POST.get('new_tags', ''))
             return redirect('species_page', id=id)
     else:
         form = SpeciesForm(instance=species)

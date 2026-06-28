@@ -76,3 +76,40 @@ class TagFilterMixin:
         ctx['tags'] = Tag.objects.order_by('name')
         ctx['selected_tag_ids'] = getattr(self, '_selected_tag_ids', [])
         return ctx
+
+
+def add_tags_from_input(instance, raw_tags: str) -> None:
+    if not raw_tags or not hasattr(instance, 'tags'):
+        return
+
+    seen = set()
+    cleaned_names = []
+    for part in raw_tags.replace(';', ',').replace('\n', ',').split(','):
+        name = part.strip()
+        if not name:
+            continue
+        normalized = name.lower()
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        cleaned_names.append(name)
+
+    if not cleaned_names:
+        return
+
+    tags = []
+    for name in cleaned_names:
+        tag = Tag.objects.filter(name__iexact=name).first()
+        if tag is None:
+            tag = Tag.objects.create(name=name)
+        tags.append(tag)
+    instance.tags.add(*tags)
+
+
+class AddTagsFromInputMixin:
+    new_tags_field_name = 'new_tags'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        add_tags_from_input(self.object, self.request.POST.get(self.new_tags_field_name, ''))
+        return response

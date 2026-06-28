@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin, SearchMixin, TagFilterMixin
+from cataclysm.view_helpers import AddTagsFromInputMixin, PerPageMixin, SearchMixin, TagFilterMixin
 
 from .models import Event
 
@@ -14,7 +14,7 @@ class EventListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     context_object_name = 'object_list'
 
 
-class EventCreateView(CreateView):
+class EventCreateView(AddTagsFromInputMixin, CreateView):
     model = Event
     # date is auto_now_add, exclude it; include all other user-editable fields
     fields = [

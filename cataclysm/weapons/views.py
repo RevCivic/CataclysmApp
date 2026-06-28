@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin, SearchMixin, TagFilterMixin
+from cataclysm.view_helpers import AddTagsFromInputMixin, PerPageMixin, SearchMixin, TagFilterMixin
 
 from .models import Weapon
 
@@ -14,7 +14,7 @@ class WeaponListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     context_object_name = 'object_list'
 
 
-class WeaponCreateView(CreateView):
+class WeaponCreateView(AddTagsFromInputMixin, CreateView):
     model = Weapon
     fields = '__all__'
     template_name = 'weapons/add_object.html'

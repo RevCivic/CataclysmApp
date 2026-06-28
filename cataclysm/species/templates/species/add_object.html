@@ -48,6 +48,10 @@
                 {{ form.physiology|as_crispy_field }}
                 {{ form.image|as_crispy_field }}
                 {{ form.tags|as_crispy_field }}
+                <div class="mb-3">
+                    <label for="id_new_tags" class="form-label">New tags (comma-separated)</label>
+                    <input id="id_new_tags" name="new_tags" type="text" class="form-control" placeholder="e.g. Core Worlds, Frontier">
+                </div>
                 {{ form.hidden|as_crispy_field }}
             </div>
         </div>

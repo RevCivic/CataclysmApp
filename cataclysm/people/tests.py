@@ -61,3 +61,19 @@ class PeopleViewsTestCase(TestCase):
     def test_person_404_on_missing(self):
         resp = self.client.get(reverse('person_page', kwargs={'id': 9999}))
         self.assertEqual(resp.status_code, 404)
+
+    def test_add_person_post_creates_and_assigns_new_tags(self):
+        resp = self.client.post(reverse('add_person'), {
+            'name': 'Lena Ortiz',
+            'age': 29,
+            'sex': 'Female',
+            'new_tags': 'Bridge Crew, Xenobiology',
+        })
+
+        self.assertEqual(resp.status_code, 302)
+        person = Person.objects.get(name='Lena Ortiz')
+        self.assertQuerysetEqual(
+            person.tags.order_by('name').values_list('name', flat=True),
+            ['Bridge Crew', 'Xenobiology'],
+            transform=lambda value: value,
+        )

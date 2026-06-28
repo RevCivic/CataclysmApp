@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin, SearchMixin, TagFilterMixin
+from cataclysm.view_helpers import AddTagsFromInputMixin, PerPageMixin, SearchMixin, TagFilterMixin
 
 from .models import Faction
 
@@ -14,7 +14,7 @@ class FactionListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     context_object_name = 'object_list'
 
 
-class FactionCreateView(CreateView):
+class FactionCreateView(AddTagsFromInputMixin, CreateView):
     model = Faction
     fields = '__all__'
     template_name = 'factions/add_object.html'
