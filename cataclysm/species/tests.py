@@ -5,7 +5,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .importing import guess_field_mapping
-from .models import Species, Tag
+from .models import Species
+from tags.models import Tag
 
 
 class SpeciesViewsTestCase(TestCase):

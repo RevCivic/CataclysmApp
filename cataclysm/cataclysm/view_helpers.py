@@ -5,6 +5,8 @@ from typing import Callable
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 
+from tags.models import Tag
+
 _VALID_PER_PAGE = ('50', '100', '500', 'all')
 
 
@@ -54,4 +56,23 @@ class PerPageMixin:
         ctx = super().get_context_data(**kwargs)
         per_page = self.request.GET.get('per_page', '50')
         ctx['current_per_page'] = per_page if per_page in _VALID_PER_PAGE else '50'
+        return ctx
+
+
+class TagFilterMixin:
+    """Mixin for ListView subclasses that filters by ?tag=<id> for tags M2M."""
+
+    tag_field_name = 'tags'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        self._selected_tag_ids = [int(tag_id) for tag_id in self.request.GET.getlist('tag') if tag_id.isdigit()]
+        if self._selected_tag_ids:
+            qs = qs.filter(**{f'{self.tag_field_name}__id__in': self._selected_tag_ids}).distinct()
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['tags'] = Tag.objects.order_by('name')
+        ctx['selected_tag_ids'] = getattr(self, '_selected_tag_ids', [])
         return ctx

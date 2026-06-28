@@ -9,8 +9,7 @@ class Armor(models.Model):
     speed_penalty = models.IntegerField()
     weight = models.DecimalField(max_digits=5, decimal_places=2)
     description = models.TextField()
-    # JSON field for dynamic tags
-    dynamic_tags = models.JSONField(blank=True, null=True)
+    tags = models.ManyToManyField('tags.Tag', blank=True)
     hidden = models.BooleanField(default=False)
 
     def __str__(self):

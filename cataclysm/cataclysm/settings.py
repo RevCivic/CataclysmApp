@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'party',
     'mindmaps',
     'species',
+    'tags',
     'weapons',
     'worlds',
     'ships',

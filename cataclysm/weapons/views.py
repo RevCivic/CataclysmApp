@@ -1,19 +1,17 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin, SearchMixin
+from cataclysm.view_helpers import PerPageMixin, SearchMixin, TagFilterMixin
 
 from .models import Weapon
 
 
-class WeaponListView(SearchMixin, PerPageMixin, ListView):
+class WeaponListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     search_fields = ['name', 'weapon_type']
     model = Weapon
+    queryset = Weapon.objects.prefetch_related('tags').order_by('name')
     template_name = 'weapons/weapons.html'
     context_object_name = 'object_list'
-
-    def get_queryset(self):
-        return Weapon.objects.all().order_by('name')
 
 
 class WeaponCreateView(CreateView):
@@ -27,4 +25,3 @@ class WeaponDetailView(DetailView):
     model = Weapon
     template_name = 'weapons/detail.html'
     context_object_name = 'object'
-

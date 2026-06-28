@@ -2,6 +2,8 @@
 from django.test import TestCase
 from django.urls import reverse
 
+from tags.models import Tag
+
 from .models import Faction
 
 
@@ -25,3 +27,17 @@ class FactionViewsTestCase(TestCase):
         resp = self.client.get(reverse('factions:detail', kwargs={'pk': self.faction.pk}))
         self.assertEqual(resp.status_code, 200)
 
+    def test_list_filters_by_tag(self):
+        other_faction = Faction.objects.create(
+            name='Outer Rim Union',
+            description='Independent worlds.',
+        )
+        tag = Tag.objects.create(name='Diplomatic')
+        other_tag = Tag.objects.create(name='Military')
+        self.faction.tags.add(tag)
+        other_faction.tags.add(other_tag)
+
+        resp = self.client.get(reverse('factions:index'), {'tag': [tag.id]})
+
+        self.assertContains(resp, 'Galactic Accord')
+        self.assertNotContains(resp, 'Outer Rim Union')

@@ -8,13 +8,6 @@ class Trait(models.Model):
         return self.name
 
 
-class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-
-    def __str__(self):
-        return self.name
-
-
 # Create your models here.
 class Person(models.Model):
     name = models.CharField(max_length=50)
@@ -32,7 +25,7 @@ class Person(models.Model):
     stats = models.ForeignKey('Statset', on_delete=models.SET_NULL, blank=True, null=True)
     skills = models.ForeignKey('Skillset', on_delete=models.SET_NULL, blank=True, null=True)
     traits = models.ManyToManyField('Trait', blank=True)
-    tags = models.ManyToManyField('Tag', blank=True)
+    tags = models.ManyToManyField('tags.Tag', blank=True)
     location = models.CharField(max_length=50, blank=True)
     additional_images = models.ManyToManyField('PersonImage', blank=True)
     hidden = models.BooleanField(default=False)

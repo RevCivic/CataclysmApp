@@ -1,10 +1,42 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 {% block content %}
 <div class="list-header index_menu">
 	<h1 class="app_name">Worlds</h1>
 	<a href="{% url 'worlds:add' %}" class="btn btn-primary">Add World</a>
 </div>
 {% include '_pagination.html' %}
+{% if tags %}
+<form method="get" class="pagination-controls">
+	<input type="hidden" name="per_page" value="{{ current_per_page }}">
+	{% if search_query %}
+	<input type="hidden" name="q" value="{{ search_query }}">
+	{% endif %}
+	<div class="lcars-table-wrap">
+		<table class="toggle-table">
+			<tr>
+				<th colspan="{{ tags|length }}" class="table-label">Tag Filters</th>
+			</tr>
+			<tr>
+				{% for tag in tags %}
+				<th>{{ tag.name }}</th>
+				{% endfor %}
+			</tr>
+			<tr>
+				{% for tag in tags %}
+				<td><input type="checkbox" name="tag" value="{{ tag.id }}" {% if tag.id in selected_tag_ids %}checked{% endif %}></td>
+				{% endfor %}
+			</tr>
+		</table>
+	</div>
+	<div style="margin-top: 1rem;">
+		<button type="submit" class="btn btn-secondary">Apply Tag Filters</button>
+		{% if selected_tag_ids %}
+		<a href="?{% url_replace tag='' page=1 %}" class="btn btn-secondary">Clear Tags</a>
+		{% endif %}
+	</div>
+</form>
+{% endif %}
 <div class="lcars-table-wrap">
 <table class="table table-hover sci-fi-table">
 	<thead>
@@ -16,6 +48,7 @@
 			<th>Colonized</th>
 			<th>Terraform</th>
 			<th>Flora/Fauna</th>
+			<th>Tags</th>
 			<th>Hidden</th>
 			<th></th>
 		</tr>
@@ -30,11 +63,18 @@
 			<td>{{ w.colonized }}</td>
 			<td>{{ w.terraformed }}</td>
 			<td>{% if w.contains_flora %}Flora {% endif %}{% if w.contains_fauna %}Fauna{% endif %}</td>
+			<td>
+				{% for tag in w.tags.all %}
+				{{ tag.name }}{% if not forloop.last %}, {% endif %}
+				{% empty %}
+				—
+				{% endfor %}
+			</td>
 			<td>{{ w.hidden }}</td>
 			<td><a href="{% url 'worlds:detail' w.pk %}">View</a></td>
 		</tr>
 	{% empty %}
-		<tr><td colspan="9">No worlds yet</td></tr>
+		<tr><td colspan="10">No worlds yet</td></tr>
 	{% endfor %}
 	</tbody>
 </table>

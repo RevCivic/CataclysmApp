@@ -1,20 +1,17 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin, SearchMixin
+from cataclysm.view_helpers import PerPageMixin, SearchMixin, TagFilterMixin
 
 from .models import Faction
 
 
-class FactionListView(SearchMixin, PerPageMixin, ListView):
+class FactionListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     search_fields = ['name', 'description']
     model = Faction
+    queryset = Faction.objects.prefetch_related('people', 'worlds', 'events', 'tags').order_by('name')
     template_name = 'factions/factions.html'
     context_object_name = 'object_list'
-
-    def get_queryset(self):
-        # prefetch M2M relations used by the list template (.count calls)
-        return Faction.objects.prefetch_related('people', 'worlds', 'events').order_by('name')
 
 
 class FactionCreateView(CreateView):
@@ -28,4 +25,3 @@ class FactionDetailView(DetailView):
     model = Faction
     template_name = 'factions/detail.html'
     context_object_name = 'object'
-

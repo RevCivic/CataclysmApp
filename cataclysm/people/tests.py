@@ -2,7 +2,9 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Person, Tag, Trait
+from tags.models import Tag
+
+from .models import Person, Trait
 
 
 class PeopleViewsTestCase(TestCase):
