@@ -1,19 +1,19 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin, SearchMixin
+from cataclysm.view_helpers import PerPageMixin, SearchMixin, TagFilterMixin
 
 from .models import Armor
 
 
-class ArmorListView(SearchMixin, PerPageMixin, ListView):
+class ArmorListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     search_fields = ['name', 'armor_type']
     model = Armor
     template_name = 'armor/armor.html'
     context_object_name = 'object_list'
 
     def get_queryset(self):
-        return Armor.objects.all().order_by('name')
+        return Armor.objects.prefetch_related('tags').order_by('name')
 
 
 class ArmorCreateView(CreateView):
@@ -27,4 +27,3 @@ class ArmorDetailView(DetailView):
     model = Armor
     template_name = 'armor/detail.html'
     context_object_name = 'object'
-

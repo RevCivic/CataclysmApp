@@ -24,6 +24,7 @@ class Event(models.Model):
     factions = models.ManyToManyField('factions.Faction', blank=True)
     species = models.ManyToManyField('species.Species', blank=True)
     worlds = models.ManyToManyField('worlds.World', blank=True)
+    tags = models.ManyToManyField('tags.Tag', blank=True)
     event_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     hidden = models.BooleanField(default=False)
 

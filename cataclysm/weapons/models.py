@@ -12,6 +12,7 @@ class Weapon(models.Model):
     secondary_weapon = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
     weight = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
+    tags = models.ManyToManyField('tags.Tag', blank=True)
     hidden = models.BooleanField(default=False)
 
     def __str__(self):

@@ -12,6 +12,7 @@ class World(models.Model):
     contains_sentient_life = models.BooleanField()
     special_traits = models.JSONField()
     points_of_interest = models.JSONField()
+    tags = models.ManyToManyField('tags.Tag', blank=True)
     hidden = models.BooleanField(default=False)
 
     def __str__(self):

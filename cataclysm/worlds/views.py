@@ -1,19 +1,19 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView
 
-from cataclysm.view_helpers import PerPageMixin, SearchMixin
+from cataclysm.view_helpers import PerPageMixin, SearchMixin, TagFilterMixin
 
 from .models import World
 
 
-class WorldListView(SearchMixin, PerPageMixin, ListView):
+class WorldListView(SearchMixin, TagFilterMixin, PerPageMixin, ListView):
     search_fields = ['name', 'system']
     model = World
     template_name = 'worlds/worlds.html'
     context_object_name = 'object_list'
 
     def get_queryset(self):
-        return World.objects.all().order_by('name')
+        return World.objects.prefetch_related('tags').order_by('name')
 
 
 class WorldCreateView(CreateView):
@@ -27,4 +27,3 @@ class WorldDetailView(DetailView):
     model = World
     template_name = 'worlds/detail.html'
     context_object_name = 'object'
-
