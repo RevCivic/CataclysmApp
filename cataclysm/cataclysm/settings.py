@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'party',
     'mindmaps',
     'species',
+    'sheet_imports',
     'tags',
     'weapons',
     'worlds',

@@ -300,3 +300,22 @@ safe to rerun, and operators can trace every imported value to its tab and row.
 The best first implementation slice is Phase 0 plus a dry-run-only Phase 1
 parser. It delivers a trustworthy diff and exposes identity/data-quality
 decisions before any production data is changed.
+
+## Implementation status
+
+The first database-readiness slice now provides the Phase 1 storage foundation:
+
+* people can carry an optional stable source ID and preserve non-numeric age
+  text without inventing an age;
+* aliases, normalized capabilities, organizational assignments, relationships,
+  accommodations, and queryable profile facts have dedicated relational
+  models;
+* sheet sources, import runs, and source-row bindings retain raw and normalized
+  payloads, warnings, fingerprints, state, and an optional link to any imported
+  model object; and
+* database constraints and indexes protect idempotency and support the planned
+  filters.
+
+Parser DTOs, identity review, dry-run reporting, and apply orchestration remain
+the next implementation slice. No production sheet data is imported merely by
+applying these migrations.
