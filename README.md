@@ -172,4 +172,22 @@ Authenticated users can save the current filter set as a private or shared
 named view from the People index. Shared views are readable by anyone with
 access to the app; private views are restricted to their owner. The same panel
 exports the filtered results as CSV. CSV values that spreadsheet applications
-could interpret as formulas are escaped before download.
+could interpret as formulas are escaped before download. The result-column
+picker controls both the HTML table and CSV export, and column selections are
+stored with named views.
+
+### Import searchable capabilities from the Stats tab
+
+After crew identities exist, preview the workbook's wide `Stats` matrix:
+
+```bash
+cd cataclysm
+python manage.py import_crew_stats \
+  --spreadsheet-id "$SPREADSHEET_ID" \
+  --report-json /tmp/stats-import-report.json
+```
+
+The command is read-only unless `--apply` is supplied. It converts every
+non-empty capability marker into a normalized `PersonCapability`, preserves the
+original marker, reuses source-row bindings on repeat runs, and leaves missing
+or duplicate character names unresolved rather than guessing.

@@ -27,6 +27,22 @@ SORT_FIELDS = {
     '-hidden': '-hidden',
 }
 
+PERSON_COLUMNS = {
+    'id': 'ID',
+    'name': 'Name',
+    'age': 'Age',
+    'sex': 'Sex',
+    'species': 'Species',
+    'faction': 'Faction',
+    'rank': 'Rank',
+    'position': 'Position',
+    'assignments': 'Assignments',
+    'traits': 'Traits',
+    'tags': 'Tags',
+    'picture': 'Picture',
+}
+DEFAULT_PERSON_COLUMNS = list(PERSON_COLUMNS)
+
 
 def _integer_values(values):
     return [int(value) for value in values if str(value).isdigit()]
@@ -45,10 +61,12 @@ class PersonFilterState:
     role: str = ''
     location: str = ''
     order_by: str = 'name'
+    columns: list[str] = field(default_factory=lambda: DEFAULT_PERSON_COLUMNS.copy())
 
     @classmethod
     def from_querydict(cls, params):
         requested_order = params.get('order_by', 'name')
+        requested_columns = params.getlist('column')
         return cls(
             query=params.get('q', '').strip(),
             tag_ids=_integer_values(params.getlist('tag')),
@@ -61,6 +79,11 @@ class PersonFilterState:
             role=params.get('role', '').strip(),
             location=params.get('location', '').strip(),
             order_by=requested_order if requested_order in SORT_FIELDS else 'name',
+            columns=(
+                [column for column in requested_columns if column in PERSON_COLUMNS]
+                if requested_columns
+                else DEFAULT_PERSON_COLUMNS.copy()
+            ),
         )
 
     def as_dict(self):
@@ -85,10 +108,12 @@ class PersonFilterState:
                 params.setlist(key, [str(item) for item in value])
             elif value:
                 params[key] = str(value)
+        if self.columns != DEFAULT_PERSON_COLUMNS:
+            params.setlist('column', self.columns)
         return params.urlencode()
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data, columns=None):
         params = QueryDict(mutable=True)
         if not isinstance(data, dict):
             return cls()
@@ -97,6 +122,8 @@ class PersonFilterState:
                 params.setlist(key, [str(item) for item in value])
             elif isinstance(value, (str, int)):
                 params[key] = str(value)
+        if isinstance(columns, list):
+            params.setlist('column', [str(column) for column in columns])
         return cls.from_querydict(params)
 
 

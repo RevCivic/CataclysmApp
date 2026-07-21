@@ -19,6 +19,7 @@
         {% if filter_state.rank %}<input type="hidden" name="rank" value="{{ filter_state.rank }}">{% endif %}
         {% if filter_state.role %}<input type="hidden" name="role" value="{{ filter_state.role }}">{% endif %}
         {% if filter_state.location %}<input type="hidden" name="location" value="{{ filter_state.location }}">{% endif %}
+        {% for value in filter_state.columns %}<input type="hidden" name="column" value="{{ value }}">{% endfor %}
         <input type="search" name="q" class="search-input" placeholder="Search…" value="{{ search_query|default:'' }}" aria-label="Search">
         <button type="submit" class="btn btn-secondary search-btn">Search</button>
         {% if search_query %}

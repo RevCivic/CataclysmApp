@@ -203,6 +203,7 @@ class SavedPeopleViewTests(TestCase):
         saved_view = SavedPersonView.objects.get(owner=self.owner)
         self.assertEqual(saved_view.filters['role'], 'Engineer')
         self.assertEqual(saved_view.filters['order_by'], 'name')
+        self.assertIn('assignments', saved_view.columns)
         self.assertRedirects(response, '/people/?role=Engineer&order_by=name')
         opened = self.client.get(reverse('open_person_view', kwargs={'view_id': saved_view.id}))
         self.assertRedirects(opened, '/people/?role=Engineer&order_by=name')
@@ -232,18 +233,37 @@ class SavedPeopleViewTests(TestCase):
         self.assertRedirects(response, '/people/?role=Pilot&order_by=name')
 
     def test_csv_export_uses_current_filters(self):
-        response = self.client.get(reverse('export_people_csv'), {'role': 'Engineer'})
+        response = self.client.get(
+            reverse('export_people_csv'),
+            {'role': 'Engineer', 'column': ['name', 'position']},
+        )
         rows = list(csv.reader(io.StringIO(response.content.decode())))
 
         self.assertEqual(response['Content-Type'], 'text/csv')
-        self.assertEqual(rows[0][0], 'Name')
+        self.assertEqual(rows[0], ['Name', 'Position'])
         self.assertEqual(rows[1][0], 'Engineer Export')
         self.assertEqual(len(rows), 2)
 
     def test_csv_export_escapes_spreadsheet_formulas(self):
         Person.objects.create(name='=HYPERLINK("bad")', age=20)
 
-        response = self.client.get(reverse('export_people_csv'), {'q': 'HYPERLINK'})
+        response = self.client.get(reverse('export_people_csv'), {'q': 'HYPERLINK', 'column': 'name'})
         rows = list(csv.reader(io.StringIO(response.content.decode())))
 
         self.assertEqual(rows[1][0], "'=HYPERLINK(\"bad\")")
+
+    def test_saved_view_restores_selected_columns(self):
+        saved_view = SavedPersonView.objects.create(
+            owner=self.owner,
+            name='Compact',
+            visibility=SavedPersonView.Visibility.SHARED,
+            filters={'role': 'Engineer'},
+            columns=['name', 'assignments'],
+        )
+
+        response = self.client.get(reverse('open_person_view', kwargs={'view_id': saved_view.id}))
+
+        self.assertRedirects(
+            response,
+            '/people/?role=Engineer&order_by=name&column=name&column=assignments',
+        )

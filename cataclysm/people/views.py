@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from people.forms import PersonForm, PersonImageForm
-from people.filters import PersonFilterState, filter_people
+from people.filters import PERSON_COLUMNS, PersonFilterState, filter_people
 from people.models import Capability, OrganizationUnit, Person, SavedPersonView, Trait
 from species.models import Species
 from tags.models import Tag
@@ -55,6 +55,7 @@ def index(request):
         ),
         'filter_state': state,
         'filter_query_string': state.as_query_string(),
+        'person_columns': PERSON_COLUMNS,
         'saved_views': (
             SavedPersonView.objects.filter(Q(owner=request.user) | Q(visibility=SavedPersonView.Visibility.SHARED))
             .select_related('owner')
@@ -108,7 +109,12 @@ def save_person_view(request):
     SavedPersonView.objects.update_or_create(
         owner=request.user,
         name=name,
-        defaults={'visibility': visibility, 'filters': state.as_dict(), 'schema_version': 1},
+        defaults={
+            'visibility': visibility,
+            'filters': state.as_dict(),
+            'columns': state.columns,
+            'schema_version': 1,
+        },
     )
     return redirect(f"{reverse('people_index')}?{state.as_query_string()}")
 
@@ -117,7 +123,7 @@ def open_person_view(request, view_id):
     saved_view = get_object_or_404(SavedPersonView, pk=view_id)
     if saved_view.visibility != SavedPersonView.Visibility.SHARED and saved_view.owner_id != request.user.id:
         return HttpResponse(status=404)
-    state = PersonFilterState.from_dict(saved_view.filters)
+    state = PersonFilterState.from_dict(saved_view.filters, saved_view.columns)
     return redirect(f"{reverse('people_index')}?{state.as_query_string()}")
 
 
@@ -127,25 +133,28 @@ def export_people_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="crew.csv"'
     writer = csv.writer(response)
-    writer.writerow(('Name', 'Age', 'Sex', 'Species', 'Rank', 'Position', 'Assignments', 'Traits', 'Tags'))
+    columns = state.columns
+    writer.writerow(tuple(PERSON_COLUMNS[column] for column in columns))
     for person in people:
         assignments = '; '.join(
             f'{assignment.unit.name}: {assignment.role}'.rstrip(': ')
             for assignment in person.assignments.all()
         )
-        writer.writerow(
-            tuple(_csv_safe(value) for value in (
-                person.name,
-                person.age if person.age is not None else person.age_text,
-                person.sex,
-                person.species.species_name if person.species else '',
-                person.rank,
-                person.position,
-                assignments,
-                '; '.join(trait.name for trait in person.traits.all()),
-                '; '.join(tag.name for tag in person.tags.all()),
-            ))
-        )
+        values = {
+            'id': person.id,
+            'name': person.name,
+            'age': person.age if person.age is not None else person.age_text,
+            'sex': person.sex,
+            'species': person.species.species_name if person.species else '',
+            'faction': person.faction.name if person.faction else '',
+            'rank': person.rank,
+            'position': person.position,
+            'assignments': assignments,
+            'traits': '; '.join(trait.name for trait in person.traits.all()),
+            'tags': '; '.join(tag.name for tag in person.tags.all()),
+            'picture': request.build_absolute_uri(person.image.url) if person.image else '',
+        }
+        writer.writerow(tuple(_csv_safe(values[column]) for column in columns))
     return response
 
 

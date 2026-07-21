@@ -327,5 +327,13 @@ allow-listed query service, searches imported related data, combines advanced
 crew filters, applies AND semantics to selected traits/capabilities, keeps
 filters shareable in the URL, and excludes hidden records before pagination.
 Private/shared named views and safe filtered CSV export are implemented using
-the same validated query state and authorization rules. Configurable persisted
-result columns remain to be implemented.
+the same validated query state and authorization rules. Result columns can now
+be selected for both the HTML directory and CSV exports and are persisted with
+named views. This completes the first Phase 2 discovery slice; richer table
+presets and identity reconciliation remain future work.
+
+The Stats portion of Phase 3 is now implemented as a separate dry-run-first
+command. It derives capability names from the sheet headings, retains raw
+markers and row provenance, binds only exact unique character names, and makes
+unchanged reruns no-ops. Departments, Quarters, Supers, Kids, Family, and the
+identity reconciliation interface remain outstanding.

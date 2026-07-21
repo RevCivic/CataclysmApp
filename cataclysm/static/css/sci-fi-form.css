@@ -107,6 +107,21 @@
     margin-top: 1rem;
 }
 
+.column-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--lcars-panel, #ff8c00);
+}
+
+.column-picker legend {
+    padding: 0 0.5rem;
+    color: var(--lcars-panel, #ff8c00);
+    font-weight: bold;
+}
+
 .saved-view-panel,
 .saved-view-actions,
 .saved-view-actions form {
