@@ -161,3 +161,9 @@ the two tabs, retain raw row values, and reuse source-row bindings on later
 runs. Applying an unchanged row is a no-op. Ambiguous duplicate names are
 reported as unresolved rather than guessed. Existing manually curated traits
 are not removed by an import.
+
+The People index can search imported aliases, species, roles, organizations,
+and profile facts. Its advanced filters support species, traits, capabilities,
+organizations, status, rank, role, and location/origin. Repeating trait or
+capability selections uses **match all** semantics, and all filter state remains
+in the URL so filtered directories can be bookmarked or shared.

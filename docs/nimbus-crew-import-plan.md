@@ -321,3 +321,10 @@ raw-row provenance, and idempotent binding reuse are now implemented for Main
 Crew and Other Crew. Identity review UI and parsers for the remaining tabs are
 the next implementation slice. No production sheet data is imported merely by
 applying the migrations or running the command without `--apply`.
+
+The Phase 2 query foundation is also in place: the People index uses an
+allow-listed query service, searches imported related data, combines advanced
+crew filters, applies AND semantics to selected traits/capabilities, keeps
+filters shareable in the URL, and excludes hidden records before pagination.
+Persisted named views, configurable result columns, and CSV export remain to be
+implemented.

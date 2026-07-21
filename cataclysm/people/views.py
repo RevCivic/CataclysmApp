@@ -2,7 +2,9 @@ from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
 from people.forms import PersonForm, PersonImageForm
-from people.models import Person, Trait
+from people.filters import PersonFilterState, filter_people
+from people.models import Capability, OrganizationUnit, Person, Trait
+from species.models import Species
 from tags.models import Tag
 
 
@@ -10,18 +12,17 @@ _VALID_PER_PAGE = ('50', '100', '500', 'all')
 
 
 def index(request):
-    qs = Person.objects.select_related('species', 'faction').prefetch_related('traits', 'tags').order_by('name')
-    order_by = request.GET.get('order_by')
-    if order_by:
-        qs = qs.order_by(order_by)
-
-    q = request.GET.get('q', '').strip()
-    if q:
-        qs = qs.filter(name__icontains=q)
-
-    selected_tag_ids = [int(tag_id) for tag_id in request.GET.getlist('tag') if tag_id.isdigit()]
-    if selected_tag_ids:
-        qs = qs.filter(tags__id__in=selected_tag_ids).distinct()
+    state = PersonFilterState.from_querydict(request.GET)
+    include_hidden = request.user.is_authenticated and request.user.groups.filter(name='admins').exists()
+    qs = Person.objects.select_related('species', 'faction').prefetch_related(
+        'traits',
+        'tags',
+        'aliases',
+        'capabilities__capability',
+        'assignments__unit',
+        'profile_facts',
+    )
+    qs = filter_people(qs, state, include_hidden=include_hidden)
 
     per_page = request.GET.get('per_page', '50')
     if per_page not in _VALID_PER_PAGE:
@@ -29,6 +30,18 @@ def index(request):
 
     traits = Trait.objects.all()
     tags = Tag.objects.order_by('name')
+    filter_context = {
+        'capabilities': Capability.objects.order_by('category', 'name'),
+        'species_options': Species.objects.order_by('species_name'),
+        'unit_options': OrganizationUnit.objects.order_by('kind', 'name'),
+        'status_options': (
+            Person.objects.exclude(assignments__status='')
+            .values_list('assignments__status', flat=True)
+            .distinct()
+            .order_by('assignments__status')
+        ),
+        'filter_state': state,
+    }
 
     if per_page == 'all':
         return render(request, 'people_index.html', {
@@ -37,10 +50,11 @@ def index(request):
             'is_paginated': False,
             'traits': traits,
             'tags': tags,
-            'selected_tag_ids': selected_tag_ids,
             'current_per_page': per_page,
-            'search_query': q,
-            'current_order_by': order_by or '',
+            'selected_tag_ids': state.tag_ids,
+            'search_query': state.query,
+            'current_order_by': state.order_by,
+            **filter_context,
         })
 
     paginator = Paginator(qs, int(per_page))
@@ -51,10 +65,11 @@ def index(request):
         'is_paginated': page_obj.has_other_pages(),
         'traits': traits,
         'tags': tags,
-        'selected_tag_ids': selected_tag_ids,
+        'selected_tag_ids': state.tag_ids,
         'current_per_page': per_page,
-        'search_query': q,
-        'current_order_by': order_by or '',
+        'search_query': state.query,
+        'current_order_by': state.order_by,
+        **filter_context,
     })
 
 

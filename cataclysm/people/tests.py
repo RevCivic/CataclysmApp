@@ -61,6 +61,12 @@ class PeopleViewsTestCase(TestCase):
         self.assertContains(resp, 'Hugo Walgrave')
         self.assertNotContains(resp, 'Unaffiliated')
 
+    def test_index_rejects_arbitrary_order_by_fields(self):
+        resp = self.client.get('/people/', {'order_by': 'name; DROP TABLE people_person'})
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.context['current_order_by'], 'name')
+
     def test_add_person_get_returns_200(self):
         resp = self.client.get(reverse('add_person'))
         self.assertEqual(resp.status_code, 200)
@@ -123,3 +129,52 @@ class ImportedPeopleModelTests(TestCase):
         self.assertEqual(accommodation.section, 'B')
         self.assertEqual(fact.value, 'Mountain Base')
         self.assertEqual(relationship.unresolved_name, 'Unmatched Parent')
+
+
+class PeopleDiscoveryTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.engineer = Person.objects.create(name='Engineer One', age=30)
+        cls.hidden = Person.objects.create(name='Hidden Engineer', age=31, hidden=True)
+        cls.pilot = Person.objects.create(name='Pilot Two', age=32)
+        cls.engineer.aliases.create(name='The Fixer')
+        ship = OrganizationUnit.objects.create(name='Potempkin', kind=OrganizationUnit.Kind.SHIP)
+        PersonAssignment.objects.create(
+            person=cls.engineer,
+            unit=ship,
+            role='Engineer',
+            rank='LT',
+            status='Good',
+        )
+        engineering = Capability.objects.create(name='Engineering')
+        command = Capability.objects.create(name='Command')
+        PersonCapability.objects.create(person=cls.engineer, capability=engineering)
+        PersonCapability.objects.create(person=cls.engineer, capability=command)
+        PersonCapability.objects.create(person=cls.pilot, capability=command)
+        cls.engineering_id = engineering.id
+        cls.command_id = command.id
+        cls.ship_id = ship.id
+
+    def test_search_matches_alias_and_hides_hidden_people(self):
+        response = self.client.get('/people/', {'q': 'Fixer'})
+
+        self.assertContains(response, 'Engineer One')
+        self.assertNotContains(response, 'Hidden Engineer')
+
+    def test_capability_filters_use_and_semantics(self):
+        response = self.client.get(
+            '/people/',
+            {'capability': [self.engineering_id, self.command_id]},
+        )
+
+        self.assertContains(response, 'Engineer One')
+        self.assertNotContains(response, 'Pilot Two')
+
+    def test_assignment_filters_can_be_combined(self):
+        response = self.client.get(
+            '/people/',
+            {'unit': self.ship_id, 'status': 'Good', 'role': 'engineer', 'rank': 'lt'},
+        )
+
+        self.assertContains(response, 'Engineer One')
+        self.assertNotContains(response, 'Pilot Two')
