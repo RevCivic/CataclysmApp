@@ -131,3 +131,39 @@ Useful options:
 Without `--overwrite`, images are skipped only when the stored `image_source_url` already matches the current sheet URL; if the sheet URL changed, the image is refreshed.
 
 For security, downloads only support direct `http/https` image URLs and intentionally do **not** follow HTTP redirects to reduce SSRF-style redirect abuse.
+
+## Preview or import crew data from Google Sheets
+
+The schema-driven crew importer understands the different layouts of the
+`Main Crew` and `Other Crew` tabs. It is read-only by default:
+
+```bash
+cd cataclysm
+python manage.py import_crew_workbook \
+  --spreadsheet-id "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit" \
+  --tabs "Main Crew" "Other Crew"
+```
+
+Review the created/updated/unresolved counts and warnings. To write the parsed
+records and their source-row provenance, rerun with the explicit `--apply`
+flag. A JSON report can be produced in either mode:
+
+```bash
+python manage.py import_crew_workbook \
+  --spreadsheet-id "$SPREADSHEET_ID" \
+  --tabs "Main Crew" "Other Crew" \
+  --report-json /tmp/crew-import-report.json \
+  --apply
+```
+
+Imports preserve qualified/unknown ages as text, use separate trait maps for
+the two tabs, retain raw row values, and reuse source-row bindings on later
+runs. Applying an unchanged row is a no-op. Ambiguous duplicate names are
+reported as unresolved rather than guessed. Existing manually curated traits
+are not removed by an import.
+
+The People index can search imported aliases, species, roles, organizations,
+and profile facts. Its advanced filters support species, traits, capabilities,
+organizations, status, rank, role, and location/origin. Repeating trait or
+capability selections uses **match all** semantics, and all filter state remains
+in the URL so filtered directories can be bookmarked or shared.
