@@ -8,6 +8,7 @@ import requests
 # Public Google Sheets CSV export base URL.  No API key or service account is
 # required — the sheet only needs to be shared with "Anyone with the link".
 _EXPORT_BASE = "https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export"
+_GVIZ_BASE = "https://docs.google.com/spreadsheets/d/{spreadsheet_id}/gviz/tq"
 _SPREADSHEETS_API_BASE = "https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}"
 _GRID_DATA_FIELDS = (
     "sheets(data(rowData(values("
@@ -78,10 +79,21 @@ def read_sheet_data(spreadsheet_id, range_name):
     """
     spreadsheet_id = extract_spreadsheet_id(spreadsheet_id)
     url = _EXPORT_BASE.format(spreadsheet_id=spreadsheet_id)
+    params = {"format": "csv", "range": range_name}
+    if "!" in range_name:
+        # The /export endpoint does not reliably honor a tab name embedded in
+        # its range parameter. GViz accepts tab and range separately and works
+        # for publicly shared workbooks without requiring a numeric gid.
+        tab_name, cell_range = range_name.rsplit("!", 1)
+        tab_name = tab_name.strip()
+        if len(tab_name) >= 2 and tab_name[0] == tab_name[-1] == "'":
+            tab_name = tab_name[1:-1].replace("''", "'")
+        url = _GVIZ_BASE.format(spreadsheet_id=spreadsheet_id)
+        params = {"tqx": "out:csv", "sheet": tab_name, "range": cell_range}
     try:
         response = requests.get(
             url,
-            params={"format": "csv", "range": range_name},
+            params=params,
             timeout=30,
         )
         response.raise_for_status()

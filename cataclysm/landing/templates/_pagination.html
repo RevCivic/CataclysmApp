@@ -11,6 +11,14 @@
         {% for tag_id in selected_tag_ids %}
         <input type="hidden" name="tag" value="{{ tag_id }}">
         {% endfor %}
+        {% for value in filter_state.trait_ids %}<input type="hidden" name="trait" value="{{ value }}">{% endfor %}
+        {% for value in filter_state.capability_ids %}<input type="hidden" name="capability" value="{{ value }}">{% endfor %}
+        {% for value in filter_state.species_ids %}<input type="hidden" name="species" value="{{ value }}">{% endfor %}
+        {% for value in filter_state.unit_ids %}<input type="hidden" name="unit" value="{{ value }}">{% endfor %}
+        {% for value in filter_state.statuses %}<input type="hidden" name="status" value="{{ value }}">{% endfor %}
+        {% if filter_state.rank %}<input type="hidden" name="rank" value="{{ filter_state.rank }}">{% endif %}
+        {% if filter_state.role %}<input type="hidden" name="role" value="{{ filter_state.role }}">{% endif %}
+        {% if filter_state.location %}<input type="hidden" name="location" value="{{ filter_state.location }}">{% endif %}
         <input type="search" name="q" class="search-input" placeholder="Search…" value="{{ search_query|default:'' }}" aria-label="Search">
         <button type="submit" class="btn btn-secondary search-btn">Search</button>
         {% if search_query %}
