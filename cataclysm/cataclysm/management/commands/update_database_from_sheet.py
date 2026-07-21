@@ -21,7 +21,8 @@ except Exception:
 SAMPLE_SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "1XRyeXDIhNE6iwTXS_zDc_eHrQFU96Z2OUCIXm_t0twE")
 SAMPLE_RANGE_NAME = os.environ.get("SHEET_RANGE", "Other Crew!A5:Z")
 
-# Maps column index → Trait name (columns 4-17 in the sheet are trait flags).
+# Legacy Main Crew mapping. New imports should use import_crew_workbook, whose
+# tab-specific schemas account for the different Other Crew column offsets.
 TRAIT_COLUMNS = {
     4: 'Tactician',
     5: 'Medical',
@@ -110,6 +111,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Django management command entry point."""
         main()
-
 
 

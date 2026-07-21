@@ -11,8 +11,7 @@
 
     {% include '_pagination.html' %}
 
-    {% if tags %}
-    <form method="get" class="pagination-controls">
+    <form method="get" class="crew-filter-panel lcars-panel">
         <input type="hidden" name="per_page" value="{{ current_per_page }}">
         {% if current_order_by %}
         <input type="hidden" name="order_by" value="{{ current_order_by }}">
@@ -20,6 +19,53 @@
         {% if search_query %}
         <input type="hidden" name="q" value="{{ search_query }}">
         {% endif %}
+        <div class="sci-fi-form-grid crew-filter-grid">
+            <label>Species
+                <select name="species" multiple>
+                    {% for species in species_options %}
+                    <option value="{{ species.id }}" {% if species.id in filter_state.species_ids %}selected{% endif %}>{{ species.species_name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Traits (match all)
+                <select name="trait" multiple>
+                    {% for trait in traits %}
+                    <option value="{{ trait.id }}" {% if trait.id in filter_state.trait_ids %}selected{% endif %}>{{ trait.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Capabilities (match all)
+                <select name="capability" multiple>
+                    {% for capability in capabilities %}
+                    <option value="{{ capability.id }}" {% if capability.id in filter_state.capability_ids %}selected{% endif %}>{{ capability.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Organization
+                <select name="unit" multiple>
+                    {% for unit in unit_options %}
+                    <option value="{{ unit.id }}" {% if unit.id in filter_state.unit_ids %}selected{% endif %}>{{ unit.name }} ({{ unit.get_kind_display }})</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Status
+                <select name="status" multiple>
+                    {% for status in status_options %}
+                    {% if status %}<option value="{{ status }}" {% if status in filter_state.statuses %}selected{% endif %}>{{ status }}</option>{% endif %}
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Rank <input type="text" name="rank" value="{{ filter_state.rank }}"></label>
+            <label>Role <input type="text" name="role" value="{{ filter_state.role }}"></label>
+            <label>Location / Origin <input type="text" name="location" value="{{ filter_state.location }}"></label>
+        </div>
+        <fieldset class="column-picker">
+            <legend>Result columns</legend>
+            {% for column_id, column_label in person_columns.items %}
+            <label><input type="checkbox" name="column" value="{{ column_id }}" {% if column_id in filter_state.columns %}checked{% endif %}> {{ column_label }}</label>
+            {% endfor %}
+        </fieldset>
+        {% if tags %}
         <div class="lcars-table-wrap">
             <table class="toggle-table">
                 <tr>
@@ -37,16 +83,38 @@
                 </tr>
             </table>
         </div>
-        <div style="margin-top: 1rem;">
-            <button type="submit" class="btn btn-secondary">Apply Tag Filters</button>
-            {% if selected_tag_ids %}
-            <a href="?{% url_replace tag='' page=1 %}" class="btn btn-secondary">Clear Tags</a>
-            {% endif %}
+        {% endif %}
+        <div class="crew-filter-actions">
+            <button type="submit" class="btn btn-secondary">Apply Filters</button>
+            <a href="{% url 'people_index' %}?per_page={{ current_per_page }}" class="btn btn-secondary">Clear Filters</a>
         </div>
     </form>
-    {% endif %}
 
-    <div class="column-buttons">
+    <div class="saved-view-panel">
+        <div>
+            <strong>Saved views:</strong>
+            {% for saved_view in saved_views %}
+                <a class="btn btn-secondary" href="{% url 'open_person_view' saved_view.id %}">{{ saved_view.name }}{% if saved_view.owner != request.user %} · {{ saved_view.owner.username }}{% endif %}</a>
+            {% empty %}<span>None yet.</span>{% endfor %}
+        </div>
+        <div class="saved-view-actions">
+            <a class="btn btn-secondary" href="{% url 'export_people_csv' %}?{{ filter_query_string }}">Export filtered CSV</a>
+            {% if request.user.is_authenticated %}
+            <form method="post" action="{% url 'save_person_view' %}">
+                {% csrf_token %}
+                <input type="hidden" name="query_string" value="{{ filter_query_string }}">
+                <label>View name <input required maxlength="100" name="name"></label>
+                <select name="visibility" aria-label="Saved view visibility">
+                    <option value="private">Private</option>
+                    <option value="shared">Shared</option>
+                </select>
+                <button class="btn btn-secondary" type="submit">Save current view</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if 'traits' in filter_state.columns %}<div class="column-buttons">
         <div class="lcars-table-wrap">
         <table class="toggle-table">
             <tr>
@@ -70,7 +138,7 @@
             </tr>
         </table>
         </div>
-    </div>
+    </div>{% endif %}
 
     <script>
         var buttons = document.getElementsByClassName("column-button");
@@ -112,21 +180,22 @@
     <table class="sci-fi-list">
         <thead>
             <tr>
-                <th class="center"><a href="?{% url_replace order_by='id' %}">ID</a></th>
-                <th class="center"><a href="?{% url_replace order_by='name' %}">Name</a></th>
-                <th class="center"><a href="?{% url_replace order_by='age' %}">Age</a></th>
-                <th class="center"><a href="?{% url_replace order_by='sex' %}">Sex</a></th>
-                <th class="center"><a href="?{% url_replace order_by='species' %}">Species</a></th>
-                <th class="center"><a href="?{% url_replace order_by='faction' %}">Faction</a></th>
-                <th class="center"><a href="?{% url_replace order_by='rank' %}">Rank</a></th>
-                <th class="center"><a href="?{% url_replace order_by='position' %}">Position</a></th>
-                {% for trait in traits %}
+                {% if 'id' in filter_state.columns %}<th class="center"><a href="?{% url_replace order_by='id' %}">ID</a></th>{% endif %}
+                {% if 'name' in filter_state.columns %}<th class="center"><a href="?{% url_replace order_by='name' %}">Name</a></th>{% endif %}
+                {% if 'age' in filter_state.columns %}<th class="center"><a href="?{% url_replace order_by='age' %}">Age</a></th>{% endif %}
+                {% if 'sex' in filter_state.columns %}<th class="center"><a href="?{% url_replace order_by='sex' %}">Sex</a></th>{% endif %}
+                {% if 'species' in filter_state.columns %}<th class="center"><a href="?{% url_replace order_by='species' %}">Species</a></th>{% endif %}
+                {% if 'faction' in filter_state.columns %}<th class="center"><a href="?{% url_replace order_by='faction' %}">Faction</a></th>{% endif %}
+                {% if 'rank' in filter_state.columns %}<th class="center"><a href="?{% url_replace order_by='rank' %}">Rank</a></th>{% endif %}
+                {% if 'position' in filter_state.columns %}<th class="center"><a href="?{% url_replace order_by='position' %}">Position</a></th>{% endif %}
+                {% if 'assignments' in filter_state.columns %}<th class="center">Assignments</th>{% endif %}
+                {% if 'traits' in filter_state.columns %}{% for trait in traits %}
                     <th class="rotate {{ trait.name|slugify }} boolean"><div><span>{{ trait.name }}</span></div></th>
-                {% endfor %}
-                {% if tags %}
+                {% endfor %}{% endif %}
+                {% if tags and 'tags' in filter_state.columns %}
                     <th class="center">Tags</th>
                 {% endif %}
-                <th class="crew-image">Picture</th>
+                {% if 'picture' in filter_state.columns %}<th class="crew-image">Picture</th>{% endif %}
                 {% if request.user|has_group:'admins' %}
                     <th><a href="?{% url_replace order_by='hidden' %}">Hidden</a></th>
                 {% endif %}
@@ -135,20 +204,24 @@
         </thead>
         <tbody>
             {% for person in people_list %}
-                {% if not person.hidden %}
                     <tr>
-                        <td><a href="{% url 'person_page' person.id %}">{{ person.id }}</a></td>
-                        <td>{{ person.name }}</td>
-                        <td>{{ person.age }}</td>
-                        <td>{{ person.sex }}</td>
-                        <td>{{ person.species }}</td>
-                        <td>{{ person.faction }}</td>
-                        <td>{{ person.rank }}</td>
-                        <td>{{ person.position }}</td>
-                        {% for trait in traits %}
+                        {% if 'id' in filter_state.columns %}<td><a href="{% url 'person_page' person.id %}">{{ person.id }}</a></td>{% endif %}
+                        {% if 'name' in filter_state.columns %}<td>{{ person.name }}</td>{% endif %}
+                        {% if 'age' in filter_state.columns %}<td>{% firstof person.age person.age_text "—" %}</td>{% endif %}
+                        {% if 'sex' in filter_state.columns %}<td>{{ person.sex }}</td>{% endif %}
+                        {% if 'species' in filter_state.columns %}<td>{{ person.species }}</td>{% endif %}
+                        {% if 'faction' in filter_state.columns %}<td>{{ person.faction }}</td>{% endif %}
+                        {% if 'rank' in filter_state.columns %}<td>{{ person.rank }}</td>{% endif %}
+                        {% if 'position' in filter_state.columns %}<td>{{ person.position }}</td>{% endif %}
+                        {% if 'assignments' in filter_state.columns %}<td>
+                            {% for assignment in person.assignments.all %}
+                                {{ assignment.unit.name }}{% if assignment.role %}: {{ assignment.role }}{% endif %}{% if assignment.status %} ({{ assignment.status }}){% endif %}{% if not forloop.last %}<br>{% endif %}
+                            {% empty %}—{% endfor %}
+                        </td>{% endif %}
+                        {% if 'traits' in filter_state.columns %}{% for trait in traits %}
                             <td class="boolean {{ trait.name|slugify }}">{% if trait in person.traits.all %}<span class="green-checkmark">&#10004;</span>{% else %}<span class="gray-x">&#10006;</span>{% endif %}</td>
-                        {% endfor %}
-                        {% if tags %}
+                        {% endfor %}{% endif %}
+                        {% if tags and 'tags' in filter_state.columns %}
                             <td>
                                 {% for tag in person.tags.all %}
                                     {{ tag.name }}{% if not forloop.last %}, {% endif %}
@@ -157,18 +230,17 @@
                                 {% endfor %}
                             </td>
                         {% endif %}
-                        {% if person.image %}
+                        {% if 'picture' in filter_state.columns %}{% if person.image %}
                             <td>
                                 <img src="{{ person.image.url }}" alt="{{ person.name }}" class="crew_list_image"></img>
                             </td>
                         {% else %}
                             <td>No image available</td>
-                        {% endif %}
+                        {% endif %}{% endif %}
                         {% if request.user|has_group:'admins' %}
                             <td>{{ person.hidden }}</td>
                         {% endif %}
                     </tr>
-                {% endif %}
             {% empty %}
                 <tr>
                     <td colspan="3">No people found.</td>
