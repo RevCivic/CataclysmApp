@@ -326,5 +326,6 @@ The Phase 2 query foundation is also in place: the People index uses an
 allow-listed query service, searches imported related data, combines advanced
 crew filters, applies AND semantics to selected traits/capabilities, keeps
 filters shareable in the URL, and excludes hidden records before pagination.
-Persisted named views, configurable result columns, and CSV export remain to be
-implemented.
+Private/shared named views and safe filtered CSV export are implemented using
+the same validated query state and authorization rules. Configurable persisted
+result columns remain to be implemented.

@@ -167,3 +167,9 @@ and profile facts. Its advanced filters support species, traits, capabilities,
 organizations, status, rank, role, and location/origin. Repeating trait or
 capability selections uses **match all** semantics, and all filter state remains
 in the URL so filtered directories can be bookmarked or shared.
+
+Authenticated users can save the current filter set as a private or shared
+named view from the People index. Shared views are readable by anyone with
+access to the app; private views are restricted to their owner. The same panel
+exports the filtered results as CSV. CSV values that spreadsheet applications
+could interpret as formulas are escaped before download.

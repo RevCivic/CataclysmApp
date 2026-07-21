@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -198,6 +199,30 @@ class PersonProfileFact(models.Model):
 
     def __str__(self):
         return f'{self.person}: {self.key}'
+
+
+class SavedPersonView(models.Model):
+    class Visibility(models.TextChoices):
+        PRIVATE = 'private', 'Private'
+        SHARED = 'shared', 'Shared'
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='saved_person_views')
+    name = models.CharField(max_length=100)
+    visibility = models.CharField(max_length=10, choices=Visibility.choices, default=Visibility.PRIVATE)
+    filters = models.JSONField(default=dict)
+    columns = models.JSONField(default=list, blank=True)
+    schema_version = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=('owner', 'name'), name='unique_saved_person_view_name'),
+        ]
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name
 
 
 class Statset(models.Model):

@@ -10,6 +10,7 @@ from .models import (
     PersonImage,
     PersonProfileFact,
     PersonRelationship,
+    SavedPersonView,
     Skillset,
     Statset,
     Trait,
@@ -29,3 +30,4 @@ admin.site.register(PersonAssignment)
 admin.site.register(PersonRelationship)
 admin.site.register(AccommodationAssignment)
 admin.site.register(PersonProfileFact)
+admin.site.register(SavedPersonView)

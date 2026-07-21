@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 from django.db.models import Q, QuerySet
+from django.http import QueryDict
 
 from .models import Person
 
@@ -61,6 +62,42 @@ class PersonFilterState:
             location=params.get('location', '').strip(),
             order_by=requested_order if requested_order in SORT_FIELDS else 'name',
         )
+
+    def as_dict(self):
+        return {
+            'q': self.query,
+            'tag': self.tag_ids,
+            'trait': self.trait_ids,
+            'capability': self.capability_ids,
+            'species': self.species_ids,
+            'unit': self.unit_ids,
+            'status': self.statuses,
+            'rank': self.rank,
+            'role': self.role,
+            'location': self.location,
+            'order_by': self.order_by,
+        }
+
+    def as_query_string(self):
+        params = QueryDict(mutable=True)
+        for key, value in self.as_dict().items():
+            if isinstance(value, list):
+                params.setlist(key, [str(item) for item in value])
+            elif value:
+                params[key] = str(value)
+        return params.urlencode()
+
+    @classmethod
+    def from_dict(cls, data):
+        params = QueryDict(mutable=True)
+        if not isinstance(data, dict):
+            return cls()
+        for key, value in data.items():
+            if isinstance(value, list):
+                params.setlist(key, [str(item) for item in value])
+            elif isinstance(value, (str, int)):
+                params[key] = str(value)
+        return cls.from_querydict(params)
 
 
 def filter_people(queryset: QuerySet[Person], state: PersonFilterState, include_hidden=False):

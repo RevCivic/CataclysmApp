@@ -1,9 +1,15 @@
+import csv
+
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Q
+from django.http import HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from people.forms import PersonForm, PersonImageForm
 from people.filters import PersonFilterState, filter_people
-from people.models import Capability, OrganizationUnit, Person, Trait
+from people.models import Capability, OrganizationUnit, Person, SavedPersonView, Trait
 from species.models import Species
 from tags.models import Tag
 
@@ -11,10 +17,12 @@ from tags.models import Tag
 _VALID_PER_PAGE = ('50', '100', '500', 'all')
 
 
-def index(request):
-    state = PersonFilterState.from_querydict(request.GET)
-    include_hidden = request.user.is_authenticated and request.user.groups.filter(name='admins').exists()
-    qs = Person.objects.select_related('species', 'faction').prefetch_related(
+def _can_include_hidden(user):
+    return user.is_authenticated and user.groups.filter(name='admins').exists()
+
+
+def _people_queryset(state, user):
+    queryset = Person.objects.select_related('species', 'faction').prefetch_related(
         'traits',
         'tags',
         'aliases',
@@ -22,7 +30,12 @@ def index(request):
         'assignments__unit',
         'profile_facts',
     )
-    qs = filter_people(qs, state, include_hidden=include_hidden)
+    return filter_people(queryset, state, include_hidden=_can_include_hidden(user))
+
+
+def index(request):
+    state = PersonFilterState.from_querydict(request.GET)
+    qs = _people_queryset(state, request.user)
 
     per_page = request.GET.get('per_page', '50')
     if per_page not in _VALID_PER_PAGE:
@@ -41,6 +54,14 @@ def index(request):
             .order_by('assignments__status')
         ),
         'filter_state': state,
+        'filter_query_string': state.as_query_string(),
+        'saved_views': (
+            SavedPersonView.objects.filter(Q(owner=request.user) | Q(visibility=SavedPersonView.Visibility.SHARED))
+            .select_related('owner')
+            .distinct()
+            if request.user.is_authenticated
+            else SavedPersonView.objects.filter(visibility=SavedPersonView.Visibility.SHARED).select_related('owner')
+        ),
     }
 
     if per_page == 'all':
@@ -71,6 +92,68 @@ def index(request):
         'current_order_by': state.order_by,
         **filter_context,
     })
+
+
+@login_required
+def save_person_view(request):
+    if request.method != 'POST':
+        return redirect('people_index')
+    name = request.POST.get('name', '').strip()
+    if not name:
+        return redirect('people_index')
+    visibility = request.POST.get('visibility', SavedPersonView.Visibility.PRIVATE)
+    if visibility not in SavedPersonView.Visibility.values:
+        visibility = SavedPersonView.Visibility.PRIVATE
+    state = PersonFilterState.from_querydict(QueryDict(request.POST.get('query_string', '')))
+    SavedPersonView.objects.update_or_create(
+        owner=request.user,
+        name=name,
+        defaults={'visibility': visibility, 'filters': state.as_dict(), 'schema_version': 1},
+    )
+    return redirect(f"{reverse('people_index')}?{state.as_query_string()}")
+
+
+def open_person_view(request, view_id):
+    saved_view = get_object_or_404(SavedPersonView, pk=view_id)
+    if saved_view.visibility != SavedPersonView.Visibility.SHARED and saved_view.owner_id != request.user.id:
+        return HttpResponse(status=404)
+    state = PersonFilterState.from_dict(saved_view.filters)
+    return redirect(f"{reverse('people_index')}?{state.as_query_string()}")
+
+
+def export_people_csv(request):
+    state = PersonFilterState.from_querydict(request.GET)
+    people = _people_queryset(state, request.user)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="crew.csv"'
+    writer = csv.writer(response)
+    writer.writerow(('Name', 'Age', 'Sex', 'Species', 'Rank', 'Position', 'Assignments', 'Traits', 'Tags'))
+    for person in people:
+        assignments = '; '.join(
+            f'{assignment.unit.name}: {assignment.role}'.rstrip(': ')
+            for assignment in person.assignments.all()
+        )
+        writer.writerow(
+            tuple(_csv_safe(value) for value in (
+                person.name,
+                person.age if person.age is not None else person.age_text,
+                person.sex,
+                person.species.species_name if person.species else '',
+                person.rank,
+                person.position,
+                assignments,
+                '; '.join(trait.name for trait in person.traits.all()),
+                '; '.join(tag.name for tag in person.tags.all()),
+            ))
+        )
+    return response
+
+
+def _csv_safe(value):
+    text = str(value or '')
+    if text.startswith(('=', '+', '-', '@')):
+        return "'" + text
+    return text
 
 
 def person_page(request, id):
@@ -110,7 +193,7 @@ def edit_person(request, id):
 def delete_person(request, id):
     person = get_object_or_404(Person, id=id)
     person.delete()
-    return redirect('index')
+    return redirect('people_index')
 
 
 def add_images(request, id):

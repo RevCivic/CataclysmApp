@@ -1,4 +1,8 @@
 """Smoke tests for people views."""
+import csv
+import io
+
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
@@ -14,6 +18,7 @@ from .models import (
     PersonCapability,
     PersonProfileFact,
     PersonRelationship,
+    SavedPersonView,
     Trait,
 )
 
@@ -178,3 +183,67 @@ class PeopleDiscoveryTests(TestCase):
 
         self.assertContains(response, 'Engineer One')
         self.assertNotContains(response, 'Pilot Two')
+
+
+class SavedPeopleViewTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.owner = get_user_model().objects.create_user(username='view-owner', password='secret-pass')
+        cls.other = get_user_model().objects.create_user(username='other-user', password='secret-pass')
+        Person.objects.create(name='Engineer Export', age=30, position='Engineer')
+        Person.objects.create(name='Pilot Export', age=31, position='Pilot')
+
+    def test_authenticated_user_can_save_and_open_validated_view(self):
+        self.client.force_login(self.owner)
+        response = self.client.post(
+            reverse('save_person_view'),
+            {'name': 'Engineers', 'visibility': 'private', 'query_string': 'role=Engineer&order_by=not-a-field'},
+        )
+
+        saved_view = SavedPersonView.objects.get(owner=self.owner)
+        self.assertEqual(saved_view.filters['role'], 'Engineer')
+        self.assertEqual(saved_view.filters['order_by'], 'name')
+        self.assertRedirects(response, '/people/?role=Engineer&order_by=name')
+        opened = self.client.get(reverse('open_person_view', kwargs={'view_id': saved_view.id}))
+        self.assertRedirects(opened, '/people/?role=Engineer&order_by=name')
+
+    def test_private_view_is_not_visible_to_another_user(self):
+        saved_view = SavedPersonView.objects.create(
+            owner=self.owner,
+            name='Private',
+            filters={'role': 'Engineer'},
+        )
+        self.client.force_login(self.other)
+
+        response = self.client.get(reverse('open_person_view', kwargs={'view_id': saved_view.id}))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_shared_view_can_be_opened_anonymously(self):
+        saved_view = SavedPersonView.objects.create(
+            owner=self.owner,
+            name='Shared',
+            visibility=SavedPersonView.Visibility.SHARED,
+            filters={'role': 'Pilot'},
+        )
+
+        response = self.client.get(reverse('open_person_view', kwargs={'view_id': saved_view.id}))
+
+        self.assertRedirects(response, '/people/?role=Pilot&order_by=name')
+
+    def test_csv_export_uses_current_filters(self):
+        response = self.client.get(reverse('export_people_csv'), {'role': 'Engineer'})
+        rows = list(csv.reader(io.StringIO(response.content.decode())))
+
+        self.assertEqual(response['Content-Type'], 'text/csv')
+        self.assertEqual(rows[0][0], 'Name')
+        self.assertEqual(rows[1][0], 'Engineer Export')
+        self.assertEqual(len(rows), 2)
+
+    def test_csv_export_escapes_spreadsheet_formulas(self):
+        Person.objects.create(name='=HYPERLINK("bad")', age=20)
+
+        response = self.client.get(reverse('export_people_csv'), {'q': 'HYPERLINK'})
+        rows = list(csv.reader(io.StringIO(response.content.decode())))
+
+        self.assertEqual(rows[1][0], "'=HYPERLINK(\"bad\")")

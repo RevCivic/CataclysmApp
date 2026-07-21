@@ -80,9 +80,33 @@
         {% endif %}
         <div class="crew-filter-actions">
             <button type="submit" class="btn btn-secondary">Apply Filters</button>
-            <a href="{% url 'index' %}?per_page={{ current_per_page }}" class="btn btn-secondary">Clear Filters</a>
+            <a href="{% url 'people_index' %}?per_page={{ current_per_page }}" class="btn btn-secondary">Clear Filters</a>
         </div>
     </form>
+
+    <div class="saved-view-panel">
+        <div>
+            <strong>Saved views:</strong>
+            {% for saved_view in saved_views %}
+                <a class="btn btn-secondary" href="{% url 'open_person_view' saved_view.id %}">{{ saved_view.name }}{% if saved_view.owner != request.user %} · {{ saved_view.owner.username }}{% endif %}</a>
+            {% empty %}<span>None yet.</span>{% endfor %}
+        </div>
+        <div class="saved-view-actions">
+            <a class="btn btn-secondary" href="{% url 'export_people_csv' %}?{{ filter_query_string }}">Export filtered CSV</a>
+            {% if request.user.is_authenticated %}
+            <form method="post" action="{% url 'save_person_view' %}">
+                {% csrf_token %}
+                <input type="hidden" name="query_string" value="{{ filter_query_string }}">
+                <label>View name <input required maxlength="100" name="name"></label>
+                <select name="visibility" aria-label="Saved view visibility">
+                    <option value="private">Private</option>
+                    <option value="shared">Shared</option>
+                </select>
+                <button class="btn btn-secondary" type="submit">Save current view</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
 
     <div class="column-buttons">
         <div class="lcars-table-wrap">
