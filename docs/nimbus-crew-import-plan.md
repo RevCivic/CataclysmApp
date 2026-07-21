@@ -316,6 +316,8 @@ The first database-readiness slice now provides the Phase 1 storage foundation:
 * database constraints and indexes protect idempotency and support the planned
   filters.
 
-Parser DTOs, identity review, dry-run reporting, and apply orchestration remain
+Schema-specific parser DTOs, dry-run reporting, explicit apply orchestration,
+raw-row provenance, and idempotent binding reuse are now implemented for Main
+Crew and Other Crew. Identity review UI and parsers for the remaining tabs are
 the next implementation slice. No production sheet data is imported merely by
-applying these migrations.
+applying the migrations or running the command without `--apply`.
